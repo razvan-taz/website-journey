@@ -10,7 +10,12 @@
           @if (post.type === 'article') { 📝 Article } @else { ▶ Video }
         </div>
 
-        <h3 style="margin:0 0 8px 0;">{{ post.title }}</h3>
+        <h3 style="margin:0 0 8px 0;">
+          <a [routerLink]="['/content', post.id]" style="text-decoration:none;">
+            {{ post.title }}
+          </a>
+        </h3>
+
         <p style="margin:0; opacity:0.85;">{{ post.summary }}</p>
 
         @if (post.type === 'video' && post.youtubeUrl) {
