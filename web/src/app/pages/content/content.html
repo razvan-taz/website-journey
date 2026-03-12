@@ -1,2 +1,24 @@
 <h1>Content</h1>
-<p>Articles + YouTube videos feed.</p>
+
+<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:16px;">
+  @for (post of posts; track post.id) {
+    <article style="border:1px solid #ddd; border-radius:12px; overflow:hidden;">
+      <img [src]="post.thumbnailUrl" [alt]="post.title" style="width:100%; display:block;" />
+
+      <div style="padding:12px;">
+        <div style="font-size:12px; opacity:0.7; margin-bottom:6px;">
+          @if (post.type === 'article') { 📝 Article } @else { ▶ Video }
+        </div>
+
+        <h3 style="margin:0 0 8px 0;">{{ post.title }}</h3>
+        <p style="margin:0; opacity:0.85;">{{ post.summary }}</p>
+
+        @if (post.type === 'video' && post.youtubeUrl) {
+          <p style="margin-top:10px;">
+            <a [href]="post.youtubeUrl" target="_blank" rel="noreferrer">Watch on YouTube</a>
+          </p>
+        }
+      </div>
+    </article>
+  }
+</div>
