@@ -1,0 +1,123 @@
+/* ── Hero ───────────────────────────────────────────────────── */
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  width: 100%;
+  background: radial-gradient(ellipse at 50% 40%, #2a1a1a 0%, #1a1a1a 70%);
+  padding: 4rem 1.5rem;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.hero-content {
+  max-width: 720px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.hero-headline {
+  font-size: clamp(2.25rem, 5vw, 4rem);
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.hero-subheadline {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: #aaaaaa;
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+/* ── Buttons ────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background-color: #880824;
+  color: #ffffff;
+  border: 2px solid #880824;
+}
+
+.btn-primary:hover {
+  opacity: 0.85;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: #880824;
+  border: 2px solid #880824;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(136, 8, 36, 0.1);
+}
+
+/* ── Latest Content ─────────────────────────────────────────── */
+
+.latest-content {
+  padding: 3rem 1.5rem;
+}
+
+.latest-content-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.section-heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #dadada;
+  margin: 0 0 1rem;
+  border-bottom: 2px solid #880824;
+  padding-bottom: 0.5rem;
+  display: inline-block;
+}
+
+.section-placeholder {
+  color: #aaaaaa;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

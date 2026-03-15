@@ -1,0 +1,42 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1 class="page-title">Articles</h1>
+    <a routerLink="/admin/articles/new" class="btn-create">+ New Article</a>
+  </div>
+
+  @if (loading()) {
+    <p class="admin-loading">Loading...</p>
+  } @else if (error()) {
+    <p class="admin-error">{{ error() }}</p>
+  } @else {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Tag</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (article of articles(); track article.slug) {
+          <tr>
+            <td class="title-cell">{{ article.title }}</td>
+            <td>{{ article.author }}</td>
+            <td>{{ article.publishDate }}</td>
+            <td><span class="badge">{{ article.type }}</span></td>
+            <td>{{ article.tag }}</td>
+            <td class="actions-cell">
+              <a [routerLink]="['/admin/articles/edit', article.slug]" class="btn-edit">Edit</a>
+              <button class="btn-delete" (click)="delete(article.slug)" [disabled]="deleting() === article.slug">
+                {{ deleting() === article.slug ? '...' : 'Delete' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

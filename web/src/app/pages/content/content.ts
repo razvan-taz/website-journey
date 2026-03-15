@@ -1,16 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal, DestroyRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
-
-type PostType = 'article' | 'video';
-
-type Post = {
-  id: string;
-  title: string;
-  summary: string;
-  thumbnailUrl: string;
-  type: PostType;
-  youtubeUrl?: string;
-};
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ArticleService, ArticleListItem } from '../../services/article.service';
 
 @Component({
   selector: 'app-content',
@@ -20,28 +11,48 @@ type Post = {
   styleUrl: './content.css',
 })
 export class Content {
-  posts: Post[] = [
-    {
-      id: 'wow-reset-checklist',
-      title: 'WoW Weekly Reset Checklist (No-Life Edition)',
-      summary: 'A practical weekly loop so you don’t log in, stare into the void, and log out.',
-      thumbnailUrl: 'https://via.placeholder.com/320x180?text=WoW',
-      type: 'article',
-    },
-    {
-      id: 'warframe-returning-player',
-      title: 'Warframe: Returning Player Quickstart (2026)',
-      summary: 'What to do first so you don’t get crushed by 400 systems at once.',
-      thumbnailUrl: 'https://via.placeholder.com/320x180?text=Warframe',
-      type: 'article',
-    },
-    {
-      id: 'video-build-philosophy',
-      title: 'Build Philosophy: Why “fun” beats “meta” (most of the time)',
-      summary: 'A short video rant about optimization, identity, and not becoming a spreadsheet.',
-      thumbnailUrl: 'https://via.placeholder.com/320x180?text=Video',
-      type: 'video',
-      youtubeUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    },
-  ];
+  posts = signal<ArticleListItem[]>([]);
+  loading = signal(true);
+  error = signal<string | null>(null);
+  currentPage = signal(0);
+  hasMore = signal(false);
+  loadingMore = signal(false);
+
+  private articleService = inject(ArticleService);
+  private destroyRef = inject(DestroyRef);
+
+  constructor() {
+    this.articleService
+      .getArticles(0, 12)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.posts.set(response.content);
+          this.currentPage.set(0);
+          this.hasMore.set(!response.last);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set('Failed to load articles. Please try again later.');
+          this.loading.set(false);
+        },
+      });
+  }
+
+  loadMore(): void {
+    const nextPage = this.currentPage() + 1;
+    this.loadingMore.set(true);
+    this.articleService
+      .getArticles(nextPage, 12)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.posts.update(existing => [...existing, ...response.content]);
+          this.currentPage.set(nextPage);
+          this.hasMore.set(!response.last);
+          this.loadingMore.set(false);
+        },
+        error: () => this.loadingMore.set(false),
+      });
+  }
 }

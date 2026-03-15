@@ -1,0 +1,131 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  position: relative;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+  color: #dadada;
+}
+
+.modal-title {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  color: #dadada;
+  font-weight: 600;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+}
+
+.field-group label {
+  color: #dadada;
+  font-size: 0.875rem;
+  margin-bottom: 0.4rem;
+}
+
+.field-group input {
+  width: 100%;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  color: #dadada;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.field-group input::placeholder {
+  color: #666;
+}
+
+.field-group input:focus {
+  border-color: #880824;
+}
+
+.field-error {
+  margin-top: 0.35rem;
+  color: #ff6b6b;
+  font-size: 0.78rem;
+}
+
+.login-error {
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 4px;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  color: #ff6b6b;
+  font-size: 0.875rem;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: #880824;
+  color: #fff;
+  border: 1px solid #880824;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: #6a061c;
+  border-color: #6a061c;
+}
+
+.mode-toggle {
+  margin: 1.25rem 0 0 0;
+  text-align: center;
+  font-size: 0.82rem;
+  color: #888;
+}
+
+.mode-toggle a {
+  color: #880824;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.mode-toggle a:hover {
+  text-decoration: underline;
+}

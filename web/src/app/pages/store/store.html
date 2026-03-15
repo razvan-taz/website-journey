@@ -1,2 +1,54 @@
-<h1>Store</h1>
-<p>Merch catalog (browse first, payments later).</p>
+@if (loading()) {
+  <p class="store-loading">Loading products...</p>
+} @else if (error()) {
+  <p class="store-error">{{ error() }}</p>
+} @else {
+  <h1 class="store-title">Store</h1>
+
+  <div class="category-filters">
+    @for (cat of categories; track cat) {
+      <button
+        class="filter-btn"
+        [class.active]="activeCategory() === cat"
+        (click)="setCategory(cat)"
+      >
+        {{ cat }}
+      </button>
+    }
+  </div>
+
+  @if (filteredProducts().length === 0) {
+    <p class="store-empty">No products found in this category.</p>
+  } @else {
+    <div class="card-grid">
+      @for (product of filteredProducts(); track product.id) {
+        <a class="card" [routerLink]="['/store', product.id]">
+          <div class="card-thumbnail">
+            <img [src]="product.imageUrl" [alt]="product.name" loading="lazy" width="400" height="400" />
+          </div>
+
+          <div class="card-body">
+            <span class="card-tag">{{ product.category }}</span>
+
+            <h3 class="card-title">{{ product.name }}</h3>
+
+            <div class="card-footer">
+              <span class="card-price">{{ product.price | currency }}</span>
+              <span class="card-stock" [class.out-of-stock]="product.stock === 0">
+                {{ product.stock > 0 ? 'In stock' : 'Out of stock' }}
+              </span>
+            </div>
+          </div>
+        </a>
+      }
+    </div>
+
+    @if (hasMore()) {
+      <div class="load-more-container">
+        <button class="btn-load-more" (click)="loadMore()" [disabled]="loadingMore()">
+          {{ loadingMore() ? 'Loading...' : 'Load More' }}
+        </button>
+      </div>
+    }
+  }
+}

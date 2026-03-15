@@ -1,3 +1,62 @@
-<h1>Content Detail</h1>
-<p>Post id: <strong>{{ id }}</strong></p>
-<p>(Next we’ll load the actual post details.)</p>
+<p><a routerLink="/content">← Back to Content</a></p>
+
+@if (loading()) {
+  <p>Loading...</p>
+} @else if (error() === 'not-found') {
+  <h1>Not found</h1>
+  <p>This article doesn't exist.</p>
+} @else if (error()) {
+  <h1>Something went wrong</h1>
+  <p>Failed to load the article. Please try again later.</p>
+} @else if (article(); as post) {
+  <h1>{{ post.title }}</h1>
+  @if (post.premium) {
+    <span class="premium-badge">✦ Premium</span>
+  }
+
+  <p style="opacity:0.85;">{{ post.author }} &middot; {{ post.publishDate }}</p>
+
+  <img [src]="post.thumbnailUrl" [alt]="post.title" style="width:100%; max-width:900px; border-radius:12px; margin:16px 0;" />
+
+  @if (post.type === 'article') {
+    @if (post.accessDenied) {
+      <div class="article-body teaser" [innerHTML]="post.body"></div>
+      <div class="paywall-banner">
+        <div class="paywall-icon">🔒</div>
+        <h2 class="paywall-title">Premium Content</h2>
+        <p class="paywall-subtitle">Subscribe to read the full article</p>
+        @if (isLoggedIn()) {
+          <p class="paywall-auth-note">Your subscription has expired or you don't have one. Subscribe to continue.</p>
+        } @else {
+          <p class="paywall-auth-note">Your subscription has expired or you don't have one. Subscribe to continue.</p>
+          <p class="paywall-signin-note">Already a subscriber? <a routerLink="/login">Sign in</a> to access this content.</p>
+        }
+        <a routerLink="/subscribe" class="paywall-btn">Subscribe Now</a>
+      </div>
+    } @else if (post.body) {
+      <div class="article-body" [innerHTML]="post.body"></div>
+    } @else {
+      <p><em>(Article body will go here.)</em></p>
+    }
+  } @else {
+    <p><em>(Video content)</em></p>
+  }
+
+  @if (post.relatedArticles.length > 0) {
+    <section class="related-articles">
+      <h2 class="related-title">Related Articles</h2>
+      <div class="related-grid">
+        @for (related of post.relatedArticles; track related.slug) {
+          <a class="related-card" [routerLink]="['/content', related.slug]">
+            <img [src]="related.thumbnailUrl" [alt]="related.title" class="related-img" loading="lazy" />
+            <div class="related-info">
+              <span class="related-author">{{ related.author }}</span>
+              <h3 class="related-card-title">{{ related.title }}</h3>
+              <span class="related-date">{{ related.publishDate }}</span>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+  }
+}

@@ -1,0 +1,78 @@
+<div class="profile-page">
+  <h1 class="profile-title">My Account</h1>
+
+  <!-- User Info -->
+  <section class="profile-section">
+    <h2 class="section-heading">Account</h2>
+    <div class="info-card">
+      <div class="info-row">
+        <span class="info-label">Name</span>
+        <span class="info-value">{{ user()?.name }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email</span>
+        <span class="info-value">{{ user()?.email }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Role</span>
+        <span class="info-value">
+          <span class="role-badge" [class.role-admin]="isAdmin()">{{ user()?.role }}</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subscription -->
+  <section class="profile-section">
+    <h2 class="section-heading">Subscription</h2>
+    @if (subscriptionStatus()?.active) {
+      <div class="info-card">
+        <div class="info-row">
+          <span class="info-label">Plan</span>
+          <span class="info-value sub-active">&#x2713; {{ subscriptionStatus()!.planName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Billing</span>
+          <span class="info-value">{{ subscriptionStatus()!.billingPeriod }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Expires</span>
+          <span class="info-value">{{ subscriptionStatus()!.endDate }} ({{ subscriptionStatus()!.daysRemaining }} days)</span>
+        </div>
+      </div>
+    } @else {
+      <div class="no-sub-card">
+        <p>You don't have an active subscription.</p>
+        <a routerLink="/subscribe" class="btn-subscribe-now">View Plans</a>
+      </div>
+    }
+  </section>
+
+  <!-- Order History -->
+  <section class="profile-section">
+    <h2 class="section-heading">Order History</h2>
+    @if (loadingOrders()) {
+      <p class="loading-text">Loading orders...</p>
+    } @else if (orders().length === 0) {
+      <p class="empty-text">No orders yet. <a routerLink="/store">Browse the store</a></p>
+    } @else {
+      <div class="orders-list">
+        @for (order of orders(); track order.orderId) {
+          <div class="order-card">
+            <div class="order-header">
+              <span class="order-id">#{{ order.orderId }}</span>
+              <span class="order-status">{{ order.status }}</span>
+              <span class="order-total">{{ order.total | currency }}</span>
+              <span class="order-date">{{ order.createdAt | slice:0:10 }}</span>
+            </div>
+            <ul class="order-items">
+              @for (item of order.items; track item.productName) {
+                <li class="order-item">{{ item.productName }} &times; {{ item.quantity }} &mdash; {{ item.unitPrice | currency }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    }
+  </section>
+</div>

@@ -1,0 +1,154 @@
+<div class="overlay" (click)="onClose()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <button class="close-btn" type="button" (click)="onClose()" aria-label="Close modal">&#x2715;</button>
+
+    <h2 class="modal-title">{{ mode === 'signin' ? 'Sign In' : 'Create Account' }}</h2>
+
+    @if (mode === 'signin') {
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <div class="field-group">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
+          @if (email.invalid && email.touched) {
+            @if (email.errors?.['required']) {
+              <span class="field-error">Email is required.</span>
+            } @else if (email.errors?.['email']) {
+              <span class="field-error">Enter a valid email address.</span>
+            }
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"
+            autocomplete="current-password"
+          />
+          @if (password.invalid && password.touched) {
+            @if (password.errors?.['required']) {
+              <span class="field-error">Password is required.</span>
+            } @else if (password.errors?.['minlength']) {
+              <span class="field-error">Password must be at least 4 characters.</span>
+            }
+          }
+        </div>
+
+        @if (errorMessage()) {
+          <div class="login-error" role="alert">
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <button class="submit-btn" type="submit" [disabled]="loading()">
+          {{ loading() ? 'Signing in...' : 'Sign In' }}
+        </button>
+
+      </form>
+
+      <p class="mode-toggle">Don't have an account? <a (click)="toggleMode()">Sign Up</a></p>
+
+    } @else {
+
+      <form [formGroup]="signUpForm" (ngSubmit)="onSignUp()" novalidate>
+
+        <div class="field-group">
+          <label for="su-name">Name</label>
+          <input
+            id="su-name"
+            type="text"
+            formControlName="name"
+            placeholder="Your name"
+            autocomplete="name"
+          />
+          @if (suName.invalid && suName.touched) {
+            @if (suName.errors?.['required']) {
+              <span class="field-error">Name is required.</span>
+            }
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="su-email">Email</label>
+          <input
+            id="su-email"
+            type="email"
+            formControlName="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
+          @if (suEmail.invalid && suEmail.touched) {
+            @if (suEmail.errors?.['required']) {
+              <span class="field-error">Email is required.</span>
+            } @else if (suEmail.errors?.['email']) {
+              <span class="field-error">Enter a valid email address.</span>
+            }
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="su-password">Password</label>
+          <input
+            id="su-password"
+            type="password"
+            formControlName="password"
+            placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"
+            autocomplete="new-password"
+          />
+          @if (suPassword.invalid && suPassword.touched) {
+            @if (suPassword.errors?.['required']) {
+              <span class="field-error">Password is required.</span>
+            } @else if (suPassword.errors?.['minlength']) {
+              <span class="field-error">Password must be at least 4 characters.</span>
+            }
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="su-confirm-password">Confirm Password</label>
+          <input
+            id="su-confirm-password"
+            type="password"
+            formControlName="confirmPassword"
+            placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"
+            autocomplete="new-password"
+          />
+          @if (suConfirmPassword.invalid && suConfirmPassword.touched) {
+            @if (suConfirmPassword.errors?.['required']) {
+              <span class="field-error">Please confirm your password.</span>
+            }
+          }
+          @if (passwordMismatch) {
+            <span class="field-error">Passwords do not match.</span>
+          }
+        </div>
+
+        @if (errorMessage()) {
+          <div class="login-error" role="alert">
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <button class="submit-btn" type="submit" [disabled]="loading()">
+          {{ loading() ? 'Creating account...' : 'Create Account' }}
+        </button>
+
+      </form>
+
+      <p class="mode-toggle">Already have an account? <a (click)="toggleMode()">Sign In</a></p>
+
+    }
+
+  </div>
+</div>

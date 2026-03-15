@@ -1,10 +1,47 @@
-<nav style="display:flex; gap:12px; padding:12px; border-bottom:1px solid #ddd;">
-  <a routerLink="/">Home</a>
-  <a routerLink="/content">Content</a>
-  <a routerLink="/store">Store</a>
-  <a routerLink="/about">About</a>
+<nav>
+  <div class="nav-links">
+    <a routerLink="/">Home</a>
+    <a routerLink="/content">Content</a>
+    <a routerLink="/store">Store</a>
+    <a routerLink="/about">About</a>
+    @if (authService.isAdmin()) {
+      <a routerLink="/admin">Admin</a>
+    }
+    <a class="nav-search-icon" (click)="showSearch = true" role="button" aria-label="Open search"><span class="search-icon"></span></a>
+  </div>
+  <div class="nav-actions">
+    <button class="btn-cart" (click)="showCart = true" aria-label="Open cart">
+      <span class="cart-icon">🛒</span>
+      @if (cartService.itemCount() > 0) {
+        <span class="cart-badge">{{ cartService.itemCount() }}</span>
+      }
+    </button>
+    @if (!authService.isLoggedIn()) {
+      <button class="btn-sign-in" (click)="showSignIn = true">Sign In</button>
+      <a class="btn-subscribe" routerLink="/subscribe">Subscribe</a>
+    } @else {
+      <div class="user-display">
+        <div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div>
+        <span class="user-name">{{ authService.currentUser()!.name }}</span>
+        @if (subscriptionStatus()?.active) {
+          <span class="sub-badge">✓ {{ subscriptionStatus()!.planName }}</span>
+        }
+        <a class="btn-profile" routerLink="/profile">Profile</a>
+        <button class="btn-logout" (click)="authService.logout()">Logout</button>
+      </div>
+    }
+  </div>
+  @if (showSignIn) {
+    <app-sign-in-modal (closed)="showSignIn = false" />
+  }
+  @if (showSearch) {
+    <app-search-overlay (closed)="showSearch = false" />
+  }
+  @if (showCart) {
+    <app-cart-drawer (closed)="showCart = false" />
+  }
 </nav>
 
-<main style="padding: 16px;">
+<main>
   <router-outlet></router-outlet>
 </main>

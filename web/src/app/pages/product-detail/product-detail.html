@@ -1,0 +1,42 @@
+<p class="back-link"><a routerLink="/store">← Back to Store</a></p>
+
+@if (loading()) {
+  <p class="detail-loading">Loading product...</p>
+} @else if (error() === 'not-found') {
+  <h1 class="detail-heading">Product not found</h1>
+  <p class="detail-message">This product doesn't exist or may have been removed.</p>
+} @else if (error()) {
+  <h1 class="detail-heading">Something went wrong</h1>
+  <p class="detail-message">Failed to load the product. Please try again later.</p>
+} @else if (product(); as p) {
+  <div class="product-layout">
+    <div class="product-image-section">
+      <img
+        [src]="p.imageUrl"
+        [alt]="p.name"
+        class="product-image"
+        loading="eager"
+        width="600"
+        height="600"
+      />
+    </div>
+
+    <div class="product-details-section">
+      <span class="product-category">{{ p.category }}</span>
+
+      <h1 class="product-name">{{ p.name }}</h1>
+
+      <p class="product-price">{{ p.price | currency }}</p>
+
+      <p class="product-stock" [class.out-of-stock]="p.stock === 0">
+        {{ p.stock > 0 ? 'In Stock' : 'Out of Stock' }}
+      </p>
+
+      <p class="product-description">{{ p.description }}</p>
+
+      @if (p.stock > 0) {
+        <button class="btn-add-to-cart" (click)="addToCart()">Add to Cart</button>
+      }
+    </div>
+  </div>
+}

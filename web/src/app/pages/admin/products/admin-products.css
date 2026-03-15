@@ -1,0 +1,116 @@
+.admin-page {
+  max-width: 1100px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  color: #dadada;
+  font-size: 24px;
+  margin: 0;
+}
+
+.btn-create {
+  padding: 8px 16px;
+  background: #880824;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.btn-create:hover {
+  background: #6a061c;
+}
+
+.admin-loading,
+.admin-error {
+  color: #888;
+  font-size: 14px;
+}
+
+.admin-error {
+  color: #e05a70;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #888;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+td {
+  padding: 12px;
+  color: #dadada;
+  font-size: 14px;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+tr:hover td {
+  background: #1a1a1a;
+}
+
+.title-cell {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-edit {
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid #444;
+  color: #888;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 13px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-edit:hover {
+  border-color: #880824;
+  color: #880824;
+}
+
+.btn-delete {
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid #444;
+  color: #888;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-delete:hover {
+  border-color: #e05a70;
+  color: #e05a70;
+}
+
+.btn-delete:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

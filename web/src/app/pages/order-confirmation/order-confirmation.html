@@ -1,0 +1,29 @@
+@if (confirmation()) {
+  <div class="confirmation-page">
+    <div class="confirmation-card">
+      <div class="confirmation-icon">✓</div>
+      <h1 class="confirmation-title">Order Placed!</h1>
+      <p class="confirmation-subtitle">Thank you for your order.</p>
+
+      <div class="confirmation-details">
+        <div class="detail-row">
+          <span class="detail-label">Order ID</span>
+          <span class="detail-value">#{{ confirmation()!.orderId }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Status</span>
+          <span class="detail-value status-badge">{{ confirmation()!.status }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Total</span>
+          <span class="detail-value">{{ confirmation()!.total | currency }}</span>
+        </div>
+      </div>
+
+      <div class="confirmation-actions">
+        <a routerLink="/store" class="btn-continue">Continue Shopping</a>
+        <a routerLink="/" class="btn-home">Go Home</a>
+      </div>
+    </div>
+  </div>
+}

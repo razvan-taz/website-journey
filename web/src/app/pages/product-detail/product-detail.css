@@ -1,0 +1,149 @@
+/* ── Back link ────────────────────────────────────── */
+
+.back-link {
+  margin: 0 0 24px 0;
+}
+
+.back-link a {
+  color: #888;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.15s ease;
+}
+
+.back-link a:hover {
+  color: #dadada;
+}
+
+/* ── State messages ───────────────────────────────── */
+
+.detail-loading,
+.detail-message {
+  color: #888;
+  font-size: 1rem;
+  margin-top: 32px;
+  text-align: center;
+}
+
+.detail-heading {
+  color: #dadada;
+  margin: 32px 0 8px 0;
+  text-align: center;
+}
+
+/* ── Layout ───────────────────────────────────────── */
+
+.product-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .product-layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+/* ── Image section ────────────────────────────────── */
+
+.product-image-section {
+  background: #111;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  max-width: 600px;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+}
+
+/* ── Details section ──────────────────────────────── */
+
+.product-details-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Category badge ───────────────────────────────── */
+
+.product-category {
+  display: inline-block;
+  background: #880824;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+  align-self: flex-start;
+}
+
+/* ── Name ─────────────────────────────────────────── */
+
+.product-name {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #dadada;
+  line-height: 1.25;
+}
+
+/* ── Price ────────────────────────────────────────── */
+
+.product-price {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #dadada;
+}
+
+/* ── Stock indicator ──────────────────────────────── */
+
+.product-stock {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #5cb85c;
+}
+
+.product-stock.out-of-stock {
+  color: #e05a70;
+}
+
+/* ── Description ──────────────────────────────────── */
+
+.product-description {
+  margin: 0;
+  font-size: 1rem;
+  color: #aaa;
+  line-height: 1.7;
+}
+
+/* ── Add to Cart ──────────────────────────────────── */
+
+.btn-add-to-cart {
+  padding: 12px 32px;
+  background: #880824;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: background 0.3s;
+  align-self: flex-start;
+}
+
+.btn-add-to-cart:hover {
+  background: #6a061c;
+}

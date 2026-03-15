@@ -1,0 +1,118 @@
+.confirmation-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 24px;
+}
+
+.confirmation-card {
+  background: #1f1f1f;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 48px;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+}
+
+.confirmation-icon {
+  width: 64px;
+  height: 64px;
+  background: #1a3d1a;
+  border: 2px solid #5cb85c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #5cb85c;
+  margin: 0 auto 24px;
+}
+
+.confirmation-title {
+  color: #dadada;
+  font-size: 28px;
+  margin: 0 0 8px;
+}
+
+.confirmation-subtitle {
+  color: #888;
+  margin: 0 0 32px;
+}
+
+.confirmation-details {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #333;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  color: #888;
+  font-size: 14px;
+}
+
+.detail-value {
+  color: #dadada;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-badge {
+  background: #1a3d1a;
+  color: #5cb85c;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-continue {
+  padding: 10px 24px;
+  background: #880824;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.btn-continue:hover {
+  background: #6a061c;
+}
+
+.btn-home {
+  padding: 10px 24px;
+  background: transparent;
+  color: #888;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 14px;
+  border: 1px solid #444;
+  transition: color 0.3s, border-color 0.3s;
+}
+
+.btn-home:hover {
+  color: #dadada;
+  border-color: #888;
+}

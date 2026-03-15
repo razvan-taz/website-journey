@@ -1,0 +1,40 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1 class="page-title">Products</h1>
+    <a routerLink="/admin/products/new" class="btn-create">+ New Product</a>
+  </div>
+
+  @if (loading()) {
+    <p class="admin-loading">Loading...</p>
+  } @else if (error()) {
+    <p class="admin-error">{{ error() }}</p>
+  } @else {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (product of products(); track product.id) {
+          <tr>
+            <td class="title-cell">{{ product.name }}</td>
+            <td>{{ product.category }}</td>
+            <td>${{ product.price.toFixed(2) }}</td>
+            <td>{{ product.stock }}</td>
+            <td class="actions-cell">
+              <a [routerLink]="['/admin/products/edit', product.id]" class="btn-edit">Edit</a>
+              <button class="btn-delete" (click)="delete(product.id, product.name)" [disabled]="deleting() === product.id">
+                {{ deleting() === product.id ? '...' : 'Delete' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

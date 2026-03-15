@@ -1,0 +1,65 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1 class="page-title">{{ isEdit() ? 'Edit Article' : 'New Article' }}</h1>
+    <a routerLink="/admin/articles" class="btn-back">← Back</a>
+  </div>
+
+  @if (loadingData()) {
+    <p class="admin-loading">Loading...</p>
+  } @else {
+    @if (error()) { <p class="form-error">{{ error() }}</p> }
+
+    <div class="admin-form">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" [value]="title()" (input)="title.set($any($event.target).value); autoSlug()" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Slug</label>
+          <input type="text" [value]="slug()" (input)="slug.set($any($event.target).value)" />
+        </div>
+        <div class="form-group">
+          <label>Author</label>
+          <input type="text" [value]="author()" (input)="author.set($any($event.target).value)" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Type</label>
+          <select [value]="type()" (change)="type.set($any($event.target).value)">
+            <option value="article">Article</option>
+            <option value="video">Video</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tag</label>
+          <input type="text" [value]="tag()" (input)="tag.set($any($event.target).value)" />
+        </div>
+        <div class="form-group">
+          <label>Publish Date</label>
+          <input type="date" [value]="publishDate()" (input)="publishDate.set($any($event.target).value)" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Thumbnail URL</label>
+        <input type="text" [value]="thumbnailUrl()" (input)="thumbnailUrl.set($any($event.target).value)" placeholder="https://..." />
+      </div>
+      <div class="form-group">
+        <label>Body (HTML)</label>
+        <textarea rows="16" [value]="body()" (input)="body.set($any($event.target).value)"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" [checked]="premium()" (change)="premium.set($any($event.target).checked)" />
+          Premium content (subscription required)
+        </label>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" (click)="save()" [disabled]="loading()">
+          {{ loading() ? 'Saving...' : (isEdit() ? 'Update Article' : 'Create Article') }}
+        </button>
+      </div>
+    </div>
+  }
+</div>

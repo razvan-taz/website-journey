@@ -1,0 +1,48 @@
+<div class="overlay" (click)="close()">
+  <div class="search-box" (click)="$event.stopPropagation()">
+
+    <input
+      #searchInput
+      class="search-input"
+      type="text"
+      placeholder="Search content and store..."
+      autocomplete="off"
+      spellcheck="false"
+      aria-label="Search"
+      (input)="onInput($any($event.target).value)"
+    />
+
+    @if (searching()) {
+      <p class="search-loading">Searching...</p>
+    }
+
+    @if (contentResults.length > 0) {
+      <div class="results-section">
+        <div class="section-heading">Content</div>
+        @for (result of contentResults; track result.id) {
+          <div class="result-item" (click)="onResultClick(result.route)">
+            <div class="result-title">{{ result.title }}</div>
+            <div class="result-summary">{{ result.summary }}</div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (storeResults.length > 0) {
+      <div class="results-section">
+        <div class="section-heading">Store</div>
+        @for (result of storeResults; track result.id) {
+          <div class="result-item" (click)="onResultClick(result.route)">
+            <div class="result-title">{{ result.title }}</div>
+            <div class="result-summary">{{ result.summary }}</div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (query.length >= 2 && results.length === 0) {
+      <div class="no-results">No results for "{{ query }}"</div>
+    }
+
+  </div>
+</div>

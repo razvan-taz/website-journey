@@ -1,0 +1,74 @@
+<div class="checkout-page">
+  <a class="back-link" routerLink="/store">← Back to Store</a>
+  <h1 class="checkout-title">Checkout</h1>
+
+  @if (cartService.items().length === 0) {
+    <div class="empty-cart">
+      <p>Your cart is empty.</p>
+      <a routerLink="/store" class="btn-back-store">Browse the Store</a>
+    </div>
+  } @else {
+    <div class="checkout-layout">
+
+      <!-- Shipping Form -->
+      <section class="shipping-section">
+        <h2 class="section-title">Shipping Address</h2>
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input id="name" type="text" [value]="name()" (input)="name.set($any($event.target).value)" placeholder="Jane Smith" />
+        </div>
+        <div class="form-group">
+          <label for="line1">Address</label>
+          <input id="line1" type="text" [value]="line1()" (input)="line1.set($any($event.target).value)" placeholder="123 Main St" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input id="city" type="text" [value]="city()" (input)="city.set($any($event.target).value)" placeholder="Springfield" />
+          </div>
+          <div class="form-group">
+            <label for="state">State</label>
+            <input id="state" type="text" [value]="state()" (input)="state.set($any($event.target).value)" placeholder="IL" />
+          </div>
+          <div class="form-group form-group--zip">
+            <label for="zip">ZIP</label>
+            <input id="zip" type="text" [value]="zip()" (input)="zip.set($any($event.target).value)" placeholder="62701" />
+          </div>
+        </div>
+
+        @if (error()) {
+          <p class="checkout-error">{{ error() }}</p>
+        }
+
+        <button
+          class="btn-place-order"
+          (click)="placeOrder()"
+          [disabled]="!isFormValid() || loading()">
+          {{ loading() ? 'Placing Order...' : 'Place Order' }}
+        </button>
+      </section>
+
+      <!-- Order Summary -->
+      <aside class="order-summary">
+        <h2 class="section-title">Order Summary</h2>
+        <ul class="summary-items">
+          @for (item of cartService.items(); track item.productId) {
+            <li class="summary-item">
+              <img [src]="item.imageUrl" [alt]="item.name" class="summary-img" loading="lazy" />
+              <div class="summary-info">
+                <span class="summary-name">{{ item.name }}</span>
+                <span class="summary-qty">Qty: {{ item.quantity }}</span>
+              </div>
+              <span class="summary-price">{{ item.price * item.quantity | currency }}</span>
+            </li>
+          }
+        </ul>
+        <div class="summary-total">
+          <span>Total</span>
+          <span class="total-amount">{{ cartService.subtotal() | currency }}</span>
+        </div>
+      </aside>
+
+    </div>
+  }
+</div>

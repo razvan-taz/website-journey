@@ -1,29 +1,36 @@
-<h1>Content</h1>
+@if (loading()) {
+  <p class="feed-loading">Loading articles...</p>
+} @else if (error()) {
+  <p class="feed-error">{{ error() }}</p>
+} @else {
+  <h1 class="feed-title">Content</h1>
 
-<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:16px;">
-  @for (post of posts; track post.id) {
-    <article style="border:1px solid #ddd; border-radius:12px; overflow:hidden;">
-      <img [src]="post.thumbnailUrl" [alt]="post.title" style="width:100%; display:block;" />
-
-      <div style="padding:12px;">
-        <div style="font-size:12px; opacity:0.7; margin-bottom:6px;">
-          @if (post.type === 'article') { 📝 Article } @else { ▶ Video }
+  <div class="card-grid">
+    @for (post of posts(); track post.slug) {
+      <article class="card" [routerLink]="['/content', post.slug]">
+        <div class="card-thumbnail">
+          <img [src]="post.thumbnailUrl" [alt]="post.title" loading="lazy" width="400" height="225" />
         </div>
 
-        <h3 style="margin:0 0 8px 0;">
-          <a [routerLink]="['/content', post.id]" style="text-decoration:none;">
-            {{ post.title }}
-          </a>
-        </h3>
+        <div class="card-body">
+          <span class="card-tag">{{ post.tag }}</span>
 
-        <p style="margin:0; opacity:0.85;">{{ post.summary }}</p>
+          <h3 class="card-title">{{ post.title }}</h3>
 
-        @if (post.type === 'video' && post.youtubeUrl) {
-          <p style="margin-top:10px;">
-            <a [href]="post.youtubeUrl" target="_blank" rel="noreferrer">Watch on YouTube</a>
-          </p>
-        }
-      </div>
-    </article>
+          <footer class="card-meta">
+            <span class="card-author">{{ post.author }}</span>
+            <span class="card-date">{{ post.publishDate }}</span>
+          </footer>
+        </div>
+      </article>
+    }
+  </div>
+
+  @if (hasMore()) {
+    <div class="load-more-container">
+      <button class="btn-load-more" (click)="loadMore()" [disabled]="loadingMore()">
+        {{ loadingMore() ? 'Loading...' : 'Load More' }}
+      </button>
+    </div>
   }
-</div>
+}

@@ -1,0 +1,40 @@
+<div class="drawer-backdrop" (click)="close()"></div>
+<div class="drawer-panel">
+  <div class="drawer-header">
+    <h2 class="drawer-title">Your Cart</h2>
+    <button class="drawer-close" (click)="close()" aria-label="Close cart">✕</button>
+  </div>
+
+  @if (cartService.items().length === 0) {
+    <div class="drawer-empty">
+      <p>Your cart is empty.</p>
+      <a class="btn-continue" routerLink="/store" (click)="close()">Browse the Store</a>
+    </div>
+  } @else {
+    <ul class="cart-items">
+      @for (item of cartService.items(); track item.productId) {
+        <li class="cart-item">
+          <img [src]="item.imageUrl" [alt]="item.name" class="item-img" loading="lazy" />
+          <div class="item-info">
+            <span class="item-name">{{ item.name }}</span>
+            <span class="item-price">{{ item.price | currency }}</span>
+          </div>
+          <div class="item-qty">
+            <button class="qty-btn" (click)="decrement(item.productId, item.quantity)" aria-label="Decrease quantity">−</button>
+            <span class="qty-value">{{ item.quantity }}</span>
+            <button class="qty-btn" (click)="increment(item.productId, item.quantity)" aria-label="Increase quantity">+</button>
+          </div>
+          <button class="item-remove" (click)="cartService.removeItem(item.productId)" aria-label="Remove item">✕</button>
+        </li>
+      }
+    </ul>
+
+    <div class="drawer-footer">
+      <div class="subtotal-row">
+        <span>Subtotal</span>
+        <span class="subtotal-amount">{{ cartService.subtotal() | currency }}</span>
+      </div>
+      <a class="btn-checkout" routerLink="/checkout" (click)="close()">Proceed to Checkout</a>
+    </div>
+  }
+</div>
