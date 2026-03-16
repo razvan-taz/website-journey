@@ -37,7 +37,7 @@
 }
 
 .confirmation-subtitle {
-  color: #888;
+  color: #aaa;
   margin: 0 0 32px;
 }
 
@@ -61,7 +61,7 @@
 }
 
 .detail-label {
-  color: #888;
+  color: #aaa;
   font-size: 14px;
 }
 
@@ -104,7 +104,7 @@
 .btn-home {
   padding: 10px 24px;
   background: transparent;
-  color: #888;
+  color: #aaa;
   text-decoration: none;
   border-radius: 4px;
   font-size: 14px;

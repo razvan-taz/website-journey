@@ -23,6 +23,10 @@ export const routes: Routes = [
   { path: 'subscribe', loadComponent: () => import('./pages/subscribe/subscribe').then(m => m.Subscribe) },
 
   { path: 'profile', loadComponent: () => import('./pages/profile/profile').then(m => m.Profile) },
+  { path: 'wishlist', loadComponent: () => import('./pages/wishlist/wishlist').then(m => m.Wishlist) },
+
+  { path: 'forgot-password', loadComponent: () => import('./pages/forgot-password/forgot-password').then(m => m.ForgotPassword) },
+  { path: 'reset-password', loadComponent: () => import('./pages/reset-password/reset-password').then(m => m.ResetPassword) },
 
   {
     path: 'admin',
@@ -39,5 +43,5 @@ export const routes: Routes = [
     ]
   },
 
-  { path: '**', redirectTo: '' },
+  { path: '**', loadComponent: () => import('./pages/not-found/not-found').then(m => m.NotFound) },
 ];

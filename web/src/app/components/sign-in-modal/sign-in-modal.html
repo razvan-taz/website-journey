@@ -1,5 +1,5 @@
 <div class="overlay" (click)="onClose()">
-  <div class="modal" (click)="$event.stopPropagation()">
+  <div class="modal" role="dialog" aria-modal="true" [attr.aria-label]="mode === 'signin' ? 'Sign in' : 'Create account'" (click)="$event.stopPropagation()">
 
     <button class="close-btn" type="button" (click)="onClose()" aria-label="Close modal">&#x2715;</button>
 
@@ -29,13 +29,27 @@
 
         <div class="field-group">
           <label for="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            formControlName="password"
-            placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"
-            autocomplete="current-password"
-          />
+          <div class="password-wrapper">
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="showPassword.set(!showPassword())"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            >
+              @if (showPassword()) {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              }
+            </button>
+          </div>
           @if (password.invalid && password.touched) {
             @if (password.errors?.['required']) {
               <span class="field-error">Password is required.</span>
@@ -44,6 +58,10 @@
             }
           }
         </div>
+
+        <p class="forgot-password-link">
+          <a routerLink="/forgot-password" (click)="onClose()">Forgot password?</a>
+        </p>
 
         @if (errorMessage()) {
           <div class="login-error" role="alert">
@@ -99,31 +117,59 @@
 
         <div class="field-group">
           <label for="su-password">Password</label>
-          <input
-            id="su-password"
-            type="password"
-            formControlName="password"
-            placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"
-            autocomplete="new-password"
-          />
+          <div class="password-wrapper">
+            <input
+              id="su-password"
+              [type]="showSuPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"
+              autocomplete="new-password"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="showSuPassword.set(!showSuPassword())"
+              [attr.aria-label]="showSuPassword() ? 'Hide password' : 'Show password'"
+            >
+              @if (showSuPassword()) {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              }
+            </button>
+          </div>
           @if (suPassword.invalid && suPassword.touched) {
             @if (suPassword.errors?.['required']) {
               <span class="field-error">Password is required.</span>
             } @else if (suPassword.errors?.['minlength']) {
-              <span class="field-error">Password must be at least 4 characters.</span>
+              <span class="field-error">Password must be at least 8 characters.</span>
             }
           }
         </div>
 
         <div class="field-group">
           <label for="su-confirm-password">Confirm Password</label>
-          <input
-            id="su-confirm-password"
-            type="password"
-            formControlName="confirmPassword"
-            placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"
-            autocomplete="new-password"
-          />
+          <div class="password-wrapper">
+            <input
+              id="su-confirm-password"
+              [type]="showSuConfirmPassword() ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"
+              autocomplete="new-password"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="showSuConfirmPassword.set(!showSuConfirmPassword())"
+              [attr.aria-label]="showSuConfirmPassword() ? 'Hide password' : 'Show password'"
+            >
+              @if (showSuConfirmPassword()) {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              }
+            </button>
+          </div>
           @if (suConfirmPassword.invalid && suConfirmPassword.touched) {
             @if (suConfirmPassword.errors?.['required']) {
               <span class="field-error">Please confirm your password.</span>

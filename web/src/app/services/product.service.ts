@@ -50,10 +50,12 @@ const BASE_URL = '/api/products';
 export class ProductService {
   private http = inject(HttpClient);
 
-  getProducts(page: number, size: number): Observable<ProductPageResponse> {
-    return this.http.get<ProductPageResponse>(BASE_URL, {
-      params: { page: page.toString(), size: size.toString() },
-    });
+  getProducts(page: number, size: number, category?: string): Observable<ProductPageResponse> {
+    const params: Record<string, string> = { page: page.toString(), size: size.toString() };
+    if (category && category !== 'All') {
+      params['category'] = category;
+    }
+    return this.http.get<ProductPageResponse>(BASE_URL, { params });
   }
 
   getProductById(id: number): Observable<ProductDetail> {

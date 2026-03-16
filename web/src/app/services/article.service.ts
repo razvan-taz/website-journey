@@ -80,10 +80,14 @@ const BASE_URL = '/api/articles';
 export class ArticleService {
   private http = inject(HttpClient);
 
-  getArticles(page: number, size: number): Observable<ArticlePageResponse> {
-    return this.http.get<ArticlePageResponse>(BASE_URL, {
-      params: { page: page.toString(), size: size.toString() },
-    });
+  getArticles(page: number, size: number, tag?: string): Observable<ArticlePageResponse> {
+    const params: Record<string, string> = { page: page.toString(), size: size.toString() };
+    if (tag) params['tag'] = tag;
+    return this.http.get<ArticlePageResponse>(BASE_URL, { params });
+  }
+
+  getTags(): Observable<string[]> {
+    return this.http.get<string[]>(`${BASE_URL}/tags`);
   }
 
   getArticleBySlug(slug: string): Observable<ArticleDetail> {

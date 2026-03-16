@@ -18,6 +18,9 @@ export interface PlaceOrderRequest {
     country: string;
   };
   total: number;
+  discountCode?: string | null;
+  discountAmount?: number;
+  paymentIntentId?: string;
 }
 
 export interface OrderConfirmation {

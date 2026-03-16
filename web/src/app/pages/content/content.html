@@ -1,9 +1,24 @@
-@if (loading()) {
+@if (loading() && posts().length === 0) {
   <p class="feed-loading">Loading articles...</p>
 } @else if (error()) {
   <p class="feed-error">{{ error() }}</p>
 } @else {
   <h1 class="feed-title">Content</h1>
+
+  @if (tags().length > 0) {
+    <div class="tag-filters" role="group" aria-label="Filter by tag">
+      <button
+        class="tag-btn"
+        [class.active]="selectedTag() === null"
+        (click)="selectTag(null)">All</button>
+      @for (tag of tags(); track tag) {
+        <button
+          class="tag-btn"
+          [class.active]="selectedTag() === tag"
+          (click)="selectTag(tag)">{{ tag }}</button>
+      }
+    </div>
+  }
 
   <div class="card-grid">
     @for (post of posts(); track post.slug) {
@@ -26,7 +41,11 @@
     }
   </div>
 
-  @if (hasMore()) {
+  @if (loading()) {
+    <p class="feed-loading">Loading...</p>
+  }
+
+  @if (hasMore() && !loading()) {
     <div class="load-more-container">
       <button class="btn-load-more" (click)="loadMore()" [disabled]="loadingMore()">
         {{ loadingMore() ? 'Loading...' : 'Load More' }}

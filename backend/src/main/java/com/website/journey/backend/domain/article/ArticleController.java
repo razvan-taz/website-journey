@@ -3,6 +3,7 @@ package com.website.journey.backend.domain.article;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/articles")
@@ -28,14 +31,24 @@ public class ArticleController {
     @GetMapping
     public ResponseEntity<Page<ArticleListDto>> findAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        Page<ArticleListDto> result = articleService.findAll(PageRequest.of(page, size));
-        return ResponseEntity.ok(result);
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String tag) {
+        Page<ArticleListDto> result = articleService.findAll(tag, PageRequest.of(page, size));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES).cachePublic())
+                .body(result);
+    }
+
+    @GetMapping("/tags")
+    public ResponseEntity<java.util.List<String>> getTags() {
+        return ResponseEntity.ok(articleService.getDistinctTags());
     }
 
     @GetMapping("/{slug}")
     public ResponseEntity<ArticleDetailDto> findBySlug(@PathVariable String slug) {
-        return ResponseEntity.ok(articleService.findBySlug(slug));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.MINUTES).cachePublic())
+                .body(articleService.findBySlug(slug));
     }
 
     @PostMapping

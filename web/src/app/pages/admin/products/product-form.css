@@ -16,7 +16,7 @@
 }
 
 .btn-back {
-  color: #888;
+  color: #aaa;
   text-decoration: none;
   font-size: 14px;
   transition: color 0.2s;
@@ -27,7 +27,7 @@
 }
 
 .admin-loading {
-  color: #888;
+  color: #aaa;
   font-size: 14px;
 }
 
@@ -44,7 +44,7 @@
 }
 
 .form-group label {
-  color: #888;
+  color: #aaa;
   font-size: 13px;
 }
 

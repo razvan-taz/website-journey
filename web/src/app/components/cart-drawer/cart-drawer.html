@@ -22,7 +22,7 @@
           <div class="item-qty">
             <button class="qty-btn" (click)="decrement(item.productId, item.quantity)" aria-label="Decrease quantity">−</button>
             <span class="qty-value">{{ item.quantity }}</span>
-            <button class="qty-btn" (click)="increment(item.productId, item.quantity)" aria-label="Increase quantity">+</button>
+            <button class="qty-btn" (click)="increment(item.productId, item.quantity)" aria-label="Increase quantity" [disabled]="item.isSubscription">+</button>
           </div>
           <button class="item-remove" (click)="cartService.removeItem(item.productId)" aria-label="Remove item">✕</button>
         </li>

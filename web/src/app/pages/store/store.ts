@@ -1,8 +1,10 @@
-import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
+import { Component, inject, signal, DestroyRef } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProductService, ProductListItem } from '../../services/product.service';
+import { WishlistService } from '../../services/wishlist.service';
+import { AuthService } from '../../services/auth.service';
 
 const CATEGORIES = ['All', 'Apparel', 'Accessories', 'Digital'] as const;
 type Category = (typeof CATEGORIES)[number];
@@ -27,52 +29,64 @@ export class Store {
 
   private productService = inject(ProductService);
   private destroyRef = inject(DestroyRef);
-
-  filteredProducts = computed(() => {
-    const category = this.activeCategory();
-    const all = this.products();
-    if (category === 'All') return all;
-    return all.filter(
-      (p) => p.category.toLowerCase() === category.toLowerCase()
-    );
-  });
+  readonly wishlistService = inject(WishlistService);
+  readonly authService = inject(AuthService);
 
   constructor() {
-    this.productService
-      .getProducts(0, 12)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.products.set(response.content);
-          this.currentPage.set(0);
-          this.hasMore.set(!response.last);
-          this.loading.set(false);
-        },
-        error: () => {
-          this.error.set('Failed to load products. Please try again later.');
-          this.loading.set(false);
-        },
-      });
+    this.fetchProducts(0, 'All', false);
+    if (this.authService.isLoggedIn()) {
+      this.wishlistService.load().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+    }
   }
 
   setCategory(category: Category): void {
+    if (category === this.activeCategory()) return;
     this.activeCategory.set(category);
+    this.fetchProducts(0, category, false);
   }
 
   loadMore(): void {
     const nextPage = this.currentPage() + 1;
-    this.loadingMore.set(true);
+    this.fetchProducts(nextPage, this.activeCategory(), true);
+  }
+
+  toggleWishlist(productId: number, event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+    this.wishlistService.toggle(productId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+  }
+
+  private fetchProducts(page: number, category: Category, append: boolean): void {
+    if (append) {
+      this.loadingMore.set(true);
+    } else {
+      this.loading.set(true);
+      this.error.set(null);
+    }
+
     this.productService
-      .getProducts(nextPage, 12)
+      .getProducts(page, 12, category)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
-          this.products.update(existing => [...existing, ...response.content]);
-          this.currentPage.set(nextPage);
+          if (append) {
+            this.products.update(existing => [...existing, ...response.content]);
+            this.loadingMore.set(false);
+          } else {
+            this.products.set(response.content);
+            this.loading.set(false);
+          }
+          this.currentPage.set(page);
           this.hasMore.set(!response.last);
-          this.loadingMore.set(false);
         },
-        error: () => this.loadingMore.set(false),
+        error: () => {
+          if (!append) {
+            this.error.set('Failed to load products. Please try again later.');
+            this.loading.set(false);
+          } else {
+            this.loadingMore.set(false);
+          }
+        },
       });
   }
 }

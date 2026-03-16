@@ -30,10 +30,21 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
+                        // Specific product endpoints that override the broad GET permitAll below
+                        .requestMatchers(HttpMethod.GET, "/api/products/*/reviews/eligibility").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/products/*/reviews").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/*/reviews/mine").authenticated()
+                        .requestMatchers("/api/wishlist/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/search/**").permitAll()
                         .requestMatchers("/api/subscriptions/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
+                        .requestMatchers("/sitemap.xml").permitAll()
+                        .requestMatchers("/robots.txt").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/newsletter/subscribe").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/discount/validate").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/payments/config").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()
                         // Write operations require ADMIN role
                         .requestMatchers(HttpMethod.POST, "/api/articles/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/articles/**").hasRole("ADMIN")

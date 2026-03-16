@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject, signal, DestroyRef } from '@angular/core';
+import { Component, EventEmitter, Output, inject, signal, DestroyRef, ElementRef, afterNextRender, HostListener } from '@angular/core';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -8,6 +8,7 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 function passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
@@ -19,10 +20,12 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
   return null;
 }
 
+const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+
 @Component({
   selector: 'app-sign-in-modal',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './sign-in-modal.html',
   styleUrl: './sign-in-modal.css',
 })
@@ -32,11 +35,55 @@ export class SignInModal {
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
+  private el = inject(ElementRef);
+
+  constructor() {
+    afterNextRender(() => {
+      const modal = this.el.nativeElement.querySelector('.modal') as HTMLElement;
+      if (modal) {
+        const first = modal.querySelectorAll<HTMLElement>(FOCUSABLE)[0];
+        first?.focus();
+      }
+    });
+  }
+
+  @HostListener('keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      this.onClose();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+
+    const modal = this.el.nativeElement.querySelector('.modal') as HTMLElement;
+    if (!modal) return;
+    const focusable = Array.from(modal.querySelectorAll<HTMLElement>(FOCUSABLE));
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (event.shiftKey) {
+      if (document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  }
 
   mode: 'signin' | 'signup' = 'signin';
 
   errorMessage = signal<string | null>(null);
   loading = signal(false);
+
+  showPassword = signal(false);
+  showSuPassword = signal(false);
+  showSuConfirmPassword = signal(false);
 
   form: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -47,7 +94,7 @@ export class SignInModal {
     {
       name: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(4)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]],
     },
     { validators: passwordMatchValidator }

@@ -1,0 +1,29 @@
+@if (success()) {
+  <div class="newsletter-success">
+    <span class="success-icon">✓</span>
+    <p>You're in! Welcome to the Journey newsletter.</p>
+  </div>
+} @else {
+  <div class="newsletter-box">
+    <h2 class="newsletter-title">Stay in the loop</h2>
+    <p class="newsletter-subtitle">Get new content and exclusive deals delivered to your inbox.</p>
+    <form class="newsletter-form" (submit)="submit(); $event.preventDefault()">
+      <input
+        class="newsletter-input"
+        type="email"
+        [value]="email()"
+        (input)="email.set($any($event.target).value)"
+        placeholder="your@email.com"
+        required
+        aria-label="Email address"
+      />
+      <button class="newsletter-btn" type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Subscribing...' : 'Subscribe' }}
+      </button>
+    </form>
+    @if (error()) {
+      <p class="newsletter-error">{{ error() }}</p>
+    }
+    <p class="newsletter-note">No spam. Unsubscribe anytime.</p>
+  </div>
+}

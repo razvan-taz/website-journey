@@ -31,7 +31,7 @@
 
 .admin-loading,
 .admin-error {
-  color: #888;
+  color: #aaa;
   font-size: 14px;
 }
 
@@ -47,7 +47,7 @@
 th {
   text-align: left;
   padding: 10px 12px;
-  color: #888;
+  color: #aaa;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -74,7 +74,7 @@ tr:hover td {
 
 .badge {
   background: #2a2a2a;
-  color: #888;
+  color: #aaa;
   padding: 2px 8px;
   border-radius: 10px;
   font-size: 12px;
@@ -90,7 +90,7 @@ tr:hover td {
   padding: 4px 12px;
   background: transparent;
   border: 1px solid #444;
-  color: #888;
+  color: #aaa;
   text-decoration: none;
   border-radius: 4px;
   font-size: 13px;
@@ -106,7 +106,7 @@ tr:hover td {
   padding: 4px 12px;
   background: transparent;
   border: 1px solid #444;
-  color: #888;
+  color: #aaa;
   border-radius: 4px;
   font-size: 13px;
   cursor: pointer;

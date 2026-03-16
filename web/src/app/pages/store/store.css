@@ -7,7 +7,7 @@
 .store-loading,
 .store-error,
 .store-empty {
-  color: #888;
+  color: #aaa;
   font-size: 1rem;
   margin-top: 32px;
   text-align: center;
@@ -70,6 +70,12 @@
   }
 }
 
+/* ── Card wrapper (for positioning wishlist button) ── */
+
+.card-wrapper {
+  position: relative;
+}
+
 /* ── Card ─────────────────────────────────────────── */
 
 .card {
@@ -87,6 +93,36 @@
   transform: translateY(-4px);
   border-color: #880824;
   box-shadow: 0 8px 24px rgba(136, 8, 36, 0.2);
+}
+
+/* ── Wishlist heart button ────────────────────────── */
+
+.btn-wishlist {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.55);
+  border: none;
+  border-radius: 50%;
+  color: #ccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, color 0.2s ease;
+  padding: 0;
+  z-index: 1;
+}
+
+.btn-wishlist:hover {
+  background: rgba(0, 0, 0, 0.8);
+  color: #e05a70;
+}
+
+.btn-wishlist.wishlisted {
+  color: #e05a70;
 }
 
 /* ── Thumbnail ────────────────────────────────────── */
@@ -169,7 +205,7 @@
 }
 
 .card-stock.out-of-stock {
-  color: #888;
+  color: #aaa;
 }
 
 /* ── Load More ────────────────────────────────────── */

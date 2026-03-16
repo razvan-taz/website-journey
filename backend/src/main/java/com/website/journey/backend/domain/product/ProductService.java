@@ -17,8 +17,11 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductDto> findAll(Pageable pageable) {
-        return productRepository.findAllByActiveTrue(pageable).map(this::toDto);
+    public Page<ProductDto> findAll(String category, Pageable pageable) {
+        Page<Product> page = (category != null && !category.isBlank())
+                ? productRepository.findAllByActiveTrueAndCategoryIgnoreCase(category, pageable)
+                : productRepository.findAllByActiveTrue(pageable);
+        return page.map(this::toDto);
     }
 
     @Transactional(readOnly = true)

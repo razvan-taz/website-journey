@@ -17,33 +17,32 @@ export class Content {
   currentPage = signal(0);
   hasMore = signal(false);
   loadingMore = signal(false);
+  tags = signal<string[]>([]);
+  selectedTag = signal<string | null>(null);
 
   private articleService = inject(ArticleService);
   private destroyRef = inject(DestroyRef);
 
   constructor() {
-    this.articleService
-      .getArticles(0, 12)
+    this.articleService.getTags()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.posts.set(response.content);
-          this.currentPage.set(0);
-          this.hasMore.set(!response.last);
-          this.loading.set(false);
-        },
-        error: () => {
-          this.error.set('Failed to load articles. Please try again later.');
-          this.loading.set(false);
-        },
-      });
+      .subscribe({ next: (tags) => this.tags.set(tags), error: () => {} });
+
+    this.loadPage(0, null);
+  }
+
+  selectTag(tag: string | null): void {
+    if (this.selectedTag() === tag) return;
+    this.selectedTag.set(tag);
+    this.posts.set([]);
+    this.loadPage(0, tag);
   }
 
   loadMore(): void {
     const nextPage = this.currentPage() + 1;
     this.loadingMore.set(true);
     this.articleService
-      .getArticles(nextPage, 12)
+      .getArticles(nextPage, 12, this.selectedTag() ?? undefined)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
@@ -53,6 +52,25 @@ export class Content {
           this.loadingMore.set(false);
         },
         error: () => this.loadingMore.set(false),
+      });
+  }
+
+  private loadPage(page: number, tag: string | null): void {
+    this.loading.set(true);
+    this.articleService
+      .getArticles(page, 12, tag ?? undefined)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.posts.set(response.content);
+          this.currentPage.set(page);
+          this.hasMore.set(!response.last);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set('Failed to load articles. Please try again later.');
+          this.loading.set(false);
+        },
       });
   }
 }

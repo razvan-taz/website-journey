@@ -1,5 +1,6 @@
 package com.website.journey.backend.domain.user;
 
+import com.website.journey.backend.config.EmailService;
 import com.website.journey.backend.config.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,14 +14,17 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
 
     public UserService(
             UserRepository userRepository,
             BCryptPasswordEncoder passwordEncoder,
-            JwtUtil jwtUtil) {
+            JwtUtil jwtUtil,
+            EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -38,6 +42,8 @@ public class UserService {
 
         User saved = userRepository.save(user);
         String token = jwtUtil.generateToken(saved.getEmail(), saved.getName(), saved.getRole());
+
+        emailService.sendWelcomeEmail(saved.getEmail(), saved.getName());
 
         return AuthResponse.builder()
                 .token(token)

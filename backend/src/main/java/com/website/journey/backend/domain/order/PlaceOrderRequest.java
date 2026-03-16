@@ -14,7 +14,10 @@ import java.util.List;
 public record PlaceOrderRequest(
         @NotEmpty List<@Valid OrderItemRequest> items,
         @NotNull @Valid ShippingAddress shippingAddress,
-        @NotNull @DecimalMin("0.01") BigDecimal total
+        @NotNull @DecimalMin("0.01") BigDecimal total,
+        String discountCode,
+        BigDecimal discountAmount,
+        String paymentIntentId
 ) {
     public record OrderItemRequest(
             @NotNull Long productId,

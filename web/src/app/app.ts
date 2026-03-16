@@ -3,23 +3,26 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 import { SignInModal } from './components/sign-in-modal/sign-in-modal';
 import { SearchOverlay } from './components/search-overlay/search-overlay';
 import { CartDrawer } from './components/cart-drawer/cart-drawer';
+import { CookieConsent } from './components/cookie-consent/cookie-consent';
+import { ToastContainer } from './components/toast-container/toast-container';
 import { AuthService } from './services/auth.service';
 import { CartService } from './services/cart.service';
 import { SubscriptionService, SubscriptionStatus } from './services/subscription.service';
+import { UiStateService } from './services/ui-state.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, SignInModal, SearchOverlay, CartDrawer],
+  imports: [RouterOutlet, RouterLink, SignInModal, SearchOverlay, CartDrawer, CookieConsent, ToastContainer],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
 export class App {
   authService = inject(AuthService);
   cartService = inject(CartService);
+  uiState = inject(UiStateService);
   private subscriptionService = inject(SubscriptionService);
 
-  showSignIn = false;
   showSearch = false;
   showCart = false;
 

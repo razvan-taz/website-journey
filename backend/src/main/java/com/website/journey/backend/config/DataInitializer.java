@@ -28,7 +28,7 @@ public class DataInitializer implements ApplicationRunner {
                     .role("ADMIN")
                     .build();
             userRepository.save(admin);
-            System.out.println("[DataInitializer] Default admin user created: admin@journey.dev / Admin1234!");
+            System.out.println("[DataInitializer] Default admin user created.");
         }
     }
 }

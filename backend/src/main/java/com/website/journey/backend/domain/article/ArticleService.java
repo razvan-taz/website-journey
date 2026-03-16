@@ -2,6 +2,8 @@ package com.website.journey.backend.domain.article;
 
 import com.website.journey.backend.domain.subscription.SubscriptionService;
 import com.website.journey.backend.domain.user.UserRepository;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -30,8 +32,16 @@ public class ArticleService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ArticleListDto> findAll(Pageable pageable) {
+    public Page<ArticleListDto> findAll(String tag, Pageable pageable) {
+        if (tag != null && !tag.isBlank()) {
+            return articleRepository.findByTagIgnoreCase(tag, pageable).map(this::toListDto);
+        }
         return articleRepository.findAll(pageable).map(this::toListDto);
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.List<String> getDistinctTags() {
+        return articleRepository.findDistinctTags();
     }
 
     @Transactional(readOnly = true)
@@ -80,7 +90,7 @@ public class ArticleService {
     public ArticleDetailDto create(CreateArticleRequest request) {
         Article article = Article.builder()
                 .title(request.getTitle())
-                .body(request.getBody())
+                .body(sanitize(request.getBody()))
                 .slug(request.getSlug())
                 .author(request.getAuthor())
                 .publishDate(request.getPublishDate())
@@ -100,7 +110,7 @@ public class ArticleService {
                         HttpStatus.NOT_FOUND, "Article not found"));
 
         article.setTitle(request.getTitle());
-        article.setBody(request.getBody());
+        article.setBody(sanitize(request.getBody()));
         article.setSlug(request.getSlug());
         article.setAuthor(request.getAuthor());
         article.setPublishDate(request.getPublishDate());
@@ -120,6 +130,15 @@ public class ArticleService {
                         HttpStatus.NOT_FOUND, "Article not found"));
 
         articleRepository.delete(article);
+    }
+
+    private String sanitize(String html) {
+        if (html == null) return null;
+        return Jsoup.clean(html, Safelist.relaxed()
+                .addTags("iframe", "figure", "figcaption")
+                .addAttributes("iframe", "src", "width", "height", "allowfullscreen", "frameborder")
+                .addAttributes(":all", "class", "id", "style")
+                .addProtocols("iframe", "src", "https"));
     }
 
     private ArticleListDto toListDto(Article article) {

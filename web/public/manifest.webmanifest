@@ -1,0 +1,17 @@
+{
+  "name": "Journey",
+  "short_name": "Journey",
+  "description": "Content, store, and community — all in one place.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#880824",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}

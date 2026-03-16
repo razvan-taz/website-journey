@@ -14,8 +14,82 @@
 
 <!-- Latest Content Section -->
 <section class="latest-content">
-  <div class="latest-content-inner">
-    <h2 class="section-heading">Latest Content</h2>
-    <p class="section-placeholder">Content feed coming soon.</p>
+  <div class="section-inner">
+    <div class="section-header">
+      <h2 class="section-heading">Latest Content</h2>
+      <a routerLink="/content" class="section-link">View all</a>
+    </div>
+
+    @if (articlesLoading()) {
+      <p class="section-loading">Loading articles...</p>
+    } @else if (articles().length > 0) {
+      <div class="card-grid">
+        @for (article of articles(); track article.slug) {
+          <article class="card" [routerLink]="['/content', article.slug]">
+            <div class="card-thumbnail">
+              <img
+                [src]="article.thumbnailUrl"
+                [alt]="article.title"
+                loading="lazy"
+                width="400"
+                height="225"
+              />
+            </div>
+            <div class="card-body">
+              <span class="card-tag">{{ article.tag }}</span>
+              <h3 class="card-title">{{ article.title }}</h3>
+              <footer class="card-meta">
+                <span class="card-author">{{ article.author }}</span>
+                <span class="card-date">{{ article.publishDate | date: 'mediumDate' }}</span>
+              </footer>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="newsletter-section">
+  <div class="section-inner">
+    <app-newsletter-signup />
+  </div>
+</section>
+
+<!-- Featured Products Section -->
+<section class="featured-products">
+  <div class="section-inner">
+    <div class="section-header">
+      <h2 class="section-heading">Featured Products</h2>
+      <a routerLink="/store" class="section-link">Visit the store</a>
+    </div>
+
+    @if (productsLoading()) {
+      <p class="section-loading">Loading products...</p>
+    } @else if (products().length > 0) {
+      <div class="card-grid card-grid--products">
+        @for (product of products(); track product.id) {
+          <a class="card" [routerLink]="['/store', product.id]">
+            <div class="card-thumbnail card-thumbnail--square">
+              <img
+                [src]="product.imageUrl"
+                [alt]="product.name"
+                loading="lazy"
+                width="400"
+                height="400"
+              />
+            </div>
+            <div class="card-body">
+              <span class="card-tag">{{ product.category }}</span>
+              <h3 class="card-title">{{ product.name }}</h3>
+              <div class="card-footer">
+                <span class="card-price">{{ product.price | currency }}</span>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+    }
   </div>
 </section>

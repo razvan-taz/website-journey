@@ -1,3 +1,4 @@
+<a class="skip-link" href="#main-content">Skip to main content</a>
 <nav>
   <div class="nav-links">
     <a routerLink="/">Home</a>
@@ -17,7 +18,7 @@
       }
     </button>
     @if (!authService.isLoggedIn()) {
-      <button class="btn-sign-in" (click)="showSignIn = true">Sign In</button>
+      <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button>
       <a class="btn-subscribe" routerLink="/subscribe">Subscribe</a>
     } @else {
       <div class="user-display">
@@ -27,12 +28,13 @@
           <span class="sub-badge">✓ {{ subscriptionStatus()!.planName }}</span>
         }
         <a class="btn-profile" routerLink="/profile">Profile</a>
+        <a class="btn-profile" routerLink="/wishlist">Wishlist</a>
         <button class="btn-logout" (click)="authService.logout()">Logout</button>
       </div>
     }
   </div>
-  @if (showSignIn) {
-    <app-sign-in-modal (closed)="showSignIn = false" />
+  @if (uiState.showSignIn()) {
+    <app-sign-in-modal (closed)="uiState.showSignIn.set(false)" />
   }
   @if (showSearch) {
     <app-search-overlay (closed)="showSearch = false" />
@@ -42,6 +44,9 @@
   }
 </nav>
 
-<main>
+<main id="main-content">
   <router-outlet></router-outlet>
 </main>
+
+<app-cookie-consent />
+<app-toast-container />

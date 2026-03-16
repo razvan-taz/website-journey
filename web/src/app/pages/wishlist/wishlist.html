@@ -1,0 +1,35 @@
+<h1 class="wishlist-title">Wishlist</h1>
+
+@if (loading()) {
+  <p class="wishlist-state">Loading...</p>
+} @else if (items().length === 0) {
+  <p class="wishlist-state">Your wishlist is empty. <a routerLink="/store">Browse the store</a></p>
+} @else {
+  <div class="wishlist-grid">
+    @for (item of items(); track item.productId) {
+      <div class="wishlist-card">
+        <a class="card-link" [routerLink]="['/store', item.productId]">
+          <div class="card-thumbnail">
+            <img [src]="item.imageUrl" [alt]="item.name" loading="lazy" width="300" height="300" />
+          </div>
+          <div class="card-body">
+            <h3 class="card-name">{{ item.name }}</h3>
+            <div class="card-footer">
+              <span class="card-price">{{ item.price | currency }}</span>
+              <span class="card-stock" [class.out-of-stock]="item.stock === 0">
+                {{ item.stock > 0 ? 'In stock' : 'Out of stock' }}
+              </span>
+            </div>
+          </div>
+        </a>
+        <button
+          class="btn-remove"
+          (click)="remove(item.productId)"
+          aria-label="Remove from wishlist"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    }
+  </div>
+}

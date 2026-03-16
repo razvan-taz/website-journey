@@ -14,7 +14,13 @@
     <span class="premium-badge">✦ Premium</span>
   }
 
-  <p style="opacity:0.85;">{{ post.author }} &middot; {{ post.publishDate }}</p>
+  <p class="article-meta">
+    <span>{{ post.author }}</span>
+    <span>&middot;</span>
+    <span>{{ post.publishDate }}</span>
+    <span>&middot;</span>
+    <span>{{ readingTime() }} min read</span>
+  </p>
 
   <img [src]="post.thumbnailUrl" [alt]="post.title" style="width:100%; max-width:900px; border-radius:12px; margin:16px 0;" />
 
@@ -29,7 +35,7 @@
           <p class="paywall-auth-note">Your subscription has expired or you don't have one. Subscribe to continue.</p>
         } @else {
           <p class="paywall-auth-note">Your subscription has expired or you don't have one. Subscribe to continue.</p>
-          <p class="paywall-signin-note">Already a subscriber? <a routerLink="/login">Sign in</a> to access this content.</p>
+          <p class="paywall-signin-note">Already a subscriber? <button (click)="uiState.openSignIn()" class="paywall-signin-link">Sign in</button> to access this content.</p>
         }
         <a routerLink="/subscribe" class="paywall-btn">Subscribe Now</a>
       </div>
@@ -39,8 +45,25 @@
       <p><em>(Article body will go here.)</em></p>
     }
   } @else {
-    <p><em>(Video content)</em></p>
+    @if (post.body) {
+      <div class="article-body" [innerHTML]="post.body"></div>
+    } @else {
+      <p><em>(No video content available.)</em></p>
+    }
   }
+
+  <div class="share-bar">
+    <span class="share-label">Share:</span>
+    <a class="share-btn share-twitter"
+       [href]="'https://twitter.com/intent/tweet?text=' + post.title + '&url=' + post.seo.canonicalUrl"
+       target="_blank" rel="noopener noreferrer" aria-label="Share on X (Twitter)">𝕏</a>
+    <a class="share-btn share-facebook"
+       [href]="'https://www.facebook.com/sharer/sharer.php?u=' + post.seo.canonicalUrl"
+       target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">f</a>
+    <a class="share-btn share-linkedin"
+       [href]="'https://www.linkedin.com/shareArticle?mini=true&url=' + post.seo.canonicalUrl + '&title=' + post.title"
+       target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn">in</a>
+  </div>
 
   @if (post.relatedArticles.length > 0) {
     <section class="related-articles">

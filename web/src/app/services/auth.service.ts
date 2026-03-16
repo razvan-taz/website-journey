@@ -1,4 +1,5 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, of, tap } from 'rxjs';
 
@@ -26,6 +27,7 @@ interface UserProfileResponse {
 })
 export class AuthService {
   private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
 
   private _token = signal<string | null>(null);
   private _currentUser = signal<User | null>(null);
@@ -35,6 +37,8 @@ export class AuthService {
   readonly isAdmin = computed(() => this._currentUser()?.role === 'ADMIN');
 
   constructor() {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     const savedToken = localStorage.getItem('auth_token');
     if (savedToken) {
       this._token.set(savedToken);
@@ -63,7 +67,7 @@ export class AuthService {
         tap((response) => {
           this._token.set(response.token);
           this._currentUser.set({ name: response.name, email: response.email, role: response.role });
-          localStorage.setItem('auth_token', response.token);
+          if (isPlatformBrowser(this.platformId)) localStorage.setItem('auth_token', response.token);
         }),
         map(() => true),
         catchError(() => of(false))
@@ -77,7 +81,7 @@ export class AuthService {
         tap((response) => {
           this._token.set(response.token);
           this._currentUser.set({ name: response.name, email: response.email, role: response.role });
-          localStorage.setItem('auth_token', response.token);
+          if (isPlatformBrowser(this.platformId)) localStorage.setItem('auth_token', response.token);
         }),
         map(() => true),
         catchError(() => of(false))
@@ -87,7 +91,7 @@ export class AuthService {
   logout(): void {
     this._token.set(null);
     this._currentUser.set(null);
-    localStorage.removeItem('auth_token');
+    if (isPlatformBrowser(this.platformId)) localStorage.removeItem('auth_token');
   }
 
   getToken(): string | null {

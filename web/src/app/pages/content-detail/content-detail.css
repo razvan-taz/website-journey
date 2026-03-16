@@ -1,3 +1,63 @@
+/* ── Article Meta ──────────────────────────────────── */
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.85;
+  flex-wrap: wrap;
+}
+
+/* ── Share Bar ──────────────────────────────────────── */
+
+.share-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 32px 0 24px;
+}
+
+.share-label {
+  font-size: 0.85rem;
+  color: #aaa;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.share-btn:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.share-twitter {
+  background: #000;
+  color: #fff;
+}
+
+.share-facebook {
+  background: #1877f2;
+  color: #fff;
+}
+
+.share-linkedin {
+  background: #0a66c2;
+  color: #fff;
+}
+
 /* ── Premium Badge ─────────────────────────────────── */
 
 .premium-badge {
@@ -160,7 +220,7 @@
 .related-author {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #888;
+  color: #aaa;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }

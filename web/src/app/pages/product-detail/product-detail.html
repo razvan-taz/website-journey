@@ -34,9 +34,80 @@
 
       <p class="product-description">{{ p.description }}</p>
 
-      @if (p.stock > 0) {
-        <button class="btn-add-to-cart" (click)="addToCart()">Add to Cart</button>
-      }
+      <div class="product-actions">
+        @if (p.stock > 0) {
+          <button class="btn-add-to-cart" (click)="addToCart()">Add to Cart</button>
+        }
+        @if (isLoggedIn()) {
+          <button
+            class="btn-wishlist"
+            [class.wishlisted]="wishlisted()"
+            (click)="toggleWishlist()"
+            [attr.aria-label]="wishlisted() ? 'Remove from wishlist' : 'Add to wishlist'"
+          >
+            @if (wishlisted()) {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            }
+          </button>
+        }
+      </div>
     </div>
   </div>
+
+  <!-- Reviews Section -->
+  <section class="reviews-section">
+    <h2 class="reviews-heading">
+      Customer Reviews
+      @if (reviewSummary()?.totalReviews) {
+        <span class="reviews-count">({{ reviewSummary()!.totalReviews }})</span>
+      }
+    </h2>
+
+    @if (reviewSummary()?.totalReviews) {
+      <div class="reviews-list">
+        @for (review of reviewSummary()!.reviews; track review.id) {
+          <div class="review-card">
+            <div class="review-header">
+              <span class="review-author">{{ review.userName }}</span>
+              <span class="review-date">{{ review.createdAt | slice:0:10 }}</span>
+            </div>
+            <p class="review-body">{{ review.body }}</p>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="no-reviews">No reviews yet. Be the first to review this product.</p>
+    }
+
+    @if (reviewSuccess()) {
+      <p class="review-success">✓ Your review has been submitted. Thank you!</p>
+    } @else if (isLoggedIn() && reviewEligibility()?.canReview) {
+      <div class="review-form">
+        <h3 class="review-form-title">Write a Review</h3>
+        <textarea
+          class="review-textarea"
+          [value]="newReviewBody()"
+          (input)="newReviewBody.set($any($event.target).value)"
+          placeholder="Share your thoughts about this product..."
+          rows="4"
+        ></textarea>
+        @if (reviewError()) {
+          <p class="review-error">{{ reviewError() }}</p>
+        }
+        <button
+          class="btn-submit-review"
+          (click)="submitReview()"
+          [disabled]="reviewSubmitting() || !newReviewBody().trim()"
+        >
+          {{ reviewSubmitting() ? 'Submitting...' : 'Submit Review' }}
+        </button>
+      </div>
+    } @else if (isLoggedIn() && reviewEligibility()?.hasReviewed) {
+      <p class="review-notice">You have already reviewed this product.</p>
+    } @else if (isLoggedIn() && reviewEligibility() !== null) {
+      <p class="review-notice">Only verified purchasers can leave a review.</p>
+    }
+  </section>
 }

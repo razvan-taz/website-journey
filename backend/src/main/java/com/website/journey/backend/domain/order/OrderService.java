@@ -1,5 +1,7 @@
 package com.website.journey.backend.domain.order;
 
+import com.website.journey.backend.config.EmailService;
+import com.website.journey.backend.domain.discount.DiscountCodeRepository;
 import com.website.journey.backend.domain.product.ProductRepository;
 import com.website.journey.backend.domain.subscription.SubscriptionService;
 import com.website.journey.backend.domain.user.UserRepository;
@@ -18,15 +20,21 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final SubscriptionService subscriptionService;
+    private final EmailService emailService;
+    private final DiscountCodeRepository discountCodeRepository;
 
     public OrderService(OrderRepository orderRepository,
                         UserRepository userRepository,
                         ProductRepository productRepository,
-                        SubscriptionService subscriptionService) {
+                        SubscriptionService subscriptionService,
+                        EmailService emailService,
+                        DiscountCodeRepository discountCodeRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.subscriptionService = subscriptionService;
+        this.emailService = emailService;
+        this.discountCodeRepository = discountCodeRepository;
     }
 
     @Transactional
@@ -44,14 +52,35 @@ public class OrderService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Item price must be greater than zero: " + item.name());
             }
+            if (item.productId() != null) {
+                productRepository.findById(item.productId()).ifPresent(product -> {
+                    if (!"Subscription".equals(product.getCategory()) && product.getStock() < item.quantity()) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "Insufficient stock for: " + item.name());
+                    }
+                });
+            }
         }
 
         PlaceOrderRequest.ShippingAddress shipping = request.shippingAddress();
+
+        BigDecimal discountAmount = request.discountAmount() != null ? request.discountAmount() : BigDecimal.ZERO;
+
+        // Increment discount code usage if provided
+        if (request.discountCode() != null && !request.discountCode().isBlank()) {
+            discountCodeRepository.findByCodeIgnoreCase(request.discountCode()).ifPresent(dc -> {
+                dc.setUses(dc.getUses() + 1);
+                discountCodeRepository.save(dc);
+            });
+        }
 
         Order order = Order.builder()
                 .userId(userId)
                 .status("PENDING")
                 .total(request.total())
+                .paymentIntentId(request.paymentIntentId())
+                .discountCode(request.discountCode())
+                .discountAmount(discountAmount)
                 .shippingName(shipping.name())
                 .shippingLine1(shipping.line1())
                 .shippingCity(shipping.city())
@@ -84,9 +113,29 @@ public class OrderService {
                                     : "annual";
                             subscriptionService.createSubscription(
                                     userId, product.getId(), product.getName(), billingPeriod);
+                        } else {
+                            int newStock = Math.max(0, product.getStock() - item.getQuantity());
+                            product.setStock(newStock);
+                            productRepository.save(product);
                         }
                     });
                 }
+            });
+
+            userRepository.findById(userId).ifPresent(user -> {
+                List<EmailService.OrderItemDetail> emailItems = saved.getItems().stream()
+                        .map(item -> new EmailService.OrderItemDetail(
+                                item.getProductName(),
+                                item.getQuantity(),
+                                item.getUnitPrice()))
+                        .toList();
+                emailService.sendOrderConfirmation(
+                        user.getEmail(),
+                        user.getName(),
+                        String.valueOf(saved.getId()),
+                        emailItems,
+                        saved.getTotal(),
+                        saved.getShippingName());
             });
         }
 
@@ -100,7 +149,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderHistoryResponse> getOrderHistory(Long userId) {
-        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId)
+        return orderRepository.findByUserIdWithItemsOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(order -> new OrderHistoryResponse(
                         order.getId(),
