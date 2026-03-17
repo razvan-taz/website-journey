@@ -16,6 +16,5 @@ public record ArticleDetailDto(
         String updatedAt,
         ArticleSeoDto seo,
         List<RelatedArticleDto> relatedArticles,
-        boolean premium,
         boolean accessDenied
 ) {}

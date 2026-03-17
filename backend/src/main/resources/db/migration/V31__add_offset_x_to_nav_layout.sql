@@ -1,0 +1,1 @@
+ALTER TABLE nav_layout ADD COLUMN offset_x INT NOT NULL DEFAULT 0;

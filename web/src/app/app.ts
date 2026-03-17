@@ -1,4 +1,4 @@
-import { Component, inject, signal, DestroyRef, HostListener } from '@angular/core';
+import { Component, inject, signal, DestroyRef, HostListener, ElementRef, afterNextRender } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SignInModal } from './components/sign-in-modal/sign-in-modal';
@@ -11,6 +11,7 @@ import { AuthService } from './services/auth.service';
 import { CartService } from './services/cart.service';
 import { UiStateService } from './services/ui-state.service';
 import { SiteService, ScheduleEntry } from './services/site.service';
+import { NavLayoutService, NavLayoutItem, NavZone } from './services/nav-layout.service';
 
 @Component({
   selector: 'app-root',
@@ -24,11 +25,14 @@ export class App {
   cartService = inject(CartService);
   uiState = inject(UiStateService);
   private siteService = inject(SiteService);
+  private navLayoutService = inject(NavLayoutService);
   private destroyRef = inject(DestroyRef);
+  private elRef = inject(ElementRef);
 
   showSearch = false;
   showCart = false;
   showSchedule = false;
+  showMobileMenu = false;
 
   scheduleEntries = signal<ScheduleEntry[]>([]);
   twitchStatus = this.siteService.twitchStatus;
@@ -44,10 +48,36 @@ export class App {
     this.siteService.getTwitchStatus()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({ error: () => {} });
+
+    this.navLayoutService.loadNavLayout()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ error: () => {} });
+
+    afterNextRender(() => this.measureNav());
+  }
+
+  private measureNav() {
+    const nav = this.elRef.nativeElement.querySelector('nav');
+    if (nav) this.navLayoutService.navWidth.set(nav.offsetWidth);
+  }
+
+  @HostListener('window:resize')
+  onResize() { this.measureNav(); }
+
+  zoneItems(zone: NavZone) {
+    return this.navLayoutService.zoneItems(zone);
+  }
+
+  itemOffsetStyle(item: NavLayoutItem): { [key: string]: string } {
+    const ox = item.offsetX ?? 0;
+    const oy = item.offsetY ?? 0;
+    if (!ox && !oy) return {};
+    return { transform: `translate(${ox}px, ${-oy}px)` };
   }
 
   @HostListener('document:click')
   onDocumentClick(): void {
     this.showSchedule = false;
+    this.showMobileMenu = false;
   }
 }

@@ -8,6 +8,5 @@ public record ArticleListDto(
         String publishDate,
         String thumbnailUrl,
         String type,
-        String tag,
-        boolean premium
+        String tag
 ) {}

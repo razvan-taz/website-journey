@@ -1,67 +1,337 @@
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <nav>
-  <div class="nav-logo-wrap">
-    <img src="logo.png" alt="TAZ" class="nav-logo" />
-  </div>
-  <div class="nav-twitch">
-    @if (twitchStatus()?.enabled) {
-      <a class="btn-twitch" [class.btn-twitch--live]="twitchStatus()!.live" [href]="twitchStatus()!.url" target="_blank" rel="noopener noreferrer">
-        <span class="twitch-dot"></span>
-        {{ twitchStatus()!.live ? 'Live' : 'Offline' }}
-      </a>
-    }
-  </div>
-  <div class="nav-links">
-    <a routerLink="/">Home</a>
-    <a routerLink="/content">Content</a>
-    <a routerLink="/store">Store</a>
-    <a routerLink="/about">About</a>
-    @if (authService.isAdmin()) {
-      <a routerLink="/admin">Admin</a>
-    }
-    <button class="btn-schedule" (click)="showSchedule = !showSchedule; $event.stopPropagation()">Schedule</button>
-    @if (showSchedule) {
-      <div class="schedule-dropdown" (click)="$event.stopPropagation()">
-        <div class="schedule-header">
-          <span class="schedule-title">Stream Schedule</span>
-          <button class="schedule-close" (click)="showSchedule = false">✕</button>
-        </div>
-        @for (entry of scheduleEntries(); track entry.dayOfWeek) {
-          <div class="schedule-row">
-            <span class="schedule-day">{{ entry.dayName }}</span>
-            <span class="schedule-content">{{ entry.content }}</span>
-          </div>
-        }
-        @if (scheduleEntries().length === 0) {
-          <div class="schedule-row">
-            <span class="schedule-content" style="color: #555;">No schedule set.</span>
-          </div>
-        }
-      </div>
-    }
-    <a class="nav-search-icon" (click)="showSearch = true" role="button" aria-label="Open search"><span class="search-icon"></span></a>
-  </div>
-  <div class="nav-actions">
-    <button class="btn-cart" (click)="showCart = true" aria-label="Open cart">
-      <span class="cart-icon">🛒</span>
-      @if (cartService.itemCount() > 0) {
-        <span class="cart-badge">{{ cartService.itemCount() }}</span>
-      }
+  <!-- Mobile nav bar (≤768px only) -->
+  <div class="mobile-nav-bar" (click)="$event.stopPropagation()">
+    <button class="mobile-hamburger" (click)="showMobileMenu = !showMobileMenu" aria-label="Toggle navigation menu">
+      <span></span><span></span><span></span>
     </button>
-    @if (!authService.isLoggedIn()) {
-      <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button>
-    } @else {
-      <div class="user-display">
-        <div class="user-avatar">
-          {{ authService.currentUser()!.name[0].toUpperCase() }}
-        </div>
-        <span class="user-name">{{ authService.currentUser()!.name }}</span>
-        <a class="btn-profile" routerLink="/profile">Profile</a>
-        <a class="btn-profile" routerLink="/wishlist">Wishlist</a>
-        <button class="btn-logout" (click)="authService.logout()">Logout</button>
-      </div>
+    <img src="logo.png" alt="TAZ" class="mobile-logo" />
+    <div class="mobile-nav-icons">
+      <button class="btn-cart" (click)="showCart = true" aria-label="Open cart">
+        <span class="cart-icon">🛒</span>
+        @if (cartService.itemCount() > 0) {
+          <span class="cart-badge">{{ cartService.itemCount() }}</span>
+        }
+      </button>
+      <a class="nav-search-icon" (click)="showSearch = true" role="button" aria-label="Open search">
+        <span class="search-icon"></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Above row -->
+  <div class="nav-zone nav-zone--above-left">
+    @for (item of zoneItems('above-left'); track item.itemKey) {
+      @switch (item.itemKey) {
+        @case ('logo') {
+          <img src="logo.png" alt="TAZ" class="nav-logo"
+            [style.height.px]="item.heightPx"
+            [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" />
+        }
+        @case ('twitch') {
+          @if (twitchStatus()?.enabled) {
+            <a class="btn-twitch" [class.btn-twitch--live]="twitchStatus()!.live"
+              [href]="twitchStatus()!.url" target="_blank" rel="noopener noreferrer"
+              [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+              <span class="twitch-dot"></span>
+              {{ twitchStatus()!.live ? 'Live' : 'Offline' }}
+            </a>
+          }
+        }
+        @case ('nav-links') {
+          <div class="nav-links-group" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <a routerLink="/">Home</a>
+            <a routerLink="/content">Content</a>
+            <a routerLink="/store">Store</a>
+            <a routerLink="/about">About</a>
+            @if (authService.isAdmin()) { <a routerLink="/admin">Admin</a> }
+          </div>
+        }
+        @case ('schedule') {
+          <div class="nav-schedule-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <button class="btn-schedule" (click)="showSchedule = !showSchedule; $event.stopPropagation()">Schedule</button>
+            @if (showSchedule) {
+              <div class="schedule-dropdown" (click)="$event.stopPropagation()">
+                <div class="schedule-header">
+                  <span class="schedule-title">Stream Schedule</span>
+                  <button class="schedule-close" (click)="showSchedule = false">✕</button>
+                </div>
+                @for (entry of scheduleEntries(); track entry.dayOfWeek) {
+                  <div class="schedule-row">
+                    <span class="schedule-day">{{ entry.dayName }}</span>
+                    <span class="schedule-content">{{ entry.content }}</span>
+                  </div>
+                }
+                @if (scheduleEntries().length === 0) {
+                  <div class="schedule-row">
+                    <span class="schedule-content" style="color: #555;">No schedule set.</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+        @case ('search') {
+          <a class="nav-search-icon" (click)="showSearch = true" role="button" aria-label="Open search"
+            [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <span class="search-icon"></span>
+          </a>
+        }
+        @case ('cart') {
+          <button class="btn-cart" (click)="showCart = true" aria-label="Open cart"
+            [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <span class="cart-icon">🛒</span>
+            @if (cartService.itemCount() > 0) {
+              <span class="cart-badge">{{ cartService.itemCount() }}</span>
+            }
+          </button>
+        }
+        @case ('signin') {
+          <div class="nav-signin-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            @if (!authService.isLoggedIn()) {
+              <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button>
+            } @else {
+              <div class="user-display">
+                <div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div>
+                <span class="user-name">{{ authService.currentUser()!.name }}</span>
+                <a class="btn-profile" routerLink="/profile">Profile</a>
+                <a class="btn-profile" routerLink="/wishlist">Wishlist</a>
+                <button class="btn-logout" (click)="authService.logout()">Logout</button>
+              </div>
+            }
+          </div>
+        }
+      }
     }
   </div>
+  <div class="nav-zone nav-zone--above-center">
+    @for (item of zoneItems('above-center'); track item.itemKey) {
+      @switch (item.itemKey) {
+        @case ('logo') { <img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /> }
+        @case ('twitch') {
+          @if (twitchStatus()?.enabled) {
+            <a class="btn-twitch" [class.btn-twitch--live]="twitchStatus()!.live" [href]="twitchStatus()!.url" target="_blank" rel="noopener noreferrer" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+              <span class="twitch-dot"></span>{{ twitchStatus()!.live ? 'Live' : 'Offline' }}
+            </a>
+          }
+        }
+        @case ('nav-links') {
+          <div class="nav-links-group" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <a routerLink="/">Home</a><a routerLink="/content">Content</a><a routerLink="/store">Store</a><a routerLink="/about">About</a>
+            @if (authService.isAdmin()) { <a routerLink="/admin">Admin</a> }
+          </div>
+        }
+        @case ('schedule') {
+          <div class="nav-schedule-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <button class="btn-schedule" (click)="showSchedule = !showSchedule; $event.stopPropagation()">Schedule</button>
+            @if (showSchedule) {
+              <div class="schedule-dropdown" (click)="$event.stopPropagation()">
+                <div class="schedule-header"><span class="schedule-title">Stream Schedule</span><button class="schedule-close" (click)="showSchedule = false">✕</button></div>
+                @for (entry of scheduleEntries(); track entry.dayOfWeek) { <div class="schedule-row"><span class="schedule-day">{{ entry.dayName }}</span><span class="schedule-content">{{ entry.content }}</span></div> }
+                @if (scheduleEntries().length === 0) { <div class="schedule-row"><span class="schedule-content" style="color:#555;">No schedule set.</span></div> }
+              </div>
+            }
+          </div>
+        }
+        @case ('search') { <a class="nav-search-icon" (click)="showSearch = true" role="button" aria-label="Open search" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)"><span class="search-icon"></span></a> }
+        @case ('cart') {
+          <button class="btn-cart" (click)="showCart = true" aria-label="Open cart" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <span class="cart-icon">🛒</span>
+            @if (cartService.itemCount() > 0) { <span class="cart-badge">{{ cartService.itemCount() }}</span> }
+          </button>
+        }
+        @case ('signin') {
+          <div class="nav-signin-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            @if (!authService.isLoggedIn()) { <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button> }
+            @else { <div class="user-display"><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
+          </div>
+        }
+      }
+    }
+  </div>
+  <div class="nav-zone nav-zone--above-right">
+    @for (item of zoneItems('above-right'); track item.itemKey) {
+      @switch (item.itemKey) {
+        @case ('logo') { <img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /> }
+        @case ('twitch') {
+          @if (twitchStatus()?.enabled) {
+            <a class="btn-twitch" [class.btn-twitch--live]="twitchStatus()!.live" [href]="twitchStatus()!.url" target="_blank" rel="noopener noreferrer" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+              <span class="twitch-dot"></span>{{ twitchStatus()!.live ? 'Live' : 'Offline' }}
+            </a>
+          }
+        }
+        @case ('nav-links') {
+          <div class="nav-links-group" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <a routerLink="/">Home</a><a routerLink="/content">Content</a><a routerLink="/store">Store</a><a routerLink="/about">About</a>
+            @if (authService.isAdmin()) { <a routerLink="/admin">Admin</a> }
+          </div>
+        }
+        @case ('schedule') {
+          <div class="nav-schedule-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <button class="btn-schedule" (click)="showSchedule = !showSchedule; $event.stopPropagation()">Schedule</button>
+            @if (showSchedule) {
+              <div class="schedule-dropdown" (click)="$event.stopPropagation()">
+                <div class="schedule-header"><span class="schedule-title">Stream Schedule</span><button class="schedule-close" (click)="showSchedule = false">✕</button></div>
+                @for (entry of scheduleEntries(); track entry.dayOfWeek) { <div class="schedule-row"><span class="schedule-day">{{ entry.dayName }}</span><span class="schedule-content">{{ entry.content }}</span></div> }
+                @if (scheduleEntries().length === 0) { <div class="schedule-row"><span class="schedule-content" style="color:#555;">No schedule set.</span></div> }
+              </div>
+            }
+          </div>
+        }
+        @case ('search') { <a class="nav-search-icon" (click)="showSearch = true" role="button" aria-label="Open search" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)"><span class="search-icon"></span></a> }
+        @case ('cart') {
+          <button class="btn-cart" (click)="showCart = true" aria-label="Open cart" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <span class="cart-icon">🛒</span>
+            @if (cartService.itemCount() > 0) { <span class="cart-badge">{{ cartService.itemCount() }}</span> }
+          </button>
+        }
+        @case ('signin') {
+          <div class="nav-signin-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            @if (!authService.isLoggedIn()) { <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button> }
+            @else { <div class="user-display"><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
+          </div>
+        }
+      }
+    }
+  </div>
+
+  <!-- Below row -->
+  <div class="nav-zone nav-zone--below-left">
+    @for (item of zoneItems('below-left'); track item.itemKey) {
+      @switch (item.itemKey) {
+        @case ('logo') { <img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /> }
+        @case ('twitch') {
+          @if (twitchStatus()?.enabled) {
+            <a class="btn-twitch" [class.btn-twitch--live]="twitchStatus()!.live" [href]="twitchStatus()!.url" target="_blank" rel="noopener noreferrer" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+              <span class="twitch-dot"></span>{{ twitchStatus()!.live ? 'Live' : 'Offline' }}
+            </a>
+          }
+        }
+        @case ('nav-links') {
+          <div class="nav-links-group" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <a routerLink="/">Home</a><a routerLink="/content">Content</a><a routerLink="/store">Store</a><a routerLink="/about">About</a>
+            @if (authService.isAdmin()) { <a routerLink="/admin">Admin</a> }
+          </div>
+        }
+        @case ('schedule') {
+          <div class="nav-schedule-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <button class="btn-schedule" (click)="showSchedule = !showSchedule; $event.stopPropagation()">Schedule</button>
+            @if (showSchedule) {
+              <div class="schedule-dropdown" (click)="$event.stopPropagation()">
+                <div class="schedule-header"><span class="schedule-title">Stream Schedule</span><button class="schedule-close" (click)="showSchedule = false">✕</button></div>
+                @for (entry of scheduleEntries(); track entry.dayOfWeek) { <div class="schedule-row"><span class="schedule-day">{{ entry.dayName }}</span><span class="schedule-content">{{ entry.content }}</span></div> }
+                @if (scheduleEntries().length === 0) { <div class="schedule-row"><span class="schedule-content" style="color:#555;">No schedule set.</span></div> }
+              </div>
+            }
+          </div>
+        }
+        @case ('search') { <a class="nav-search-icon" (click)="showSearch = true" role="button" aria-label="Open search" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)"><span class="search-icon"></span></a> }
+        @case ('cart') {
+          <button class="btn-cart" (click)="showCart = true" aria-label="Open cart" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <span class="cart-icon">🛒</span>
+            @if (cartService.itemCount() > 0) { <span class="cart-badge">{{ cartService.itemCount() }}</span> }
+          </button>
+        }
+        @case ('signin') {
+          <div class="nav-signin-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            @if (!authService.isLoggedIn()) { <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button> }
+            @else { <div class="user-display"><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
+          </div>
+        }
+      }
+    }
+  </div>
+  <div class="nav-zone nav-zone--below-center">
+    @for (item of zoneItems('below-center'); track item.itemKey) {
+      @switch (item.itemKey) {
+        @case ('logo') { <img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /> }
+        @case ('twitch') {
+          @if (twitchStatus()?.enabled) {
+            <a class="btn-twitch" [class.btn-twitch--live]="twitchStatus()!.live" [href]="twitchStatus()!.url" target="_blank" rel="noopener noreferrer" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+              <span class="twitch-dot"></span>{{ twitchStatus()!.live ? 'Live' : 'Offline' }}
+            </a>
+          }
+        }
+        @case ('nav-links') {
+          <div class="nav-links-group" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <a routerLink="/">Home</a><a routerLink="/content">Content</a><a routerLink="/store">Store</a><a routerLink="/about">About</a>
+            @if (authService.isAdmin()) { <a routerLink="/admin">Admin</a> }
+          </div>
+        }
+        @case ('schedule') {
+          <div class="nav-schedule-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <button class="btn-schedule" (click)="showSchedule = !showSchedule; $event.stopPropagation()">Schedule</button>
+            @if (showSchedule) {
+              <div class="schedule-dropdown" (click)="$event.stopPropagation()">
+                <div class="schedule-header"><span class="schedule-title">Stream Schedule</span><button class="schedule-close" (click)="showSchedule = false">✕</button></div>
+                @for (entry of scheduleEntries(); track entry.dayOfWeek) { <div class="schedule-row"><span class="schedule-day">{{ entry.dayName }}</span><span class="schedule-content">{{ entry.content }}</span></div> }
+                @if (scheduleEntries().length === 0) { <div class="schedule-row"><span class="schedule-content" style="color:#555;">No schedule set.</span></div> }
+              </div>
+            }
+          </div>
+        }
+        @case ('search') { <a class="nav-search-icon" (click)="showSearch = true" role="button" aria-label="Open search" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)"><span class="search-icon"></span></a> }
+        @case ('cart') {
+          <button class="btn-cart" (click)="showCart = true" aria-label="Open cart" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <span class="cart-icon">🛒</span>
+            @if (cartService.itemCount() > 0) { <span class="cart-badge">{{ cartService.itemCount() }}</span> }
+          </button>
+        }
+        @case ('signin') {
+          <div class="nav-signin-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            @if (!authService.isLoggedIn()) { <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button> }
+            @else { <div class="user-display"><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
+          </div>
+        }
+      }
+    }
+  </div>
+  <div class="nav-zone nav-zone--below-right">
+    @for (item of zoneItems('below-right'); track item.itemKey) {
+      @switch (item.itemKey) {
+        @case ('logo') { <img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /> }
+        @case ('twitch') {
+          @if (twitchStatus()?.enabled) {
+            <a class="btn-twitch" [class.btn-twitch--live]="twitchStatus()!.live" [href]="twitchStatus()!.url" target="_blank" rel="noopener noreferrer" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+              <span class="twitch-dot"></span>{{ twitchStatus()!.live ? 'Live' : 'Offline' }}
+            </a>
+          }
+        }
+        @case ('nav-links') {
+          <div class="nav-links-group" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <a routerLink="/">Home</a><a routerLink="/content">Content</a><a routerLink="/store">Store</a><a routerLink="/about">About</a>
+            @if (authService.isAdmin()) { <a routerLink="/admin">Admin</a> }
+          </div>
+        }
+        @case ('schedule') {
+          <div class="nav-schedule-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <button class="btn-schedule" (click)="showSchedule = !showSchedule; $event.stopPropagation()">Schedule</button>
+            @if (showSchedule) {
+              <div class="schedule-dropdown" (click)="$event.stopPropagation()">
+                <div class="schedule-header"><span class="schedule-title">Stream Schedule</span><button class="schedule-close" (click)="showSchedule = false">✕</button></div>
+                @for (entry of scheduleEntries(); track entry.dayOfWeek) { <div class="schedule-row"><span class="schedule-day">{{ entry.dayName }}</span><span class="schedule-content">{{ entry.content }}</span></div> }
+                @if (scheduleEntries().length === 0) { <div class="schedule-row"><span class="schedule-content" style="color:#555;">No schedule set.</span></div> }
+              </div>
+            }
+          </div>
+        }
+        @case ('search') { <a class="nav-search-icon" (click)="showSearch = true" role="button" aria-label="Open search" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)"><span class="search-icon"></span></a> }
+        @case ('cart') {
+          <button class="btn-cart" (click)="showCart = true" aria-label="Open cart" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            <span class="cart-icon">🛒</span>
+            @if (cartService.itemCount() > 0) { <span class="cart-badge">{{ cartService.itemCount() }}</span> }
+          </button>
+        }
+        @case ('signin') {
+          <div class="nav-signin-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
+            @if (!authService.isLoggedIn()) { <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button> }
+            @else { <div class="user-display"><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
+          </div>
+        }
+      }
+    }
+  </div>
+
   @if (uiState.showSignIn()) {
     <app-sign-in-modal (closed)="uiState.showSignIn.set(false)" />
   }
@@ -72,6 +342,34 @@
     <app-cart-drawer (closed)="showCart = false" />
   }
 </nav>
+
+@if (showMobileMenu) {
+  <div class="mobile-overlay" (click)="showMobileMenu = false"></div>
+  <div class="mobile-drawer" (click)="$event.stopPropagation()">
+    <nav class="mobile-drawer-links">
+      <a routerLink="/" (click)="showMobileMenu = false">Home</a>
+      <a routerLink="/content" (click)="showMobileMenu = false">Content</a>
+      <a routerLink="/store" (click)="showMobileMenu = false">Store</a>
+      <a routerLink="/about" (click)="showMobileMenu = false">About</a>
+      @if (authService.isAdmin()) {
+        <a routerLink="/admin" (click)="showMobileMenu = false">Admin</a>
+      }
+    </nav>
+    <div class="mobile-drawer-footer">
+      @if (!authService.isLoggedIn()) {
+        <button class="btn-sign-in" (click)="uiState.openSignIn(); showMobileMenu = false">Sign In</button>
+      } @else {
+        <div class="mobile-drawer-user">
+          <div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div>
+          <span class="user-name">{{ authService.currentUser()!.name }}</span>
+        </div>
+        <a class="mobile-drawer-link" routerLink="/profile" (click)="showMobileMenu = false">Profile</a>
+        <a class="mobile-drawer-link" routerLink="/wishlist" (click)="showMobileMenu = false">Wishlist</a>
+        <button class="btn-logout" (click)="authService.logout(); showMobileMenu = false">Logout</button>
+      }
+    </div>
+  </div>
+}
 
 <main id="main-content">
   <router-outlet></router-outlet>

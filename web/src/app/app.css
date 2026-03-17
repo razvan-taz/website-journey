@@ -17,26 +17,26 @@
 }
 
 nav {
-  display: flex;
-  gap: 12px;
-  padding: 12px 16px;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: 53px 53px;
   background-color: #1a1a1a;
-  border-bottom: 2px solid #880824;
   position: relative;
+  padding: 0 16px;
 }
 
-.nav-logo-wrap {
+.nav-zone {
   display: flex;
   align-items: center;
-  padding-top: 0;
+  gap: 12px;
 }
 
-.nav-twitch {
-  display: flex;
-  align-items: center;
-  padding-top: 0;
-}
+.nav-zone--above-left   { grid-column: 1; grid-row: 1; }
+.nav-zone--above-center { grid-column: 2; grid-row: 1; justify-content: center; }
+.nav-zone--above-right  { grid-column: 3; grid-row: 1; justify-content: flex-end; }
+.nav-zone--below-left   { grid-column: 1; grid-row: 2; }
+.nav-zone--below-center { grid-column: 2; grid-row: 2; justify-content: center; }
+.nav-zone--below-right  { grid-column: 3; grid-row: 2; justify-content: flex-end; }
 
 .btn-twitch {
   display: inline-flex;
@@ -73,11 +73,23 @@ nav {
   box-shadow: 0 0 4px #ff4444;
 }
 
+/* bottom border — extends beyond nav for ultra-wide screens */
+nav::before {
+  content: '';
+  position: absolute;
+  left: -9999px;
+  right: -9999px;
+  bottom: 0;
+  height: 2px;
+  background-color: #880824;
+}
+
+/* row divider line — same technique */
 nav::after {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
+  left: -9999px;
+  right: -9999px;
   top: 53px;
   height: 2px;
   background-color: #880824;
@@ -89,12 +101,10 @@ nav::after {
   display: block;
 }
 
-.nav-links {
+.nav-links-group {
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-left: 100px;
-  padding-top: 52px;
 }
 
 nav a {
@@ -147,12 +157,6 @@ nav a:hover {
   background-color: #880824;
 }
 
-.nav-actions {
-  display: flex;
-  gap: 8px;
-  margin-left: auto;
-  align-items: center;
-}
 
 .btn-sign-in {
   padding: 6px 16px;
@@ -249,10 +253,15 @@ main {
   color: #880824;
 }
 
+.nav-schedule-wrap {
+  position: relative;
+}
+
 .schedule-dropdown {
   position: absolute;
-  top: 57px;
-  right: 120px;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   background: #1a1a1a;
   border: 1px solid #2a2a2a;
   border-radius: 8px;
@@ -345,3 +354,137 @@ main {
   justify-content: center;
   font-weight: 600;
 }
+
+/* ── Mobile nav bar (hidden on desktop) ──────────── */
+
+.mobile-nav-bar { display: none; }
+
+@media (max-width: 768px) {
+  nav {
+    display: flex;
+    align-items: center;
+    height: 53px;
+    grid-template-columns: unset;
+    grid-template-rows: unset;
+  }
+
+  nav::after { display: none; }
+
+  .nav-zone { display: none; }
+
+  .mobile-nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .mobile-logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 100px;
+    width: auto;
+  }
+
+  .mobile-nav-icons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+/* ── Hamburger button ─────────────────────────────── */
+
+.mobile-hamburger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mobile-hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #dadada;
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.mobile-hamburger:hover span { background: #880824; }
+
+/* ── Mobile drawer & overlay ──────────────────────── */
+
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1999;
+}
+
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background: #1a1a1a;
+  border-right: 2px solid #880824;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  animation: drawerSlideIn 0.22s ease;
+}
+
+@keyframes drawerSlideIn {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+.mobile-drawer-links {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 16px 0;
+}
+
+.mobile-drawer-links a {
+  color: #dadada;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 14px 24px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.mobile-drawer-links a:hover {
+  color: #fff;
+  background: #2a2a2a;
+}
+
+.mobile-drawer-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobile-drawer-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.mobile-drawer-link {
+  color: #888;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.mobile-drawer-link:hover { color: #dadada; }

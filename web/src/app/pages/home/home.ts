@@ -5,6 +5,7 @@ import { Title, Meta } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ArticleService, ArticleListItem } from '../../services/article.service';
 import { ProductService, ProductListItem } from '../../services/product.service';
+import { SiteService, SocialLink } from '../../services/site.service';
 import { NewsletterSignup } from '../../components/newsletter-signup/newsletter-signup';
 
 @Component({
@@ -18,17 +19,26 @@ export class Home {
   products = signal<ProductListItem[]>([]);
   articlesLoading = signal(true);
   productsLoading = signal(true);
+  socialLinks = signal<SocialLink[]>([]);
 
   constructor() {
     const articleService = inject(ArticleService);
     const productService = inject(ProductService);
+    const siteService = inject(SiteService);
     const titleService = inject(Title);
     const metaService = inject(Meta);
 
-    titleService.setTitle('Journey | Premium Content & Store');
+    siteService.getSocialLinks()
+      .pipe(takeUntilDestroyed())
+      .subscribe({
+        next: (links) => this.socialLinks.set(links.filter(l => l.enabled)),
+        error: () => {},
+      });
+
+    titleService.setTitle('Journey | Content & Store');
     metaService.updateTag({
       name: 'description',
-      content: 'Premium, insightful content and curated products — built to serve you, not the algorithm.',
+      content: 'Insightful content and curated products — built to serve you, not the algorithm.',
     });
 
     articleService

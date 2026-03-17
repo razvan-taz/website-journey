@@ -29,7 +29,6 @@ export class ArticleForm {
   thumbnailUrl = signal('');
   type = signal('article');
   tag = signal('');
-  premium = signal(false);
 
   constructor() {
     const slugParam = this.route.snapshot.paramMap.get('slug');
@@ -48,7 +47,6 @@ export class ArticleForm {
             this.thumbnailUrl.set(a.thumbnailUrl ?? '');
             this.type.set(a.type);
             this.tag.set(a.tag ?? '');
-            this.premium.set(a.premium ?? false);
             this.loadingData.set(false);
           },
           error: () => { this.error.set('Failed to load article.'); this.loadingData.set(false); }
@@ -76,7 +74,6 @@ export class ArticleForm {
       thumbnailUrl: this.thumbnailUrl(),
       type: this.type(),
       tag: this.tag(),
-      premium: this.premium(),
     };
     const call = this.isEdit()
       ? this.articleService.updateArticle(this.route.snapshot.paramMap.get('slug')!, request)

@@ -52,9 +52,6 @@ public class Article {
     @Column(length = 100)
     private String tag;
 
-    @Column(nullable = false)
-    private boolean premium;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

@@ -30,5 +30,4 @@ public class CreateArticleRequest {
     private String thumbnailUrl;
     private String type;
     private String tag;
-    private Boolean premium;
 }

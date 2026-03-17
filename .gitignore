@@ -1,0 +1,9 @@
+# Claude agent instruction files
+CLAUDE.md
+**/CLAUDE.md
+agent.md
+agent-pm.md
+agent-backend.md
+
+# Claude local settings
+.claude/settings.local.json

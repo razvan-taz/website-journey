@@ -49,6 +49,7 @@ export const routes: Routes = [
       { path: 'faq', loadComponent: () => import('./pages/admin/faq/admin-faq').then(m => m.AdminFaq) },
       { path: 'site-pages', loadComponent: () => import('./pages/admin/site-pages/admin-site-pages').then(m => m.AdminSitePages) },
       { path: 'twitch', loadComponent: () => import('./pages/admin/twitch/admin-twitch').then(m => m.AdminTwitch) },
+      { path: 'nav-layout', loadComponent: () => import('./pages/admin/nav-layout/admin-nav-layout').then(m => m.AdminNavLayout) },
     ]
   },
 

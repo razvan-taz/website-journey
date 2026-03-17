@@ -11,7 +11,6 @@ export interface ArticleListItem {
   thumbnailUrl: string;
   type: 'article' | 'video';
   tag: string;
-  premium: boolean;
 }
 
 export interface ArticleSeo {
@@ -46,7 +45,6 @@ export interface ArticleDetail {
   updatedAt: string;
   seo: ArticleSeo;
   relatedArticles: RelatedArticle[];
-  premium: boolean;
   accessDenied?: boolean;
 }
 
@@ -69,7 +67,6 @@ export interface CreateArticleRequest {
   thumbnailUrl: string;
   type: string;
   tag: string;
-  premium?: boolean;
 }
 
 const BASE_URL = '/api/articles';

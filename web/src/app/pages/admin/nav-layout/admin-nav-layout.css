@@ -1,0 +1,186 @@
+.nl-page {
+  padding: 16px;
+}
+
+.nl-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.nl-title {
+  color: #dadada;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.nl-save-btn {
+  padding: 5px 14px;
+  background: #880824;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+  min-width: 64px;
+}
+
+.nl-save-btn:hover:not(:disabled) { background: #6a061c; }
+.nl-save-btn:disabled { opacity: 0.7; cursor: default; }
+
+/* ── Section label ───────────────────────────────── */
+
+.nl-section-label {
+  color: #888;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 14px 0 4px;
+}
+
+/* ── Tables ──────────────────────────────────────── */
+
+.nl-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Items table: Item | Zone | Offset X | Offset Y */
+.nl-row {
+  display: grid;
+  grid-template-columns: 130px 1fr 120px 120px;
+  align-items: center;
+  justify-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: #1f1f1f;
+  border-radius: 4px;
+}
+
+/* Logo table: Zone | Offset X | Offset Y | Height | Width */
+.nl-row--logo {
+  grid-template-columns: 1fr 120px 120px 110px 110px;
+}
+
+.nl-row--head {
+  background: #2a2a2a;
+  color: #888;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  text-align: center;
+}
+
+/* ── Item label ──────────────────────────────────── */
+
+.nl-item-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #dadada;
+  font-size: 13px;
+  font-weight: 500;
+  width: 100%;
+  justify-self: stretch;
+  white-space: nowrap;
+}
+
+.nl-order-btn {
+  background: #2a2a2a;
+  color: #888;
+  border: 1px solid #444;
+  border-radius: 3px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  transition: background 0.2s, color 0.2s;
+}
+
+.nl-order-btn:hover:not(:disabled) { background: #3a3a3a; color: #fff; }
+.nl-order-btn:disabled { opacity: 0.25; cursor: default; }
+
+/* ── Zone select ─────────────────────────────────── */
+
+.nl-zone-select {
+  background: #2a2a2a;
+  color: #dadada;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  width: 130px;
+}
+
+.nl-zone-select:focus {
+  outline: none;
+  border-color: #880824;
+}
+
+/* ── Dim control (− input +) ─────────────────────── */
+
+.nl-dim-ctrl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.nl-step-btn {
+  background: #2a2a2a;
+  color: #dadada;
+  border: 1px solid #444;
+  border-radius: 3px;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.2s;
+}
+
+.nl-step-btn:hover:not(:disabled) { background: #3a3a3a; }
+.nl-step-btn:disabled { opacity: 0.3; cursor: default; }
+
+/* ── Number input ────────────────────────────────── */
+
+.nl-num-input {
+  background: #1a1a1a;
+  color: #dadada;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  width: 46px;
+  height: 22px;
+  text-align: center;
+  font-size: 12px;
+  padding: 0 4px;
+  font-family: inherit;
+}
+
+.nl-num-input:focus {
+  outline: none;
+  border-color: #880824;
+}
+
+/* hide spin buttons */
+.nl-num-input::-webkit-inner-spin-button,
+.nl-num-input::-webkit-outer-spin-button { display: none; }
+.nl-num-input[type=number] { -moz-appearance: textfield; }

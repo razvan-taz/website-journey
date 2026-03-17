@@ -1,0 +1,102 @@
+<div class="nl-page">
+  <div class="nl-header">
+    <h2 class="nl-title">Nav Control</h2>
+    <button class="nl-save-btn" (click)="save()" [disabled]="saving()">
+      {{ saving() ? 'Saving…' : saved() ? 'Saved!' : 'Save' }}
+    </button>
+  </div>
+
+  <!-- ── Logo ── -->
+  @if (logoItem(); as logo) {
+    <div class="nl-section-label">Logo</div>
+    <div class="nl-table nl-table--logo">
+      <div class="nl-row nl-row--logo nl-row--head">
+        <span>Zone</span>
+        <span>Offset X</span>
+        <span>Offset Y</span>
+        <span>Height</span>
+        <span>Width</span>
+      </div>
+      <div class="nl-row nl-row--logo">
+
+        <select class="nl-zone-select" [ngModel]="logo.zone" (ngModelChange)="setZone(logo, $event)">
+          @for (zone of zones; track zone.value) {
+            <option [value]="zone.value">{{ zone.label }}</option>
+          }
+        </select>
+
+        <div class="nl-dim-ctrl">
+          <button class="nl-step-btn" (click)="adjustOffsetX(logo, -1)" [disabled]="!canNudgeLeft(logo)">−</button>
+          <input class="nl-num-input" type="number" [value]="logo.offsetX || 0"
+            (change)="setOffsetX(logo, +$any($event.target).value)" />
+          <button class="nl-step-btn" (click)="adjustOffsetX(logo, 1)" [disabled]="!canNudgeRight(logo)">+</button>
+        </div>
+
+        <div class="nl-dim-ctrl">
+          <button class="nl-step-btn" (click)="adjustOffsetY(logo, 1)"  [disabled]="!canNudgeUp(logo)">↑</button>
+          <input class="nl-num-input" type="number" [value]="logo.offsetY || 0"
+            (change)="setOffsetY(logo, +$any($event.target).value)" />
+          <button class="nl-step-btn" (click)="adjustOffsetY(logo, -1)" [disabled]="!canNudgeDown(logo)">↓</button>
+        </div>
+
+        <div class="nl-dim-ctrl">
+          <button class="nl-step-btn" (click)="adjustHeight(logo, -1)" [disabled]="!logo.heightPx">−</button>
+          <input class="nl-num-input" type="number" [value]="logo.heightPx ?? 0"
+            (change)="setHeight(logo, +$any($event.target).value)" />
+          <button class="nl-step-btn" (click)="adjustHeight(logo, 1)" [disabled]="(logo.heightPx ?? 0) >= 200">+</button>
+        </div>
+
+        <div class="nl-dim-ctrl">
+          <button class="nl-step-btn" (click)="adjustWidth(logo, -1)" [disabled]="!logo.widthPx">−</button>
+          <input class="nl-num-input" type="number" [value]="logo.widthPx ?? 0"
+            (change)="setWidth(logo, +$any($event.target).value)" />
+          <button class="nl-step-btn" (click)="adjustWidth(logo, 1)" [disabled]="(logo.widthPx ?? 0) >= 400">+</button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ── Items ── -->
+  <div class="nl-section-label">Items</div>
+  <div class="nl-table">
+    <div class="nl-row nl-row--head">
+      <span>Item</span>
+      <span>Zone</span>
+      <span>Offset X</span>
+      <span>Offset Y</span>
+    </div>
+
+    @for (item of otherItems(); track item.itemKey) {
+      <div class="nl-row">
+
+        <div class="nl-item-label">
+          <button class="nl-order-btn" (click)="moveUp(item)"   [disabled]="isFirst(item)" title="Move earlier in zone">&lt;</button>
+          <span>{{ label(item.itemKey) }}</span>
+          <button class="nl-order-btn" (click)="moveDown(item)" [disabled]="isLast(item)"  title="Move later in zone">&gt;</button>
+        </div>
+
+        <select class="nl-zone-select" [ngModel]="item.zone" (ngModelChange)="setZone(item, $event)">
+          @for (zone of zones; track zone.value) {
+            <option [value]="zone.value">{{ zone.label }}</option>
+          }
+        </select>
+
+        <div class="nl-dim-ctrl">
+          <button class="nl-step-btn" (click)="adjustOffsetX(item, -1)" [disabled]="!canNudgeLeft(item)">−</button>
+          <input class="nl-num-input" type="number" [value]="item.offsetX || 0"
+            (change)="setOffsetX(item, +$any($event.target).value)" />
+          <button class="nl-step-btn" (click)="adjustOffsetX(item, 1)" [disabled]="!canNudgeRight(item)">+</button>
+        </div>
+
+        <div class="nl-dim-ctrl">
+          <button class="nl-step-btn" (click)="adjustOffsetY(item, 1)"  [disabled]="!canNudgeUp(item)">↑</button>
+          <input class="nl-num-input" type="number" [value]="item.offsetY || 0"
+            (change)="setOffsetY(item, +$any($event.target).value)" />
+          <button class="nl-step-btn" (click)="adjustOffsetY(item, -1)" [disabled]="!canNudgeDown(item)">↓</button>
+        </div>
+
+      </div>
+    }
+  </div>
+</div>

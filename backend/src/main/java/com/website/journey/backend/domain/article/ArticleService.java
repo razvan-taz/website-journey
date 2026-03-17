@@ -62,7 +62,6 @@ public class ArticleService {
                 .thumbnailUrl(request.getThumbnailUrl())
                 .type(request.getType())
                 .tag(request.getTag())
-                .premium(request.getPremium() != null && request.getPremium())
                 .build();
 
         return toDetailDto(articleRepository.save(article), article.getBody(), Collections.emptyList(), false);
@@ -82,7 +81,6 @@ public class ArticleService {
         article.setThumbnailUrl(request.getThumbnailUrl());
         article.setType(request.getType());
         article.setTag(request.getTag());
-        article.setPremium(request.getPremium() != null && request.getPremium());
 
         Article saved = articleRepository.save(article);
         return toDetailDto(saved, saved.getBody(), Collections.emptyList(), false);
@@ -115,8 +113,7 @@ public class ArticleService {
                 article.getPublishDate() != null ? article.getPublishDate().toString() : null,
                 article.getThumbnailUrl(),
                 article.getType(),
-                article.getTag(),
-                article.isPremium()
+                article.getTag()
         );
     }
 
@@ -147,7 +144,6 @@ public class ArticleService {
                 article.getUpdatedAt() != null ? article.getUpdatedAt().toString() : null,
                 seo,
                 relatedArticles,
-                article.isPremium(),
                 accessDenied
         );
     }

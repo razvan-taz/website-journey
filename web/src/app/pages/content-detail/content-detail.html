@@ -10,10 +10,6 @@
   <p>Failed to load the article. Please try again later.</p>
 } @else if (article(); as post) {
   <h1>{{ post.title }}</h1>
-  @if (post.premium) {
-    <span class="premium-badge">✦ Premium</span>
-  }
-
   <p class="article-meta">
     <span>{{ post.author }}</span>
     <span>&middot;</span>
