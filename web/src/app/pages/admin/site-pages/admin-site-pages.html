@@ -1,0 +1,44 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1 class="page-title">Site Pages</h1>
+    <button class="btn-save" (click)="save()" [disabled]="saving() || loading()">
+      {{ saving() ? 'Saving...' : 'Save' }}
+    </button>
+  </div>
+
+  @if (success()) {
+    <p class="admin-success">Page saved successfully.</p>
+  }
+  @if (error()) {
+    <p class="admin-error">{{ error() }}</p>
+  }
+
+  <div class="tabs">
+    <button
+      class="tab-btn"
+      [class.active]="activeSlug() === 'tos'"
+      (click)="activeSlug.set('tos')"
+    >
+      Terms of Service
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeSlug() === 'privacy'"
+      (click)="activeSlug.set('privacy')"
+    >
+      Privacy Policy
+    </button>
+  </div>
+
+  @if (loading()) {
+    <p class="admin-loading">Loading...</p>
+  } @else {
+    <textarea
+      class="page-textarea"
+      rows="20"
+      [value]="activeContent()"
+      (input)="setActiveContent($any($event.target).value)"
+      [placeholder]="'Enter ' + (activeSlug() === 'tos' ? 'Terms of Service' : 'Privacy Policy') + ' content...'"
+    ></textarea>
+  }
+</div>

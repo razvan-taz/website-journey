@@ -12,6 +12,10 @@ export const serverRoutes: ServerRoute[] = [
   // Client-side only pages
   { path: 'admin', renderMode: RenderMode.Client },
   { path: 'admin/**', renderMode: RenderMode.Client },
+  { path: 'contact', renderMode: RenderMode.Server },
+  { path: 'faq', renderMode: RenderMode.Server },
+  { path: 'tos', renderMode: RenderMode.Server },
+  { path: 'privacy', renderMode: RenderMode.Server },
   { path: 'forgot-password', renderMode: RenderMode.Client },
   { path: 'reset-password', renderMode: RenderMode.Client },
 

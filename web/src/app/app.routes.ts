@@ -17,10 +17,13 @@ export const routes: Routes = [
   { path: 'store', component: Store },
   { path: 'about', component: About },
 
+  { path: 'contact', loadComponent: () => import('./pages/contact/contact').then(m => m.Contact) },
+  { path: 'faq', loadComponent: () => import('./pages/faq/faq').then(m => m.Faq) },
+  { path: 'tos', loadComponent: () => import('./pages/tos/tos').then(m => m.Tos) },
+  { path: 'privacy', loadComponent: () => import('./pages/privacy/privacy').then(m => m.Privacy) },
+
   { path: 'checkout', loadComponent: () => import('./pages/checkout/checkout').then(m => m.Checkout) },
   { path: 'order-confirmation', loadComponent: () => import('./pages/order-confirmation/order-confirmation').then(m => m.OrderConfirmation) },
-
-  { path: 'subscribe', loadComponent: () => import('./pages/subscribe/subscribe').then(m => m.Subscribe) },
 
   { path: 'profile', loadComponent: () => import('./pages/profile/profile').then(m => m.Profile) },
   { path: 'wishlist', loadComponent: () => import('./pages/wishlist/wishlist').then(m => m.Wishlist) },
@@ -40,6 +43,12 @@ export const routes: Routes = [
       { path: 'products', loadComponent: () => import('./pages/admin/products/admin-products').then(m => m.AdminProducts) },
       { path: 'products/new', loadComponent: () => import('./pages/admin/products/product-form').then(m => m.ProductForm) },
       { path: 'products/edit/:id', loadComponent: () => import('./pages/admin/products/product-form').then(m => m.ProductForm) },
+      { path: 'social-links', loadComponent: () => import('./pages/admin/social-links/admin-social-links').then(m => m.AdminSocialLinks) },
+      { path: 'schedule', loadComponent: () => import('./pages/admin/schedule/admin-schedule').then(m => m.AdminSchedule) },
+      { path: 'contact', loadComponent: () => import('./pages/admin/contact/admin-contact').then(m => m.AdminContact) },
+      { path: 'faq', loadComponent: () => import('./pages/admin/faq/admin-faq').then(m => m.AdminFaq) },
+      { path: 'site-pages', loadComponent: () => import('./pages/admin/site-pages/admin-site-pages').then(m => m.AdminSitePages) },
+      { path: 'twitch', loadComponent: () => import('./pages/admin/twitch/admin-twitch').then(m => m.AdminTwitch) },
     ]
   },
 

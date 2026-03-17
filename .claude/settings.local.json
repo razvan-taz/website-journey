@@ -33,7 +33,17 @@
       "Bash(cmd //c \"taskkill /PID 157188 /F\" && cmd //c \"taskkill /PID 29652 /F\")",
       "Bash(cmd //c \"taskkill /PID 163508 /F\" && cmd //c \"taskkill /PID 160876 /F\")",
       "Bash(cmd //c \"taskkill /PID 164120 /F\" && cmd //c \"taskkill /PID 163504 /F\")",
-      "Bash(cmd //c \"taskkill /PID 136412 /F\" && cmd //c \"taskkill /PID 167988 /F\")"
+      "Bash(cmd //c \"taskkill /PID 136412 /F\" && cmd //c \"taskkill /PID 167988 /F\")",
+      "Bash(netstat:*)",
+      "Bash(cmd /c \"taskkill /PID 201856 /F\")",
+      "Bash(cmd /c \"taskkill /PID 201856 /F\" 2>&1; echo \"exit: $?\")",
+      "Bash(powershell -Command \"Stop-Process -Id 201856 -Force; Write-Host 'killed'\")",
+      "Bash(findstr :4200)",
+      "Bash(xargs -I{} taskkill /F /PID {})",
+      "Bash(cmd /c \"taskkill /F /PID 39756\" && cmd /c \"taskkill /F /PID 1524\"; echo \"done\")",
+      "Bash(cmd /c \"taskkill /F /PID 39756 2>nul & taskkill /F /PID 1524 2>nul & echo done\")",
+      "Bash(kill:*)",
+      "Bash(wmic process:*)"
     ]
   }
 }

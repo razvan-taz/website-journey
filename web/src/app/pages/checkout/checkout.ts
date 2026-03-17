@@ -51,20 +51,12 @@ export class Checkout {
 
   // ── Computed ──────────────────────────────────────
 
-  // True when every item in the cart is a subscription (no physical shipping needed).
-  isSubscriptionOnly = computed(() =>
-    this.cartService.items().length > 0 &&
-    this.cartService.items().every(i => i.isSubscription)
-  );
-
   isFormValid = computed(() =>
-    this.isSubscriptionOnly() || (
-      this.name().trim().length > 0 &&
-      this.line1().trim().length > 0 &&
-      this.city().trim().length > 0 &&
-      this.state().trim().length > 0 &&
-      this.zip().trim().length > 0
-    )
+    this.name().trim().length > 0 &&
+    this.line1().trim().length > 0 &&
+    this.city().trim().length > 0 &&
+    this.state().trim().length > 0 &&
+    this.zip().trim().length > 0
   );
 
   orderTotal = computed(() => {
@@ -115,7 +107,7 @@ export class Checkout {
 
         this.http.post<{ clientSecret: string }>('/api/payments/create-intent', {
           amount: amountInCents,
-          currency: 'usd',
+          currency: 'eur',
         }).subscribe({
           next: ({ clientSecret }) => {
             this.clientSecret = clientSecret;
@@ -183,16 +175,14 @@ export class Checkout {
         price: item.price,
         quantity: item.quantity,
       })),
-      shippingAddress: this.isSubscriptionOnly()
-        ? { name: '', line1: '', city: '', state: '', zip: '', country: '' }
-        : {
-            name: this.name(),
-            line1: this.line1(),
-            city: this.city(),
-            state: this.state(),
-            zip: this.zip(),
-            country: this.country(),
-          },
+      shippingAddress: {
+        name: this.name(),
+        line1: this.line1(),
+        city: this.city(),
+        state: this.state(),
+        zip: this.zip(),
+        country: this.country(),
+      },
       total: this.orderTotal(),
       discountCode: this.appliedCoupon()?.code ?? null,
       discountAmount: this.appliedCoupon()?.discountAmount ?? 0,

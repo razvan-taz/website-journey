@@ -3,7 +3,6 @@ package com.website.journey.backend.domain.order;
 import com.website.journey.backend.config.EmailService;
 import com.website.journey.backend.domain.discount.DiscountCodeRepository;
 import com.website.journey.backend.domain.product.ProductRepository;
-import com.website.journey.backend.domain.subscription.SubscriptionService;
 import com.website.journey.backend.domain.user.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,20 +18,17 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-    private final SubscriptionService subscriptionService;
     private final EmailService emailService;
     private final DiscountCodeRepository discountCodeRepository;
 
     public OrderService(OrderRepository orderRepository,
                         UserRepository userRepository,
                         ProductRepository productRepository,
-                        SubscriptionService subscriptionService,
                         EmailService emailService,
                         DiscountCodeRepository discountCodeRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
-        this.subscriptionService = subscriptionService;
         this.emailService = emailService;
         this.discountCodeRepository = discountCodeRepository;
     }
@@ -54,7 +50,7 @@ public class OrderService {
             }
             if (item.productId() != null) {
                 productRepository.findById(item.productId()).ifPresent(product -> {
-                    if (!"Subscription".equals(product.getCategory()) && product.getStock() < item.quantity()) {
+                    if (product.getStock() < item.quantity()) {
                         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                 "Insufficient stock for: " + item.name());
                     }
@@ -107,17 +103,9 @@ public class OrderService {
             saved.getItems().forEach(item -> {
                 if (item.getProductId() != null) {
                     productRepository.findById(item.getProductId()).ifPresent(product -> {
-                        if ("Subscription".equals(product.getCategory())) {
-                            String billingPeriod = product.getName().toLowerCase().contains("monthly")
-                                    ? "monthly"
-                                    : "annual";
-                            subscriptionService.createSubscription(
-                                    userId, product.getId(), product.getName(), billingPeriod);
-                        } else {
-                            int newStock = Math.max(0, product.getStock() - item.getQuantity());
-                            product.setStock(newStock);
-                            productRepository.save(product);
-                        }
+                        int newStock = Math.max(0, product.getStock() - item.getQuantity());
+                        product.setStock(newStock);
+                        productRepository.save(product);
                     });
                 }
             });

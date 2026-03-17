@@ -26,6 +26,53 @@ nav {
   position: relative;
 }
 
+.nav-logo-wrap {
+  display: flex;
+  align-items: center;
+  padding-top: 0;
+}
+
+.nav-twitch {
+  display: flex;
+  align-items: center;
+  padding-top: 0;
+}
+
+.btn-twitch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: #2a2a2a;
+  color: #888;
+  border: 1px solid #444;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-twitch--live {
+  background: #1a1a1a;
+  color: #ff4444;
+  border-color: #ff4444;
+}
+
+.twitch-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #888;
+  flex-shrink: 0;
+}
+
+.btn-twitch--live .twitch-dot {
+  background: #ff4444;
+  box-shadow: 0 0 4px #ff4444;
+}
+
 nav::after {
   content: '';
   position: absolute;
@@ -36,11 +83,17 @@ nav::after {
   background-color: #880824;
 }
 
+.nav-logo {
+  height: 30px;
+  width: auto;
+  display: block;
+}
+
 .nav-links {
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-left: 200px;
+  margin-left: 100px;
   padding-top: 52px;
 }
 
@@ -119,29 +172,6 @@ nav a:hover {
   border-color: #6a061c;
 }
 
-.btn-subscribe {
-  padding: 6px 16px;
-  border: 1px solid #880824;
-  border-radius: 4px;
-  background-color: transparent;
-  color: #880824;
-  font-size: 14px;
-  cursor: pointer;
-  transition:
-    background-color 0.5s ease,
-    color 0.5s ease;
-}
-
-.btn-subscribe:hover {
-  background-color: #880824;
-  color: #fff;
-}
-
-a.btn-subscribe {
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
-}
 
 .user-display {
   display: flex;
@@ -161,6 +191,7 @@ a.btn-subscribe {
   font-size: 14px;
   font-weight: 600;
 }
+
 
 .user-name {
   color: #dadada;
@@ -196,18 +227,91 @@ a.btn-subscribe {
   color: #880824;
 }
 
-.sub-badge {
-  font-size: 11px;
-  background: rgba(92, 184, 92, 0.15);
-  color: #5cb85c;
-  border: 1px solid rgba(92, 184, 92, 0.3);
-  border-radius: 10px;
-  padding: 2px 8px;
-  font-weight: 500;
-}
 
 main {
   padding: 16px;
+}
+
+/* ── Schedule button & dropdown ───────────────────── */
+
+.btn-schedule {
+  background: none;
+  border: none;
+  color: #dadada;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.5s ease;
+}
+
+.btn-schedule:hover {
+  color: #880824;
+}
+
+.schedule-dropdown {
+  position: absolute;
+  top: 57px;
+  right: 120px;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  min-width: 320px;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.schedule-title {
+  color: #dadada;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.schedule-close {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.schedule-close:hover {
+  color: #dadada;
+}
+
+.schedule-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+.schedule-row:last-child {
+  border-bottom: none;
+}
+
+.schedule-day {
+  color: #aaa;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 90px;
+}
+
+.schedule-content {
+  color: #dadada;
+  font-size: 13px;
+  text-align: right;
 }
 
 /* ── Cart button ──────────────────────────────────── */

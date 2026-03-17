@@ -6,8 +6,8 @@
       Premium, insightful content that exists to serve you — not to sell ads.
     </p>
     <div class="hero-actions">
-      <a routerLink="/subscribe" class="btn btn-primary">Subscribe</a>
-      <a routerLink="/content" class="btn btn-secondary">Browse Content</a>
+      <a routerLink="/content" class="btn btn-primary">Browse Content</a>
+      <a routerLink="/store" class="btn btn-secondary">Visit Store</a>
     </div>
   </div>
 </section>
@@ -84,7 +84,7 @@
               <span class="card-tag">{{ product.category }}</span>
               <h3 class="card-title">{{ product.name }}</h3>
               <div class="card-footer">
-                <span class="card-price">{{ product.price | currency }}</span>
+                <span class="card-price">{{ product.price | currency:'EUR':'symbol' }}</span>
               </div>
             </div>
           </a>

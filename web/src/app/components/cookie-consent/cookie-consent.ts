@@ -1,4 +1,5 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-cookie-consent',
@@ -8,21 +9,26 @@ import { Component, signal, OnInit } from '@angular/core';
   styleUrl: './cookie-consent.css',
 })
 export class CookieConsent implements OnInit {
+  private platformId = inject(PLATFORM_ID);
   visible = signal(false);
 
   ngOnInit(): void {
-    if (!localStorage.getItem('cookie-consent')) {
+    if (isPlatformBrowser(this.platformId) && !localStorage.getItem('cookie-consent')) {
       this.visible.set(true);
     }
   }
 
   accept(): void {
-    localStorage.setItem('cookie-consent', 'accepted');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('cookie-consent', 'accepted');
+    }
     this.visible.set(false);
   }
 
   decline(): void {
-    localStorage.setItem('cookie-consent', 'declined');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('cookie-consent', 'declined');
+    }
     this.visible.set(false);
   }
 }

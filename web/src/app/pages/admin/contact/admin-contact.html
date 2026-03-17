@@ -1,0 +1,88 @@
+<div class="admin-page">
+  @if (selectedMessage()) {
+    <div class="message-detail">
+      <div class="page-header">
+        <button class="btn-back" (click)="back()">← Back</button>
+        <button
+          class="btn-delete"
+          (click)="deleteMessage(selectedMessage()!.id)"
+          [disabled]="deleting() === selectedMessage()!.id"
+        >
+          {{ deleting() === selectedMessage()!.id ? '...' : 'Delete' }}
+        </button>
+      </div>
+      <div class="message-card">
+        <div class="message-meta">
+          <div class="meta-row">
+            <span class="meta-label">From</span>
+            <span class="meta-value">{{ selectedMessage()!.name }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Email</span>
+            <a class="meta-value meta-email" [href]="'mailto:' + selectedMessage()!.email">{{ selectedMessage()!.email }}</a>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Date</span>
+            <span class="meta-value">{{ formatDate(selectedMessage()!.createdAt) }}</span>
+          </div>
+        </div>
+        <div class="message-body">{{ selectedMessage()!.message }}</div>
+      </div>
+    </div>
+  } @else {
+    <div class="page-header">
+      <h1 class="page-title">Contact Messages</h1>
+    </div>
+
+    @if (loading()) {
+      <p class="admin-loading">Loading...</p>
+    } @else if (error()) {
+      <p class="admin-error">{{ error() }}</p>
+    } @else if (messages().length === 0) {
+      <p class="admin-empty">No messages yet.</p>
+    } @else {
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Date</th>
+            <th>Read</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (msg of messages(); track msg.id) {
+            <tr [class.unread-row]="!msg.read">
+              <td class="name-cell">
+                @if (!msg.read) {
+                  <span class="unread-dot"></span>
+                }
+                {{ msg.name }}
+              </td>
+              <td class="email-cell">{{ msg.email }}</td>
+              <td class="date-cell">{{ formatDate(msg.createdAt) }}</td>
+              <td class="read-cell">
+                @if (msg.read) {
+                  <span class="read-badge">Read</span>
+                } @else {
+                  <span class="unread-badge">Unread</span>
+                }
+              </td>
+              <td class="actions-cell">
+                <button class="btn-view" (click)="selectMessage(msg)">View</button>
+                <button
+                  class="btn-delete"
+                  (click)="deleteMessage(msg.id)"
+                  [disabled]="deleting() === msg.id"
+                >
+                  {{ deleting() === msg.id ? '...' : 'Delete' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+</div>

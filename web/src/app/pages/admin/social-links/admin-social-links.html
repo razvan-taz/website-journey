@@ -1,0 +1,58 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1 class="page-title">Social Links</h1>
+  </div>
+
+  @if (loading()) {
+    <p class="admin-loading">Loading...</p>
+  } @else if (error()) {
+    <p class="admin-error">{{ error() }}</p>
+  } @else {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Platform</th>
+          <th>URL</th>
+          <th>Enabled</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (link of links(); track link.platform) {
+          <tr>
+            <td class="platform-cell">{{ displayName(link.platform) }}</td>
+            <td class="url-cell">
+              <input
+                type="url"
+                class="url-input"
+                [value]="link.url"
+                (input)="updateUrl(link.platform, $any($event.target).value)"
+                placeholder="https://..."
+              />
+            </td>
+            <td class="enabled-cell">
+              <input
+                type="checkbox"
+                [checked]="link.enabled"
+                (change)="updateEnabled(link.platform, $any($event.target).checked)"
+              />
+            </td>
+            <td class="actions-cell">
+              @if (link.saved) {
+                <span class="saved-indicator">Saved</span>
+              } @else {
+                <button
+                  class="btn-save"
+                  (click)="updateLink(link)"
+                  [disabled]="link.saving"
+                >
+                  {{ link.saving ? '...' : 'Save' }}
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

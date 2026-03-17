@@ -1,5 +1,16 @@
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <nav>
+  <div class="nav-logo-wrap">
+    <img src="logo.png" alt="TAZ" class="nav-logo" />
+  </div>
+  <div class="nav-twitch">
+    @if (twitchStatus()?.enabled) {
+      <a class="btn-twitch" [class.btn-twitch--live]="twitchStatus()!.live" [href]="twitchStatus()!.url" target="_blank" rel="noopener noreferrer">
+        <span class="twitch-dot"></span>
+        {{ twitchStatus()!.live ? 'Live' : 'Offline' }}
+      </a>
+    }
+  </div>
   <div class="nav-links">
     <a routerLink="/">Home</a>
     <a routerLink="/content">Content</a>
@@ -7,6 +18,26 @@
     <a routerLink="/about">About</a>
     @if (authService.isAdmin()) {
       <a routerLink="/admin">Admin</a>
+    }
+    <button class="btn-schedule" (click)="showSchedule = !showSchedule; $event.stopPropagation()">Schedule</button>
+    @if (showSchedule) {
+      <div class="schedule-dropdown" (click)="$event.stopPropagation()">
+        <div class="schedule-header">
+          <span class="schedule-title">Stream Schedule</span>
+          <button class="schedule-close" (click)="showSchedule = false">✕</button>
+        </div>
+        @for (entry of scheduleEntries(); track entry.dayOfWeek) {
+          <div class="schedule-row">
+            <span class="schedule-day">{{ entry.dayName }}</span>
+            <span class="schedule-content">{{ entry.content }}</span>
+          </div>
+        }
+        @if (scheduleEntries().length === 0) {
+          <div class="schedule-row">
+            <span class="schedule-content" style="color: #555;">No schedule set.</span>
+          </div>
+        }
+      </div>
     }
     <a class="nav-search-icon" (click)="showSearch = true" role="button" aria-label="Open search"><span class="search-icon"></span></a>
   </div>
@@ -19,14 +50,12 @@
     </button>
     @if (!authService.isLoggedIn()) {
       <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button>
-      <a class="btn-subscribe" routerLink="/subscribe">Subscribe</a>
     } @else {
       <div class="user-display">
-        <div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div>
+        <div class="user-avatar">
+          {{ authService.currentUser()!.name[0].toUpperCase() }}
+        </div>
         <span class="user-name">{{ authService.currentUser()!.name }}</span>
-        @if (subscriptionStatus()?.active) {
-          <span class="sub-badge">✓ {{ subscriptionStatus()!.planName }}</span>
-        }
         <a class="btn-profile" routerLink="/profile">Profile</a>
         <a class="btn-profile" routerLink="/wishlist">Wishlist</a>
         <button class="btn-logout" (click)="authService.logout()">Logout</button>
@@ -47,6 +76,8 @@
 <main id="main-content">
   <router-outlet></router-outlet>
 </main>
+
+<app-footer />
 
 <app-cookie-consent />
 <app-toast-container />

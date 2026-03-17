@@ -1,0 +1,206 @@
+.admin-page {
+  width: 100%;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  color: #dadada;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.admin-loading,
+.admin-empty {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.admin-error {
+  color: #e05a70;
+  font-size: 14px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #888;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.admin-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #1f1f1f;
+  color: #dadada;
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.unread-row .name-cell {
+  font-weight: 700;
+}
+
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.unread-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #880824;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.email-cell {
+  color: #aaa;
+}
+
+.date-cell {
+  color: #888;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.read-badge {
+  color: #555;
+  font-size: 12px;
+}
+
+.unread-badge {
+  color: #880824;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-view {
+  padding: 4px 12px;
+  background: #2a2a2a;
+  color: #dadada;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-view:hover {
+  background: #3a3a3a;
+}
+
+.btn-delete {
+  padding: 4px 12px;
+  background: transparent;
+  color: #e05a70;
+  border: 1px solid #e05a70;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background: #e05a70;
+  color: #fff;
+}
+
+.btn-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Message detail view */
+
+.btn-back {
+  background: none;
+  border: none;
+  color: #880824;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+
+.btn-back:hover {
+  color: #a01030;
+}
+
+.message-card {
+  background: #1f1f1f;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 720px;
+}
+
+.message-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.meta-row {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+}
+
+.meta-label {
+  color: #555;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 50px;
+}
+
+.meta-value {
+  color: #dadada;
+  font-size: 14px;
+}
+
+.meta-email {
+  color: #888;
+  text-decoration: none;
+}
+
+.meta-email:hover {
+  color: #dadada;
+}
+
+.message-body {
+  color: #ccc;
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}

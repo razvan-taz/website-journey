@@ -8,6 +8,15 @@
   margin: 0 auto;
 }
 
+.newsletter-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #880824;
+  margin: 0 0 10px 0;
+}
+
 .newsletter-title {
   font-size: 1.75rem;
   font-weight: 700;

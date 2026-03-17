@@ -1,0 +1,20 @@
+.page-loading {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.page-content {
+  max-width: 720px;
+}
+
+.page-content h1 {
+  margin-bottom: 32px;
+  color: #dadada;
+}
+
+.page-body {
+  color: #ccc;
+  font-size: 15px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}

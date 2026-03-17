@@ -1,0 +1,98 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1 class="page-title">FAQ</h1>
+    @if (!addingNew()) {
+      <button class="btn-add" (click)="startAdd()">+ Add Question</button>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="admin-error">{{ error() }}</p>
+  }
+
+  @if (addingNew()) {
+    <div class="faq-form-card">
+      <h3 class="form-title">New Question</h3>
+      <div class="form-group">
+        <label>Question</label>
+        <input
+          type="text"
+          class="form-input"
+          [value]="newQuestion()"
+          (input)="newQuestion.set($any($event.target).value)"
+          placeholder="Enter the question"
+        />
+      </div>
+      <div class="form-group">
+        <label>Answer</label>
+        <textarea
+          class="form-textarea"
+          rows="4"
+          [value]="newAnswer()"
+          (input)="newAnswer.set($any($event.target).value)"
+          placeholder="Enter the answer"
+        ></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" (click)="saveNew()" [disabled]="saving()">
+          {{ saving() ? 'Saving...' : 'Save' }}
+        </button>
+        <button class="btn-cancel" (click)="cancelAdd()">Cancel</button>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <p class="admin-loading">Loading...</p>
+  } @else if (items().length === 0 && !addingNew()) {
+    <p class="admin-empty">No FAQ items yet.</p>
+  } @else {
+    <div class="faq-list">
+      @for (item of items(); track item.id; let first = $first; let last = $last) {
+        <div class="faq-item">
+          @if (editingId() === item.id) {
+            <div class="faq-edit-form">
+              <div class="form-group">
+                <label>Question</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  [value]="editQuestion()"
+                  (input)="editQuestion.set($any($event.target).value)"
+                />
+              </div>
+              <div class="form-group">
+                <label>Answer</label>
+                <textarea
+                  class="form-textarea"
+                  rows="4"
+                  [value]="editAnswer()"
+                  (input)="editAnswer.set($any($event.target).value)"
+                ></textarea>
+              </div>
+              <div class="form-actions">
+                <button class="btn-save" (click)="saveEdit()" [disabled]="saving()">
+                  {{ saving() ? 'Saving...' : 'Save' }}
+                </button>
+                <button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+              </div>
+            </div>
+          } @else {
+            <div class="faq-item-content">
+              <div class="faq-item-text">
+                <p class="faq-question">{{ item.question }}</p>
+                <p class="faq-answer-preview">{{ item.answer }}</p>
+              </div>
+              <div class="faq-item-actions">
+                <button class="btn-arrow" (click)="moveUp(item.id)" [disabled]="first" title="Move up">↑</button>
+                <button class="btn-arrow" (click)="moveDown(item.id)" [disabled]="last" title="Move down">↓</button>
+                <button class="btn-edit" (click)="startEdit(item)">Edit</button>
+                <button class="btn-delete" (click)="deleteItem(item.id)">Delete</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

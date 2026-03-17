@@ -517,35 +517,3 @@
   color: #fff;
 }
 
-/* ── Subscription-only notice ─────────────────────── */
-
-.subscription-notice {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  background: #1a1f2e;
-  border: 1px solid #2a3a5a;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 24px;
-}
-
-.subscription-notice-icon {
-  font-size: 20px;
-  color: #6aadff;
-  flex-shrink: 0;
-  line-height: 1.4;
-}
-
-.subscription-notice-title {
-  color: #dadada;
-  font-size: 15px;
-  font-weight: 600;
-  margin: 0 0 4px;
-}
-
-.subscription-notice-body {
-  color: #888;
-  font-size: 13px;
-  margin: 0;
-}

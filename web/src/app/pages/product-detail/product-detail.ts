@@ -82,7 +82,7 @@ export class ProductDetail {
             offers: {
               '@type': 'Offer',
               price: data.price,
-              priceCurrency: 'USD',
+              priceCurrency: 'EUR',
               availability: data.stock > 0
                 ? 'https://schema.org/InStock'
                 : 'https://schema.org/OutOfStock',

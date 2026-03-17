@@ -34,7 +34,7 @@
               <h3 class="card-title">{{ product.name }}</h3>
 
               <div class="card-footer">
-                <span class="card-price">{{ product.price | currency }}</span>
+                <span class="card-price">{{ product.price | currency:'EUR':'symbol' }}</span>
                 <span class="card-stock" [class.out-of-stock]="product.stock === 0">
                   {{ product.stock > 0 ? 'In stock' : 'Out of stock' }}
                 </span>

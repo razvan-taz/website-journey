@@ -9,20 +9,17 @@
     </div>
   } @else {
 
-    <!-- Step indicator — hidden for subscription-only carts (no shipping step) -->
-    @if (!isSubscriptionOnly()) {
-      <div class="step-indicator" aria-label="Checkout progress">
-        <div class="step" [class.step--active]="step() === 'shipping'" [class.step--done]="step() === 'payment'">
-          <span class="step-num">{{ step() === 'payment' ? '✓' : '1' }}</span>
-          <span class="step-label">Shipping</span>
-        </div>
-        <div class="step-line"></div>
-        <div class="step" [class.step--active]="step() === 'payment'">
-          <span class="step-num">2</span>
-          <span class="step-label">Payment</span>
-        </div>
+    <div class="step-indicator" aria-label="Checkout progress">
+      <div class="step" [class.step--active]="step() === 'shipping'" [class.step--done]="step() === 'payment'">
+        <span class="step-num">{{ step() === 'payment' ? '✓' : '1' }}</span>
+        <span class="step-label">Shipping</span>
       </div>
-    }
+      <div class="step-line"></div>
+      <div class="step" [class.step--active]="step() === 'payment'">
+        <span class="step-num">2</span>
+        <span class="step-label">Payment</span>
+      </div>
+    </div>
 
     <div class="checkout-layout">
 
@@ -31,45 +28,30 @@
 
         @if (step() === 'shipping') {
 
-          @if (isSubscriptionOnly()) {
+          <h2 class="section-title">Shipping Address</h2>
 
-            <!-- Subscription-only: no shipping needed -->
-            <div class="subscription-notice">
-              <span class="subscription-notice-icon">✦</span>
-              <div>
-                <p class="subscription-notice-title">Digital subscription — no shipping required.</p>
-                <p class="subscription-notice-body">You'll get instant access once your payment is confirmed.</p>
-              </div>
-            </div>
-
-          } @else {
-
-            <h2 class="section-title">Shipping Address</h2>
-
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input id="name" type="text" [value]="name()" (input)="name.set($any($event.target).value)" placeholder="Jane Smith" autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label for="line1">Address</label>
+            <input id="line1" type="text" [value]="line1()" (input)="line1.set($any($event.target).value)" placeholder="123 Main St" autocomplete="street-address" />
+          </div>
+          <div class="form-row">
             <div class="form-group">
-              <label for="name">Full Name</label>
-              <input id="name" type="text" [value]="name()" (input)="name.set($any($event.target).value)" placeholder="Jane Smith" autocomplete="name" />
+              <label for="city">City</label>
+              <input id="city" type="text" [value]="city()" (input)="city.set($any($event.target).value)" placeholder="Springfield" autocomplete="address-level2" />
             </div>
             <div class="form-group">
-              <label for="line1">Address</label>
-              <input id="line1" type="text" [value]="line1()" (input)="line1.set($any($event.target).value)" placeholder="123 Main St" autocomplete="street-address" />
+              <label for="state">State</label>
+              <input id="state" type="text" [value]="state()" (input)="state.set($any($event.target).value)" placeholder="IL" autocomplete="address-level1" />
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="city">City</label>
-                <input id="city" type="text" [value]="city()" (input)="city.set($any($event.target).value)" placeholder="Springfield" autocomplete="address-level2" />
-              </div>
-              <div class="form-group">
-                <label for="state">State</label>
-                <input id="state" type="text" [value]="state()" (input)="state.set($any($event.target).value)" placeholder="IL" autocomplete="address-level1" />
-              </div>
-              <div class="form-group form-group--zip">
-                <label for="zip">ZIP</label>
-                <input id="zip" type="text" [value]="zip()" (input)="zip.set($any($event.target).value)" placeholder="62701" autocomplete="postal-code" />
-              </div>
+            <div class="form-group form-group--zip">
+              <label for="zip">ZIP</label>
+              <input id="zip" type="text" [value]="zip()" (input)="zip.set($any($event.target).value)" placeholder="62701" autocomplete="postal-code" />
             </div>
-
-          }
+          </div>
 
           @if (error()) {
             <p class="checkout-error" role="alert">{{ error() }}</p>
@@ -86,13 +68,11 @@
 
           <h2 class="section-title">Payment</h2>
 
-          @if (!isSubscriptionOnly()) {
-            <div class="shipping-summary">
-              <span class="shipping-summary-label">Shipping to</span>
-              <span class="shipping-summary-address">{{ name() }}, {{ line1() }}, {{ city() }} {{ state() }} {{ zip() }}</span>
-              <button class="btn-edit-shipping" type="button" (click)="goBackToShipping()">Edit</button>
-            </div>
-          }
+          <div class="shipping-summary">
+            <span class="shipping-summary-label">Shipping to</span>
+            <span class="shipping-summary-address">{{ name() }}, {{ line1() }}, {{ city() }} {{ state() }} {{ zip() }}</span>
+            <button class="btn-edit-shipping" type="button" (click)="goBackToShipping()">Edit</button>
+          </div>
 
           <div id="stripe-payment-element" class="stripe-element-container">
             @if (!paymentReady()) {
@@ -111,7 +91,7 @@
             class="btn-pay"
             (click)="pay()"
             [disabled]="!paymentReady() || loading()">
-            {{ loading() ? 'Processing...' : 'Pay ' + (orderTotal() | currency) }}
+            {{ loading() ? 'Processing...' : 'Pay ' + (orderTotal() | currency:'EUR':'symbol') }}
           </button>
 
           <p class="stripe-notice">
@@ -133,7 +113,7 @@
                 <span class="summary-name">{{ item.name }}</span>
                 <span class="summary-qty">Qty: {{ item.quantity }}</span>
               </div>
-              <span class="summary-price">{{ item.price * item.quantity | currency }}</span>
+              <span class="summary-price">{{ item.price * item.quantity | currency:'EUR':'symbol' }}</span>
             </li>
           }
         </ul>
@@ -164,7 +144,7 @@
             } @else {
               <div class="coupon-applied">
                 <span class="coupon-applied-code">{{ appliedCoupon()!.code }}</span>
-                <span class="coupon-applied-discount">-{{ appliedCoupon()!.discountAmount | currency }}</span>
+                <span class="coupon-applied-discount">-{{ appliedCoupon()!.discountAmount | currency:'EUR':'symbol' }}</span>
                 <button class="btn-remove-coupon" (click)="removeCoupon()" aria-label="Remove coupon">✕</button>
               </div>
             }
@@ -174,17 +154,17 @@
         <div class="summary-totals">
           <div class="summary-row">
             <span>Subtotal</span>
-            <span>{{ cartService.subtotal() | currency }}</span>
+            <span>{{ cartService.subtotal() | currency:'EUR':'symbol' }}</span>
           </div>
           @if (appliedCoupon()) {
             <div class="summary-row summary-row--discount">
               <span>Discount</span>
-              <span>-{{ appliedCoupon()!.discountAmount | currency }}</span>
+              <span>-{{ appliedCoupon()!.discountAmount | currency:'EUR':'symbol' }}</span>
             </div>
           }
           <div class="summary-row summary-row--total">
             <span>Total</span>
-            <span class="total-amount">{{ orderTotal() | currency }}</span>
+            <span class="total-amount">{{ orderTotal() | currency:'EUR':'symbol' }}</span>
           </div>
         </div>
       </aside>

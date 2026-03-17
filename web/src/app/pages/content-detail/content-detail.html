@@ -25,21 +25,7 @@
   <img [src]="post.thumbnailUrl" [alt]="post.title" style="width:100%; max-width:900px; border-radius:12px; margin:16px 0;" />
 
   @if (post.type === 'article') {
-    @if (post.accessDenied) {
-      <div class="article-body teaser" [innerHTML]="post.body"></div>
-      <div class="paywall-banner">
-        <div class="paywall-icon">🔒</div>
-        <h2 class="paywall-title">Premium Content</h2>
-        <p class="paywall-subtitle">Subscribe to read the full article</p>
-        @if (isLoggedIn()) {
-          <p class="paywall-auth-note">Your subscription has expired or you don't have one. Subscribe to continue.</p>
-        } @else {
-          <p class="paywall-auth-note">Your subscription has expired or you don't have one. Subscribe to continue.</p>
-          <p class="paywall-signin-note">Already a subscriber? <button (click)="uiState.openSignIn()" class="paywall-signin-link">Sign in</button> to access this content.</p>
-        }
-        <a routerLink="/subscribe" class="paywall-btn">Subscribe Now</a>
-      </div>
-    } @else if (post.body) {
+    @if (post.body) {
       <div class="article-body" [innerHTML]="post.body"></div>
     } @else {
       <p><em>(Article body will go here.)</em></p>

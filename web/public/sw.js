@@ -1,4 +1,4 @@
-const CACHE_NAME = 'journey-v2';
+const CACHE_NAME = 'journey-v3';
 
 // Static assets to pre-cache on install
 const PRECACHE_URLS = [

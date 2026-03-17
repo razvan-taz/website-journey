@@ -1,0 +1,29 @@
+<div class="faq-page">
+  <h1>FAQ</h1>
+
+  @if (loading()) {
+    <p class="faq-loading">Loading...</p>
+  } @else if (error()) {
+    <p class="faq-error">{{ error() }}</p>
+  } @else if (items().length === 0) {
+    <p class="faq-empty">No questions yet.</p>
+  } @else {
+    <div class="faq-list">
+      @for (item of items(); track item.id) {
+        <div class="faq-item">
+          <button
+            class="faq-question"
+            (click)="toggle(item.id)"
+            [attr.aria-expanded]="openItem() === item.id"
+          >
+            <span>{{ item.question }}</span>
+            <span class="faq-arrow">{{ openItem() === item.id ? '−' : '+' }}</span>
+          </button>
+          @if (openItem() === item.id) {
+            <div class="faq-answer">{{ item.answer }}</div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

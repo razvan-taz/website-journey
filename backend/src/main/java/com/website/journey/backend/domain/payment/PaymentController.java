@@ -54,7 +54,7 @@ public class PaymentController {
         try {
             PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                     .setAmount((long) request.amount())
-                    .setCurrency(request.currency() != null ? request.currency() : "usd")
+                    .setCurrency(request.currency() != null ? request.currency() : "eur")
                     .setAutomaticPaymentMethods(
                             PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
                                     .setEnabled(true)

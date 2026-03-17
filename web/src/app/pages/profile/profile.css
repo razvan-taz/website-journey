@@ -69,40 +69,6 @@
   border: 1px solid rgba(136, 8, 36, 0.3);
 }
 
-.sub-active {
-  color: #5cb85c;
-  font-weight: 500;
-}
-
-.no-sub-card {
-  background: #1f1f1f;
-  border: 1px solid #2a2a2a;
-  border-radius: 8px;
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.no-sub-card p {
-  color: #aaa;
-  margin: 0;
-}
-
-.btn-subscribe-now {
-  padding: 8px 20px;
-  background: #880824;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 4px;
-  font-size: 14px;
-  white-space: nowrap;
-  transition: background-color 0.3s;
-}
-
-.btn-subscribe-now:hover {
-  background: #6a061c;
-}
 
 .loading-text,
 .empty-text {

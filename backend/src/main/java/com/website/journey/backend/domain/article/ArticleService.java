@@ -1,14 +1,10 @@
 package com.website.journey.backend.domain.article;
 
-import com.website.journey.backend.domain.subscription.SubscriptionService;
-import com.website.journey.backend.domain.user.UserRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,15 +16,9 @@ import java.util.List;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
-    private final SubscriptionService subscriptionService;
-    private final UserRepository userRepository;
 
-    public ArticleService(ArticleRepository articleRepository,
-                          SubscriptionService subscriptionService,
-                          UserRepository userRepository) {
+    public ArticleService(ArticleRepository articleRepository) {
         this.articleRepository = articleRepository;
-        this.subscriptionService = subscriptionService;
-        this.userRepository = userRepository;
     }
 
     @Transactional(readOnly = true)
@@ -58,32 +48,7 @@ public class ArticleService {
                         .toList()
                 : Collections.emptyList();
 
-        boolean accessDenied = false;
-        String body = article.getBody();
-
-        if (article.isPremium()) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            boolean hasActiveSubscription = false;
-
-            if (authentication != null && authentication.isAuthenticated()
-                    && !"anonymousUser".equals(authentication.getName())) {
-                String email = authentication.getName();
-                Long userId = userRepository.findByEmail(email)
-                        .map(user -> user.getId())
-                        .orElse(null);
-                if (userId != null) {
-                    hasActiveSubscription = subscriptionService.getStatus(userId).active();
-                }
-            }
-
-            if (!hasActiveSubscription) {
-                String stripped = article.getBody() != null ? article.getBody().replaceAll("<[^>]*>", "").trim() : "";
-                body = stripped.length() > 350 ? stripped.substring(0, 350) + "..." : stripped;
-                accessDenied = true;
-            }
-        }
-
-        return toDetailDto(article, body, relatedArticles, accessDenied);
+        return toDetailDto(article, article.getBody(), relatedArticles, false);
     }
 
     @Transactional

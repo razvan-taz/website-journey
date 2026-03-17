@@ -19,17 +19,10 @@ export class Profile {
   user = this.authService.currentUser;
   isAdmin = this.authService.isAdmin;
 
-  subscriptionStatus = signal<any | null>(null);
   orders = signal<any[]>([]);
   loadingOrders = signal(true);
 
   constructor() {
-    // Load subscription status
-    this.http.get<any>('/api/subscriptions/my-status')
-      .pipe(takeUntilDestroyed())
-      .subscribe({ next: (s) => this.subscriptionStatus.set(s), error: () => {} });
-
-    // Load order history
     this.http.get<any[]>('/api/orders/mine')
       .pipe(takeUntilDestroyed())
       .subscribe({

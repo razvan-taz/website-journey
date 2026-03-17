@@ -1,0 +1,97 @@
+.admin-page {
+  width: 100%;
+  max-width: 640px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  color: #dadada;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.admin-loading {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.admin-error {
+  color: #e05a70;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.admin-success {
+  color: #5cb85c;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.schedule-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.schedule-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.day-label {
+  color: #aaa;
+  font-size: 13px;
+  min-width: 90px;
+  font-weight: 600;
+}
+
+.content-input {
+  flex: 1;
+  background: #111;
+  border: 1px solid #333;
+  color: #dadada;
+  padding: 10px 14px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.content-input:focus {
+  border-color: #880824;
+  outline: none;
+}
+
+.content-input::placeholder {
+  color: #555;
+}
+
+.btn-save {
+  padding: 8px 20px;
+  background: #880824;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #6a061c;
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
