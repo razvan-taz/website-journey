@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -32,16 +33,31 @@ public class ArticleController {
     public ResponseEntity<Page<ArticleListDto>> findAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String tag) {
-        Page<ArticleListDto> result = articleService.findAll(tag, PageRequest.of(page, size));
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) ArticleCategory category) {
+        Page<ArticleListDto> result = articleService.findAll(tag, category, PageRequest.of(page, size));
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES).cachePublic())
                 .body(result);
     }
 
     @GetMapping("/tags")
-    public ResponseEntity<java.util.List<String>> getTags() {
+    public ResponseEntity<List<String>> getTags() {
         return ResponseEntity.ok(articleService.getDistinctTags());
+    }
+
+    @GetMapping("/admin")
+    public ResponseEntity<Page<ArticleListDto>> findAllAdmin(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) ArticleCategory category) {
+        return ResponseEntity.ok(articleService.findAllAdmin(tag, category, PageRequest.of(page, size)));
+    }
+
+    @GetMapping("/admin/{slug}")
+    public ResponseEntity<ArticleDetailDto> findBySlugAdmin(@PathVariable String slug) {
+        return ResponseEntity.ok(articleService.findBySlugAdmin(slug));
     }
 
     @GetMapping("/{slug}")

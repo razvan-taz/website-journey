@@ -32,8 +32,12 @@ public class NewsletterSubscriber {
     @Column(name = "subscribed_at", nullable = false, updatable = false)
     private LocalDateTime subscribedAt;
 
+    @Column(name = "unsubscribe_token", nullable = false, updatable = false, columnDefinition = "UUID")
+    private java.util.UUID unsubscribeToken;
+
     @PrePersist
     protected void onCreate() {
         this.subscribedAt = LocalDateTime.now();
+        this.unsubscribeToken = java.util.UUID.randomUUID();
     }
 }

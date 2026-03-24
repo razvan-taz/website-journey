@@ -1,8 +1,6 @@
 package com.website.journey.backend.domain.user;
 
 import com.website.journey.backend.config.EmailService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,8 +12,6 @@ import java.time.LocalDateTime;
 
 @Service
 public class PasswordResetService {
-
-    private static final Logger log = LoggerFactory.getLogger(PasswordResetService.class);
 
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;

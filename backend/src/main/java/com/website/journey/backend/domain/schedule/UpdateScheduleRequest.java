@@ -7,7 +7,9 @@ public record UpdateScheduleRequest(
 ) {
     public record UpdateScheduleRow(
             int dayOfWeek,
-            String content
+            String startTime,
+            String endTime,
+            String description
     ) {
     }
 }

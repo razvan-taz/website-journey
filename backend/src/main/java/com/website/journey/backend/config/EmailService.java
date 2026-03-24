@@ -1,5 +1,7 @@
 package com.website.journey.backend.config;
 
+import com.website.journey.backend.domain.emailconfig.EmailConfig;
+import com.website.journey.backend.domain.emailconfig.EmailConfigService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -20,19 +22,34 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
-
-    @Value("${app.mail.from}")
-    private String fromAddress;
+    private final EmailConfigService emailConfigService;
 
     @Value("${app.base-url}")
     private String baseUrl;
 
-    public EmailService(JavaMailSender mailSender, TemplateEngine templateEngine) {
+    public EmailService(JavaMailSender mailSender,
+                        TemplateEngine templateEngine,
+                        EmailConfigService emailConfigService) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
+        this.emailConfigService = emailConfigService;
     }
 
     public record OrderItemDetail(String name, int quantity, BigDecimal price) {}
+
+    private String fromAddress() {
+        try {
+            EmailConfig config = emailConfigService.getConfig();
+            String address = config.getFromAddress();
+            String name = config.getFromName();
+            return name != null && !name.isBlank()
+                    ? name + " <" + address + ">"
+                    : address;
+        } catch (Exception e) {
+            log.warn("Could not load email from-address from config, using fallback: {}", e.getMessage());
+            return "noreply@journey.com";
+        }
+    }
 
     @Async
     public void sendOrderConfirmation(String toEmail,
@@ -54,7 +71,7 @@ public class EmailService {
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromAddress);
+            helper.setFrom(fromAddress());
             helper.setTo(toEmail);
             helper.setSubject("Order Confirmation #" + orderId);
             helper.setText(html, true);
@@ -82,7 +99,7 @@ public class EmailService {
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromAddress);
+            helper.setFrom(fromAddress());
             helper.setTo(toEmail);
             helper.setSubject(subject);
             helper.setText(html, true);
@@ -108,7 +125,7 @@ public class EmailService {
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromAddress);
+            helper.setFrom(fromAddress());
             helper.setTo(toEmail);
             helper.setSubject(subject);
             helper.setText(html, true);
@@ -123,6 +140,129 @@ public class EmailService {
     }
 
     @Async
+    public void sendRefundApprovedEmail(String toEmail, String userName, String orderId, java.math.BigDecimal amount) {
+        try {
+            Context ctx = new Context();
+            ctx.setVariable("userName", userName);
+            ctx.setVariable("orderId", orderId);
+            ctx.setVariable("amount", amount);
+            ctx.setVariable("baseUrl", baseUrl);
+
+            String html = templateEngine.process("email/refund-approved", ctx);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromAddress());
+            helper.setTo(toEmail);
+            helper.setSubject("Your refund has been processed");
+            helper.setText(html, true);
+
+            mailSender.send(message);
+            log.info("Refund approved email sent to {} for order {}", toEmail, orderId);
+        } catch (MessagingException e) {
+            log.warn("Failed to send refund approved email to {} for order {}: {}", toEmail, orderId, e.getMessage());
+        } catch (Exception e) {
+            log.warn("Unexpected error sending refund approved email to {} for order {}: {}", toEmail, orderId, e.getMessage());
+        }
+    }
+
+    @Async
+    public void sendRefundRejectedEmail(String toEmail, String userName, String orderId, String rejectionReason) {
+        try {
+            Context ctx = new Context();
+            ctx.setVariable("userName", userName);
+            ctx.setVariable("orderId", orderId);
+            ctx.setVariable("rejectionReason", rejectionReason);
+            ctx.setVariable("baseUrl", baseUrl);
+
+            String html = templateEngine.process("email/refund-rejected", ctx);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromAddress());
+            helper.setTo(toEmail);
+            helper.setSubject("Refund request update");
+            helper.setText(html, true);
+
+            mailSender.send(message);
+            log.info("Refund rejected email sent to {} for order {}", toEmail, orderId);
+        } catch (MessagingException e) {
+            log.warn("Failed to send refund rejected email to {} for order {}: {}", toEmail, orderId, e.getMessage());
+        } catch (Exception e) {
+            log.warn("Unexpected error sending refund rejected email to {} for order {}: {}", toEmail, orderId, e.getMessage());
+        }
+    }
+
+    @Async
+    public void sendEmailVerification(String toEmail, String userName, String token) {
+        try {
+            Context ctx = new Context();
+            ctx.setVariable("userName", userName);
+            ctx.setVariable("verificationLink", baseUrl + "/verify-email?token=" + token);
+            ctx.setVariable("baseUrl", baseUrl);
+
+            String html = templateEngine.process("email/email-verification", ctx);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromAddress());
+            helper.setTo(toEmail);
+            helper.setSubject("Verify your email");
+            helper.setText(html, true);
+
+            mailSender.send(message);
+            log.info("Email verification sent to {}", toEmail);
+        } catch (MessagingException e) {
+            log.warn("Failed to send email verification to {}: {}", toEmail, e.getMessage());
+        } catch (Exception e) {
+            log.warn("Unexpected error sending email verification to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
+    @Async
+    public void sendNewsletterToSubscriber(String toEmail, String subject, String body, String unsubscribeUrl) {
+        try {
+            String fullBody = body + "<br><br><hr style='border:none;border-top:1px solid #333;margin:24px 0'>"
+                    + "<p style='color:#666;font-size:12px;text-align:center;margin:0'>"
+                    + "You are receiving this because you subscribed to our newsletter. "
+                    + "<a href='" + unsubscribeUrl + "' style='color:#880824'>Unsubscribe</a></p>";
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromAddress());
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(fullBody, true);
+            mailSender.send(message);
+            log.info("Newsletter sent to {}", toEmail);
+        } catch (MessagingException e) {
+            log.warn("Failed to send newsletter to {}: {}", toEmail, e.getMessage());
+        } catch (Exception e) {
+            log.warn("Unexpected error sending newsletter to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
+    public void sendTestEmail() {
+        try {
+            String toEmail = fromAddress();
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromAddress());
+            helper.setTo(toEmail);
+            helper.setSubject("Journey — SMTP test");
+            helper.setText("<html><body style='font-family:sans-serif;background:#111;color:#dadada;padding:32px'>"
+                    + "<h2 style='color:#880824'>SMTP test successful</h2>"
+                    + "<p>Your email configuration is working correctly.</p>"
+                    + "</body></html>", true);
+            mailSender.send(message);
+            log.info("Test email sent to {}", toEmail);
+        } catch (MessagingException e) {
+            throw new RuntimeException("SMTP test failed: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("SMTP test failed: " + e.getMessage(), e);
+        }
+    }
+
+    @Async
     public void sendWelcomeEmail(String toEmail, String userName) {
         try {
             Context ctx = new Context();
@@ -133,7 +273,7 @@ public class EmailService {
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromAddress);
+            helper.setFrom(fromAddress());
             helper.setTo(toEmail);
             helper.setSubject("Welcome to Journey!");
             helper.setText(html, true);

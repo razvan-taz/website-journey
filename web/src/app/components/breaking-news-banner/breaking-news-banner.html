@@ -1,0 +1,8 @@
+@if (article() && !dismissed()) {
+  <div class="breaking-banner" role="alert" aria-live="polite">
+    <span class="breaking-label">BREAKING</span>
+    <span class="breaking-title">{{ article()!.title }}</span>
+    <a class="breaking-link" [routerLink]="['/content', article()!.slug]">Read now →</a>
+    <button class="breaking-dismiss" (click)="dismiss()" aria-label="Dismiss breaking news banner">✕</button>
+  </div>
+}

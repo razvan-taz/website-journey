@@ -1,13 +1,51 @@
 <div class="profile-page">
   <h1 class="profile-title">My Account</h1>
 
+  <!-- Email verification banner -->
+  @if (user()?.emailVerified === false) {
+    <div class="verify-banner">
+      <span>⚠ Your email address is not verified.</span>
+      @if (resendVerificationSuccess()) {
+        <span class="verify-banner-sent">Verification email sent!</span>
+      } @else {
+        <button class="verify-banner-btn" (click)="resendVerification()" [disabled]="resendingVerification()">
+          {{ resendingVerification() ? 'Sending...' : 'Resend verification email' }}
+        </button>
+      }
+      @if (resendVerificationError()) {
+        <span class="verify-banner-error">{{ resendVerificationError() }}</span>
+      }
+    </div>
+  }
+
   <!-- User Info -->
   <section class="profile-section">
     <h2 class="section-heading">Account</h2>
     <div class="info-card">
       <div class="info-row">
         <span class="info-label">Name</span>
-        <span class="info-value">{{ user()?.name }}</span>
+        <span class="info-value name-row">
+          @if (editingName()) {
+            <input
+              class="name-input"
+              type="text"
+              [value]="editNameValue()"
+              (input)="editNameValue.set($any($event.target).value)"
+              (keydown.enter)="saveName()"
+              (keydown.escape)="cancelEditName()"
+            />
+            <button class="btn-name-save" (click)="saveName()" [disabled]="savingName() || !editNameValue().trim()">
+              {{ savingName() ? 'Saving...' : 'Save' }}
+            </button>
+            <button class="btn-name-cancel" (click)="cancelEditName()" [disabled]="savingName()">Cancel</button>
+            @if (saveNameError()) {
+              <span class="name-error">{{ saveNameError() }}</span>
+            }
+          } @else {
+            {{ user()?.name }}
+            <button class="btn-name-edit" (click)="startEditName()" title="Edit name">✏</button>
+          }
+        </span>
       </div>
       <div class="info-row">
         <span class="info-label">Email</span>
@@ -19,6 +57,74 @@
           <span class="role-badge" [class.role-admin]="isAdmin()">{{ user()?.role }}</span>
         </span>
       </div>
+    </div>
+  </section>
+
+  <!-- Change Password -->
+  <section class="profile-section">
+    <h2 class="section-heading">Security</h2>
+    <div class="info-card">
+      @if (!changingPassword()) {
+        <div class="info-row">
+          <span class="info-label">Password</span>
+          <span class="info-value">
+            <button class="btn-name-edit" (click)="startChangePassword()" title="Change password">Change password ✏</button>
+          </span>
+        </div>
+      } @else {
+        <div class="password-form">
+          <div class="pw-group">
+            <label class="pw-label">Current password</label>
+            <input type="password" class="name-input" [value]="currentPassword()" (input)="currentPassword.set($any($event.target).value)" autocomplete="current-password" />
+          </div>
+          <div class="pw-group">
+            <label class="pw-label">New password <span class="pw-hint">(min. 8 characters)</span></label>
+            <input type="password" class="name-input" [value]="newPassword()" (input)="newPassword.set($any($event.target).value)" autocomplete="new-password" />
+          </div>
+          <div class="pw-group">
+            <label class="pw-label">Confirm new password</label>
+            <input type="password" class="name-input" [value]="confirmPassword()" (input)="confirmPassword.set($any($event.target).value)" autocomplete="new-password" />
+          </div>
+          @if (passwordError()) {
+            <p class="name-error">{{ passwordError() }}</p>
+          }
+          @if (passwordSuccess()) {
+            <p class="pw-success">Password changed successfully.</p>
+          }
+          <div class="name-row" style="margin-top: 12px;">
+            <button class="btn-name-save" (click)="savePassword()" [disabled]="savingPassword() || !currentPassword().trim() || !newPassword().trim() || !confirmPassword().trim()">
+              {{ savingPassword() ? 'Saving...' : 'Save' }}
+            </button>
+            <button class="btn-name-cancel" (click)="cancelChangePassword()" [disabled]="savingPassword()">Cancel</button>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Preferences -->
+  <section class="profile-section">
+    <h2 class="section-heading">Preferences</h2>
+    <div class="info-card">
+      <div class="info-row">
+        <span class="info-label">Notifications</span>
+        <span class="info-value notif-toggle-row">
+          <button
+            class="btn-toggle"
+            [class.btn-toggle-on]="user()?.notificationsEnabled !== false"
+            (click)="toggleNotifications()"
+            [disabled]="savingNotifPref()"
+          >
+            {{ savingNotifPref() ? 'Saving...' : (user()?.notificationsEnabled !== false ? 'Enabled' : 'Disabled') }}
+          </button>
+          <span class="notif-toggle-hint">
+            {{ user()?.notificationsEnabled !== false ? 'You will receive in-app notifications.' : 'In-app notifications are turned off.' }}
+          </span>
+        </span>
+      </div>
+      @if (notifPrefError()) {
+        <p class="name-error">{{ notifPrefError() }}</p>
+      }
     </div>
   </section>
 
@@ -35,7 +141,7 @@
           <div class="order-card">
             <div class="order-header">
               <span class="order-id">#{{ order.orderId }}</span>
-              <span class="order-status">{{ order.status }}</span>
+              <span class="order-status">{{ getDisplayStatus(order) }}</span>
               <span class="order-total">{{ order.total | currency:'EUR':'symbol' }}</span>
               <span class="order-date">{{ order.createdAt | slice:0:10 }}</span>
             </div>
@@ -44,9 +150,47 @@
                 <li class="order-item">{{ item.productName }} &times; {{ item.quantity }} &mdash; {{ item.unitPrice | currency:'EUR':'symbol' }}</li>
               }
             </ul>
+            <div class="order-actions">
+              @if (canRequestRefund(order)) {
+                <button class="btn-refund" (click)="openRefundModal(order.orderId)">Request Refund</button>
+              }
+              @if (refundedOrders().has(order.orderId)) {
+                <span class="refund-submitted">Refund request submitted</span>
+              }
+            </div>
           </div>
         }
       </div>
     }
   </section>
 </div>
+
+<!-- Refund Modal -->
+@if (refundingOrderId() !== null) {
+  <div class="modal-backdrop" (click)="closeRefundModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2 class="modal-title">Request Refund</h2>
+      <p class="modal-subtitle">Order #{{ refundingOrderId() }}</p>
+      <label class="modal-label" for="refund-reason">Reason <span class="required">*</span></label>
+      <textarea
+        id="refund-reason"
+        class="modal-textarea"
+        [ngModel]="refundReason()"
+        (ngModelChange)="refundReason.set($event)"
+        maxlength="500"
+        rows="4"
+        placeholder="Please describe why you'd like a refund..."
+      ></textarea>
+      <p class="char-count">{{ refundReason().length }}/500</p>
+      @if (refundError()) {
+        <p class="modal-error">{{ refundError() }}</p>
+      }
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeRefundModal()" [disabled]="refundSubmitting()">Cancel</button>
+        <button class="btn-submit" (click)="submitRefund()" [disabled]="refundSubmitting() || !refundReason().trim()">
+          {{ refundSubmitting() ? 'Submitting...' : 'Submit Request' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

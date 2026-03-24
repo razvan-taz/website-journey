@@ -3,6 +3,8 @@ package com.website.journey.backend.domain.schedule;
 public record StreamScheduleDto(
         int dayOfWeek,
         String dayName,
-        String content
+        String startTime,
+        String endTime,
+        String description
 ) {
 }

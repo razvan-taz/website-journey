@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export type ArticleCategory = 'NEWS' | 'GUIDE' | 'ARTICLE' | 'VIDEO';
+
 export interface ArticleListItem {
   id: number;
   title: string;
@@ -11,6 +13,12 @@ export interface ArticleListItem {
   thumbnailUrl: string;
   type: 'article' | 'video';
   tag: string;
+  status: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED';
+  viewCount: number;
+  scheduledAt: string | null;
+  category: ArticleCategory | null;
+  tags: string | null;
+  readingTimeMinutes: number | null;
 }
 
 export interface ArticleSeo {
@@ -38,14 +46,21 @@ export interface ArticleDetail {
   author: string;
   publishDate: string;
   thumbnailUrl: string;
+  videoUrl: string | null;
   type: 'article' | 'video';
   tag: string;
   body: string;
+  breakingNews: boolean;
   createdAt: string;
   updatedAt: string;
   seo: ArticleSeo;
   relatedArticles: RelatedArticle[];
   accessDenied?: boolean;
+  status: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED';
+  scheduledAt: string | null;
+  category: ArticleCategory | null;
+  tags: string | null;
+  readingTimeMinutes: number | null;
 }
 
 export interface ArticlePageResponse {
@@ -65,8 +80,14 @@ export interface CreateArticleRequest {
   author: string;
   publishDate: string;
   thumbnailUrl: string;
+  videoUrl: string | null;
   type: string;
   tag: string;
+  breakingNews: boolean;
+  status: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED';
+  scheduledAt: string | null;
+  category: ArticleCategory | null;
+  tags: string | null;
 }
 
 const BASE_URL = '/api/articles';
@@ -77,10 +98,22 @@ const BASE_URL = '/api/articles';
 export class ArticleService {
   private http = inject(HttpClient);
 
-  getArticles(page: number, size: number, tag?: string): Observable<ArticlePageResponse> {
+  getArticles(page: number, size: number, tag?: string, category?: ArticleCategory): Observable<ArticlePageResponse> {
     const params: Record<string, string> = { page: page.toString(), size: size.toString() };
     if (tag) params['tag'] = tag;
+    if (category) params['category'] = category;
     return this.http.get<ArticlePageResponse>(BASE_URL, { params });
+  }
+
+  getArticlesAdmin(page: number, size: number, tag?: string, category?: ArticleCategory): Observable<ArticlePageResponse> {
+    const params: Record<string, string> = { page: page.toString(), size: size.toString() };
+    if (tag) params['tag'] = tag;
+    if (category) params['category'] = category;
+    return this.http.get<ArticlePageResponse>(`${BASE_URL}/admin`, { params });
+  }
+
+  getArticleBySlugAdmin(slug: string): Observable<ArticleDetail> {
+    return this.http.get<ArticleDetail>(`${BASE_URL}/admin/${slug}`);
   }
 
   getTags(): Observable<string[]> {

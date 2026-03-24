@@ -1,0 +1,181 @@
+.admin-page {
+  max-width: 900px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-back {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #aaa;
+  font-size: 12px;
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-back:hover {
+  border-color: #880824;
+  color: #dadada;
+}
+
+.page-title {
+  color: #dadada;
+  font-size: 24px;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.total-count {
+  color: #666;
+  font-size: 13px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #aaa;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+td {
+  padding: 8px 12px;
+  color: #dadada;
+  font-size: 13px;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+tr:hover td {
+  background: #1a1a1a;
+}
+
+.email-cell {
+  max-width: 340px;
+}
+
+.date-cell {
+  color: #888;
+  white-space: nowrap;
+  width: 120px;
+}
+
+.actions-cell {
+  width: 80px;
+}
+
+.empty-row {
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+  padding: 24px;
+}
+
+.btn-remove {
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid #444;
+  color: #aaa;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-remove:hover:not(:disabled) {
+  border-color: #e05a70;
+  color: #e05a70;
+}
+
+.btn-remove:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Pagination ───────────────────────────────────── */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.page-btn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid #444;
+  color: #aaa;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  border-color: #880824;
+  color: #dadada;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.page-info {
+  color: #888;
+  font-size: 13px;
+}
+
+/* ── States ───────────────────────────────────────── */
+
+.admin-loading,
+.admin-error {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.admin-error {
+  color: #e05a70;
+}
+
+.btn-export {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid #444;
+  color: #aaa;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-export:hover {
+  border-color: #880824;
+  color: #dadada;
+}

@@ -1,0 +1,97 @@
+<div class="page-header">
+  <h1 class="page-title">Refund Requests</h1>
+  @if (!loading()) {
+    <span class="page-count">{{ totalElements() }} total</span>
+  }
+</div>
+
+<!-- Status filter tabs -->
+<div class="filter-tabs">
+  <button class="filter-tab" [class.active]="activeFilter() === ''" (click)="setFilter('')">All</button>
+  <button class="filter-tab" [class.active]="activeFilter() === 'PENDING'" (click)="setFilter('PENDING')">Pending</button>
+  <button class="filter-tab" [class.active]="activeFilter() === 'APPROVED'" (click)="setFilter('APPROVED')">Approved</button>
+  <button class="filter-tab" [class.active]="activeFilter() === 'REJECTED'" (click)="setFilter('REJECTED')">Rejected</button>
+</div>
+
+@if (loading()) {
+  <p class="loading-text">Loading refunds...</p>
+} @else if (error()) {
+  <p class="error-text">{{ error() }}</p>
+} @else if (refunds().length === 0) {
+  <p class="empty-text">No refund requests found.</p>
+} @else {
+  <div class="table-wrap">
+    <table class="refunds-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>User</th>
+          <th>Reason</th>
+          <th>Requested</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of refunds(); track r.id) {
+          <tr>
+            <td>#{{ r.orderId }}</td>
+            <td class="cell-email">{{ r.userEmail }}</td>
+            <td class="cell-reason" [title]="r.reason">{{ r.reason | slice:0:60 }}{{ r.reason.length > 60 ? '…' : '' }}</td>
+            <td class="cell-date">{{ r.requestedAt | slice:0:10 }}</td>
+            <td>
+              <span class="status-badge" [class]="'status-' + r.status.toLowerCase()">{{ r.status }}</span>
+            </td>
+            <td class="cell-actions">
+              @if (r.status === 'PENDING') {
+                <button class="btn-approve" (click)="approve(r.id)">Approve</button>
+                <button class="btn-reject" (click)="openRejectModal(r.id)">Reject</button>
+              }
+              @if (actionErrors()[r.id]) {
+                <span class="row-error">{{ actionErrors()[r.id] }}</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button class="page-btn" (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 0">‹ Prev</button>
+      @for (p of pageNumbers(); track p) {
+        <button class="page-btn" [class.active]="p === currentPage()" (click)="goToPage(p)">{{ p + 1 }}</button>
+      }
+      <button class="page-btn" (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages() - 1">Next ›</button>
+    </div>
+  }
+}
+
+<!-- Reject modal -->
+@if (rejectingId() !== null) {
+  <div class="modal-backdrop" (click)="closeRejectModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2 class="modal-title">Reject Refund</h2>
+      <label class="modal-label" for="reject-reason">Rejection reason <span class="required">*</span></label>
+      <textarea
+        id="reject-reason"
+        class="modal-textarea"
+        [ngModel]="rejectReason()"
+        (ngModelChange)="rejectReason.set($event)"
+        rows="3"
+        placeholder="Reason for rejection..."
+      ></textarea>
+      @if (rejectError()) {
+        <p class="modal-error">{{ rejectError() }}</p>
+      }
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeRejectModal()" [disabled]="rejectSubmitting()">Cancel</button>
+        <button class="btn-submit-reject" (click)="submitReject()" [disabled]="rejectSubmitting() || !rejectReason().trim()">
+          {{ rejectSubmitting() ? 'Rejecting...' : 'Reject' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

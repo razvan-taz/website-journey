@@ -1,0 +1,60 @@
+<div class="admin-page">
+  <div class="page-header">
+    <div class="header-left">
+      <a routerLink="/admin/newsletter" class="btn-back">← Back</a>
+      <h1 class="page-title">Newsletter Subscribers</h1>
+    </div>
+    @if (totalElements() > 0) {
+      <div class="header-right">
+        <span class="total-count">{{ totalElements() }} subscribers</span>
+        <button class="btn-export" (click)="exportCsv()">Export CSV</button>
+      </div>
+    }
+  </div>
+
+  @if (loading()) {
+    <p class="admin-loading">Loading...</p>
+  } @else if (error()) {
+    <p class="admin-error">{{ error() }}</p>
+  } @else {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Subscribed</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (sub of subscribers(); track sub.id) {
+          <tr>
+            <td class="email-cell">{{ sub.email }}</td>
+            <td class="date-cell">{{ sub.subscribedAt | date:'dd MMM yyyy' }}</td>
+            <td class="actions-cell">
+              <button
+                class="btn-remove"
+                (click)="remove(sub.id)"
+                [disabled]="removing() === sub.id"
+              >
+                {{ removing() === sub.id ? '...' : 'Remove' }}
+              </button>
+            </td>
+          </tr>
+        }
+        @if (subscribers().length === 0) {
+          <tr>
+            <td colspan="3" class="empty-row">No subscribers.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="page-btn" (click)="prevPage()" [disabled]="page() === 0">← Prev</button>
+        <span class="page-info">Page {{ page() + 1 }} of {{ totalPages() }}</span>
+        <button class="page-btn" (click)="nextPage()" [disabled]="page() >= totalPages() - 1">Next →</button>
+      </div>
+    }
+  }
+</div>

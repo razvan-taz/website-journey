@@ -1,5 +1,6 @@
 package com.website.journey.backend.domain.article;
 
+import com.website.journey.backend.websocket.WebSocketEventService;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.data.domain.Page;
@@ -15,14 +16,64 @@ import java.util.List;
 @Service
 public class ArticleService {
 
-    private final ArticleRepository articleRepository;
+    private static final int WORDS_PER_MINUTE = 200;
 
-    public ArticleService(ArticleRepository articleRepository) {
+    private final ArticleRepository articleRepository;
+    private final WebSocketEventService webSocketEventService;
+
+    public ArticleService(ArticleRepository articleRepository,
+                          WebSocketEventService webSocketEventService) {
         this.articleRepository = articleRepository;
+        this.webSocketEventService = webSocketEventService;
+    }
+
+    // --- Public endpoints (PUBLISHED only) ---
+
+    @Transactional(readOnly = true)
+    public Page<ArticleListDto> findAll(String tag, ArticleCategory category, Pageable pageable) {
+        if (category != null) {
+            return articleRepository.findByCategoryAndStatus(category, ArticleStatus.PUBLISHED, pageable)
+                    .map(this::toListDto);
+        }
+        if (tag != null && !tag.isBlank()) {
+            return articleRepository.findByTagIgnoreCaseAndStatus(tag, ArticleStatus.PUBLISHED, pageable)
+                    .map(this::toListDto);
+        }
+        return articleRepository.findByStatus(ArticleStatus.PUBLISHED, pageable).map(this::toListDto);
     }
 
     @Transactional(readOnly = true)
-    public Page<ArticleListDto> findAll(String tag, Pageable pageable) {
+    public List<String> getDistinctTags() {
+        return articleRepository.findDistinctTags();
+    }
+
+    @Transactional
+    public ArticleDetailDto findBySlug(String slug) {
+        Article article = articleRepository.findBySlugAndStatus(slug, ArticleStatus.PUBLISHED)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Article not found"));
+
+        article.setViewCount(article.getViewCount() + 1);
+        articleRepository.save(article);
+
+        List<RelatedArticleDto> relatedArticles = article.getTag() != null
+                ? articleRepository
+                        .findTop4ByTagAndSlugNotAndStatusOrderByPublishDateDesc(article.getTag(), slug, ArticleStatus.PUBLISHED)
+                        .stream()
+                        .map(this::toRelatedDto)
+                        .toList()
+                : Collections.emptyList();
+
+        return toDetailDto(article, article.getBody(), relatedArticles, false);
+    }
+
+    // --- Admin endpoints (all statuses) ---
+
+    @Transactional(readOnly = true)
+    public Page<ArticleListDto> findAllAdmin(String tag, ArticleCategory category, Pageable pageable) {
+        if (category != null) {
+            return articleRepository.findByCategory(category, pageable).map(this::toListDto);
+        }
         if (tag != null && !tag.isBlank()) {
             return articleRepository.findByTagIgnoreCase(tag, pageable).map(this::toListDto);
         }
@@ -30,12 +81,7 @@ public class ArticleService {
     }
 
     @Transactional(readOnly = true)
-    public java.util.List<String> getDistinctTags() {
-        return articleRepository.findDistinctTags();
-    }
-
-    @Transactional(readOnly = true)
-    public ArticleDetailDto findBySlug(String slug) {
+    public ArticleDetailDto findBySlugAdmin(String slug) {
         Article article = articleRepository.findBySlug(slug)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Article not found"));
@@ -53,18 +99,34 @@ public class ArticleService {
 
     @Transactional
     public ArticleDetailDto create(CreateArticleRequest request) {
+        ArticleStatus status = request.getStatus() != null ? request.getStatus() : ArticleStatus.PUBLISHED;
+        String sanitizedBody = sanitize(request.getBody());
+
         Article article = Article.builder()
                 .title(request.getTitle())
-                .body(sanitize(request.getBody()))
+                .body(sanitizedBody)
                 .slug(request.getSlug())
                 .author(request.getAuthor())
                 .publishDate(request.getPublishDate())
                 .thumbnailUrl(request.getThumbnailUrl())
                 .type(request.getType())
                 .tag(request.getTag())
+                .videoUrl(request.getVideoUrl())
+                .breakingNews(request.isBreakingNews())
+                .status(status)
+                .scheduledAt(request.getScheduledAt())
+                .category(request.getCategory())
+                .tags(request.getTags())
+                .readingTimeMinutes(calculateReadingTime(sanitizedBody))
                 .build();
 
-        return toDetailDto(articleRepository.save(article), article.getBody(), Collections.emptyList(), false);
+        Article saved = articleRepository.save(article);
+
+        if (saved.isBreakingNews() && saved.getStatus() == ArticleStatus.PUBLISHED) {
+            emitBreakingNews(saved);
+        }
+
+        return toDetailDto(saved, saved.getBody(), Collections.emptyList(), false);
     }
 
     @Transactional
@@ -73,16 +135,32 @@ public class ArticleService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Article not found"));
 
+        String sanitizedBody = sanitize(request.getBody());
+
         article.setTitle(request.getTitle());
-        article.setBody(sanitize(request.getBody()));
+        article.setBody(sanitizedBody);
         article.setSlug(request.getSlug());
         article.setAuthor(request.getAuthor());
         article.setPublishDate(request.getPublishDate());
         article.setThumbnailUrl(request.getThumbnailUrl());
         article.setType(request.getType());
         article.setTag(request.getTag());
+        article.setVideoUrl(request.getVideoUrl());
+        article.setBreakingNews(request.isBreakingNews());
+        if (request.getStatus() != null) {
+            article.setStatus(request.getStatus());
+        }
+        article.setScheduledAt(request.getScheduledAt());
+        article.setCategory(request.getCategory());
+        article.setTags(request.getTags());
+        article.setReadingTimeMinutes(calculateReadingTime(sanitizedBody));
 
         Article saved = articleRepository.save(article);
+
+        if (saved.isBreakingNews() && saved.getStatus() == ArticleStatus.PUBLISHED) {
+            emitBreakingNews(saved);
+        }
+
         return toDetailDto(saved, saved.getBody(), Collections.emptyList(), false);
     }
 
@@ -93,6 +171,26 @@ public class ArticleService {
                         HttpStatus.NOT_FOUND, "Article not found"));
 
         articleRepository.delete(article);
+    }
+
+    private int calculateReadingTime(String html) {
+        if (html == null || html.isBlank()) return 1;
+        String text = html.replaceAll("<[^>]*>", " ").replaceAll("\\s+", " ").trim();
+        int wordCount = text.split("\\s+").length;
+        return Math.max(1, (int) Math.ceil((double) wordCount / WORDS_PER_MINUTE));
+    }
+
+    private void emitBreakingNews(Article article) {
+        String strippedBody = article.getBody() != null
+                ? article.getBody().replaceAll("<[^>]*>", "").trim()
+                : "";
+        String summary = strippedBody.substring(0, Math.min(150, strippedBody.length()));
+        webSocketEventService.emitBreakingNewsPublished(
+                article.getId(),
+                article.getTitle(),
+                article.getSlug(),
+                summary
+        );
     }
 
     private String sanitize(String html) {
@@ -113,7 +211,15 @@ public class ArticleService {
                 article.getPublishDate() != null ? article.getPublishDate().toString() : null,
                 article.getThumbnailUrl(),
                 article.getType(),
-                article.getTag()
+                article.getTag(),
+                article.getVideoUrl(),
+                article.isBreakingNews(),
+                article.getStatus(),
+                article.getViewCount(),
+                article.getScheduledAt() != null ? article.getScheduledAt().toString() : null,
+                article.getCategory(),
+                article.getTags(),
+                article.getReadingTimeMinutes()
         );
     }
 
@@ -140,11 +246,19 @@ public class ArticleService {
                 article.getThumbnailUrl(),
                 article.getType(),
                 article.getTag(),
+                article.getVideoUrl(),
+                article.isBreakingNews(),
                 article.getCreatedAt() != null ? article.getCreatedAt().toString() : null,
                 article.getUpdatedAt() != null ? article.getUpdatedAt().toString() : null,
                 seo,
                 relatedArticles,
-                accessDenied
+                accessDenied,
+                article.getStatus(),
+                article.getViewCount(),
+                article.getScheduledAt() != null ? article.getScheduledAt().toString() : null,
+                article.getCategory(),
+                article.getTags(),
+                article.getReadingTimeMinutes()
         );
     }
 

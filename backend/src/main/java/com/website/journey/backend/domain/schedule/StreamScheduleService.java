@@ -29,7 +29,9 @@ public class StreamScheduleService {
             StreamScheduleEntry entry = streamScheduleRepository.findByDayOfWeek(row.dayOfWeek())
                     .orElseThrow(() -> new ResponseStatusException(
                             HttpStatus.NOT_FOUND, "Schedule entry not found for day: " + row.dayOfWeek()));
-            entry.setContent(row.content());
+            entry.setStartTime(row.startTime());
+            entry.setEndTime(row.endTime());
+            entry.setDescription(row.description());
             streamScheduleRepository.save(entry);
         }
         return streamScheduleRepository.findAllByOrderByDayOfWeekAsc().stream()
@@ -41,7 +43,9 @@ public class StreamScheduleService {
         return new StreamScheduleDto(
                 entry.getDayOfWeek(),
                 entry.getDayName(),
-                entry.getContent()
+                entry.getStartTime(),
+                entry.getEndTime(),
+                entry.getDescription()
         );
     }
 }

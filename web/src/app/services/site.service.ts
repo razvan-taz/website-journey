@@ -11,7 +11,9 @@ export interface SocialLink {
 export interface ScheduleEntry {
   dayOfWeek: number;
   dayName: string;
-  content: string;
+  startTime: string;
+  endTime: string;
+  description: string;
 }
 
 export interface SitePage {
@@ -20,7 +22,7 @@ export interface SitePage {
   updatedAt: string;
 }
 
-export interface TwitchStatus {
+export interface LiveStatus {
   enabled: boolean;
   url: string;
   live: boolean;
@@ -30,7 +32,7 @@ export interface TwitchStatus {
 export class SiteService {
   private http = inject(HttpClient);
 
-  twitchStatus = signal<TwitchStatus | null>(null);
+  liveStatus = signal<LiveStatus | null>(null);
 
   getSocialLinks(): Observable<SocialLink[]> {
     return this.http.get<SocialLink[]>('/api/site/social-links');
@@ -52,7 +54,7 @@ export class SiteService {
     return this.http.get<ScheduleEntry[]>('/api/admin/schedule');
   }
 
-  updateSchedule(rows: { rows: Array<{ dayOfWeek: number; content: string }> }): Observable<ScheduleEntry[]> {
+  updateSchedule(rows: { rows: Array<{ dayOfWeek: number; startTime: string; endTime: string; description: string }> }): Observable<ScheduleEntry[]> {
     return this.http.put<ScheduleEntry[]>('/api/admin/schedule', rows);
   }
 
@@ -68,19 +70,19 @@ export class SiteService {
     return this.http.put<SitePage>(`/api/admin/pages/${slug}`, { content });
   }
 
-  getTwitchStatus(): Observable<TwitchStatus> {
-    return this.http.get<TwitchStatus>('/api/site/twitch-status').pipe(
-      tap(s => this.twitchStatus.set(s))
+  getLiveStatus(): Observable<LiveStatus> {
+    return this.http.get<LiveStatus>('/api/site/live-status').pipe(
+      tap(s => this.liveStatus.set(s))
     );
   }
 
-  getAdminTwitchStatus(): Observable<TwitchStatus> {
-    return this.http.get<TwitchStatus>('/api/admin/twitch-status');
+  getAdminLiveStatus(): Observable<LiveStatus> {
+    return this.http.get<LiveStatus>('/api/admin/live-status');
   }
 
-  updateTwitchStatus(data: TwitchStatus): Observable<TwitchStatus> {
-    return this.http.put<TwitchStatus>('/api/admin/twitch-status', data).pipe(
-      tap(s => this.twitchStatus.set(s))
+  updateLiveStatus(data: LiveStatus): Observable<LiveStatus> {
+    return this.http.put<LiveStatus>('/api/admin/live-status', data).pipe(
+      tap(s => this.liveStatus.set(s))
     );
   }
 }

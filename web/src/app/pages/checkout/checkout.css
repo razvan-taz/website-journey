@@ -9,16 +9,16 @@
 /* ── Back link ────────────────────────────────────── */
 
 .back-link {
-  color: #aaa;
+  color: #880824;
   text-decoration: none;
   font-size: 14px;
   display: inline-block;
   margin-bottom: 16px;
-  transition: color 0.15s ease;
+  transition: opacity 0.15s ease;
 }
 
 .back-link:hover {
-  color: #dadada;
+  opacity: 0.75;
 }
 
 /* ── Title ────────────────────────────────────────── */

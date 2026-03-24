@@ -1,0 +1,49 @@
+.admin-page { max-width: 1100px; }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-title { color: #dadada; font-size: 24px; margin: 0; }
+
+.btn-back {
+  color: #880824;
+  text-decoration: none;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+.btn-back:hover { opacity: 0.75; }
+
+.admin-loading, .admin-error { color: #aaa; font-size: 14px; }
+.admin-error { color: #e05a70; }
+
+.admin-table { width: 100%; border-collapse: collapse; }
+
+th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #aaa;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+td {
+  padding: 12px;
+  color: #dadada;
+  font-size: 14px;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+tr:hover td { background: #1a1a1a; }
+
+.rank-col { width: 40px; text-align: right; }
+.rank-value { color: #555; font-size: 13px; }
+.hits-col { width: 70px; text-align: right; }
+.hits-value { color: #aaa; font-size: 13px; font-variant-numeric: tabular-nums; }
+.title-cell { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.empty-row { text-align: center; color: #666; font-size: 13px; padding: 24px; }

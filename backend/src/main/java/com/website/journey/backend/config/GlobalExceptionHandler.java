@@ -1,8 +1,10 @@
 package com.website.journey.backend.config;
 
+import com.website.journey.backend.domain.user.EmailNotVerifiedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -29,6 +31,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleResponseStatusException(
             ResponseStatusException ex, HttpServletRequest request) {
         return buildErrorResponse(ex.getStatusCode().value(), ex.getReason(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<Map<String, Object>> handleEmailNotVerified(
+            EmailNotVerifiedException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage(), request.getRequestURI());
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String, Object>> handleOptimisticLockingFailure(
+            ObjectOptimisticLockingFailureException ex, HttpServletRequest request) {
+        return buildErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Item is no longer available in the requested quantity",
+                request.getRequestURI());
     }
 
     @ExceptionHandler(Exception.class)

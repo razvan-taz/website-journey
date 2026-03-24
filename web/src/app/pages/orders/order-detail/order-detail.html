@@ -1,0 +1,86 @@
+<div class="order-detail-page">
+  @if (loading()) {
+    <p class="od-loading">Loading order...</p>
+  } @else if (error()) {
+    <p class="od-error">{{ error() }}</p>
+  } @else if (order(); as o) {
+    <div class="od-header">
+      <a class="od-back" routerLink="/orders">&larr; My Orders</a>
+      <div class="od-title-row">
+        <h1 class="od-title">Order #{{ o.orderId }}</h1>
+        <span class="od-status" [class]="'status-' + o.status.toLowerCase()">{{ statusLabel(o.status) }}</span>
+      </div>
+      <p class="od-date">Placed on {{ o.createdAt | date: 'longDate' }}</p>
+    </div>
+
+    <div class="od-grid">
+      <section class="od-section od-items">
+        <h2 class="od-section-title">Items</h2>
+        <div class="od-items-list">
+          @for (item of o.items; track item.productName) {
+            <div class="od-item">
+              <span class="od-item-name">{{ item.productName }}</span>
+              <span class="od-item-qty">&times;{{ item.quantity }}</span>
+              <span class="od-item-price">{{ item.unitPrice * item.quantity | currency: 'EUR' : 'symbol' }}</span>
+            </div>
+          }
+        </div>
+        <div class="od-totals">
+          @if (o.discountAmount > 0) {
+            <div class="od-total-row">
+              <span>Discount <small>({{ o.discountCode }})</small></span>
+              <span class="od-discount">-{{ o.discountAmount | currency: 'EUR' : 'symbol' }}</span>
+            </div>
+          }
+          <div class="od-total-row od-grand-total">
+            <span>Total</span>
+            <span>{{ o.total | currency: 'EUR' : 'symbol' }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="od-section od-shipping">
+        <h2 class="od-section-title">Shipping Address</h2>
+        <address class="od-address">
+          <strong>{{ o.shippingAddress.name }}</strong><br>
+          {{ o.shippingAddress.line1 }}<br>
+          {{ o.shippingAddress.city }}, {{ o.shippingAddress.state }} {{ o.shippingAddress.zip }}<br>
+          {{ o.shippingAddress.country }}
+        </address>
+      </section>
+    </div>
+
+    <div class="od-actions">
+      <a class="btn-invoice" [routerLink]="['/orders', o.orderId, 'invoice']">View / Print Invoice</a>
+
+      @if (refundSuccess()) {
+        <p class="od-refund-success">Refund request submitted successfully.</p>
+      } @else if (canRequestRefund(o.status)) {
+        @if (!showRefundForm()) {
+          <button class="btn-refund" (click)="showRefundForm.set(true)">Request Refund</button>
+        } @else {
+          <div class="od-refund-form">
+            <label class="od-refund-label" for="refund-reason">Reason for refund</label>
+            <textarea
+              id="refund-reason"
+              class="od-refund-textarea"
+              rows="3"
+              [value]="refundReason()"
+              (input)="refundReason.set($any($event.target).value)"
+              placeholder="Please describe why you'd like a refund..."
+            ></textarea>
+            @if (refundError()) {
+              <p class="od-refund-error">{{ refundError() }}</p>
+            }
+            <div class="od-refund-buttons">
+              <button class="btn-refund-submit" (click)="submitRefund()" [disabled]="refundSubmitting() || !refundReason().trim()">
+                {{ refundSubmitting() ? 'Submitting...' : 'Submit Request' }}
+              </button>
+              <button class="btn-refund-cancel" (click)="showRefundForm.set(false)">Cancel</button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

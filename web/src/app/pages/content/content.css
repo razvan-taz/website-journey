@@ -4,6 +4,32 @@
   font-size: 2rem;
 }
 
+/* ── Category Filters ─────────────────────────────── */
+
+.category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.cat-btn {
+  padding: 5px 14px;
+  background: transparent;
+  border: 1px solid #555;
+  border-radius: 6px;
+  color: #bbb;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 0.2s;
+}
+
+.cat-btn:hover { border-color: #880824; color: #dadada; }
+.cat-btn.active { background: #880824; border-color: #880824; color: #fff; }
+
 /* ── Tag Filters ──────────────────────────────────── */
 
 .tag-filters {
@@ -105,6 +131,27 @@
   gap: 10px;
 }
 
+/* ── Meta top (category + tag) ───────────────────── */
+
+.card-meta-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.card-category {
+  display: inline-block;
+  background: #333;
+  color: #ccc;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
 /* ── Tag badge ────────────────────────────────────── */
 
 .card-tag {
@@ -162,6 +209,11 @@
 }
 
 .card-date {
+  font-style: italic;
+}
+
+.card-reading-time {
+  color: #888;
   font-style: italic;
 }
 

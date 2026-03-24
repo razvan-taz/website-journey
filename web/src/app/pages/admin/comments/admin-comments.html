@@ -1,0 +1,44 @@
+<div class="admin-comments-page">
+  <h2 class="ac-title">Comment Moderation</h2>
+
+  <div class="ac-filters">
+    <label class="ac-filter-label">Filter by status:</label>
+    <select class="ac-filter-select" [value]="filterStatus()" (change)="onFilterChange($any($event.target).value)">
+      <option value="PENDING">Pending</option>
+      <option value="APPROVED">Approved</option>
+      <option value="REJECTED">Rejected</option>
+      <option value="">All</option>
+    </select>
+  </div>
+
+  @if (loading()) {
+    <p class="ac-loading">Loading comments...</p>
+  } @else if (comments().length === 0) {
+    <p class="ac-empty">No comments found.</p>
+  } @else {
+    <div class="ac-list">
+      @for (c of comments(); track c.id) {
+        <div class="ac-item">
+          <div class="ac-item-header">
+            <div class="ac-meta">
+              <span class="ac-author">{{ c.authorName }}</span>
+              <span class="ac-target">{{ c.targetType | lowercase }} #{{ c.targetId }}</span>
+              <span class="ac-date">{{ c.createdAt | date: 'medium' }}</span>
+            </div>
+            <span class="ac-status" [class]="'ac-status-' + c.status.toLowerCase()">{{ c.status }}</span>
+          </div>
+          <p class="ac-content">{{ c.content }}</p>
+          <div class="ac-actions">
+            @if (c.status !== 'APPROVED') {
+              <button class="btn-approve" (click)="approve(c.id)">Approve</button>
+            }
+            @if (c.status !== 'REJECTED') {
+              <button class="btn-reject" (click)="reject(c.id)">Reject</button>
+            }
+            <button class="btn-delete" (click)="delete(c.id)">Delete</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

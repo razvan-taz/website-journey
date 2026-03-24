@@ -1,0 +1,42 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1 class="page-title">Article Analytics</h1>
+    <a routerLink="/admin/articles" class="btn-back">← Back to Articles</a>
+  </div>
+
+  @if (loading()) {
+    <p class="admin-loading">Loading...</p>
+  } @else if (error()) {
+    <p class="admin-error">{{ error() }}</p>
+  } @else {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th class="rank-col">#</th>
+          <th class="hits-col">Views</th>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Published</th>
+          <th>Tag</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (article of ranked(); track article.slug; let i = $index) {
+          <tr>
+            <td class="rank-col rank-value">{{ i + 1 }}</td>
+            <td class="hits-col hits-value">{{ formatHits(article.viewCount) }}</td>
+            <td class="title-cell">{{ article.title }}</td>
+            <td>{{ article.author }}</td>
+            <td>{{ article.publishDate }}</td>
+            <td>{{ article.tag }}</td>
+          </tr>
+        }
+        @if (ranked().length === 0) {
+          <tr>
+            <td colspan="6" class="empty-row">No published articles.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

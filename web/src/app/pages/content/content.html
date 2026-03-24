@@ -5,6 +5,13 @@
 } @else {
   <h1 class="feed-title">Content</h1>
 
+  <div class="category-filters" role="group" aria-label="Filter by category">
+    <button class="cat-btn" [class.active]="selectedCategory() === null" (click)="selectCategory(null)">All</button>
+    @for (cat of categories; track cat.value) {
+      <button class="cat-btn" [class.active]="selectedCategory() === cat.value" (click)="selectCategory(cat.value)">{{ cat.label }}</button>
+    }
+  </div>
+
   @if (tags().length > 0) {
     <div class="tag-filters" role="group" aria-label="Filter by tag">
       <button
@@ -28,13 +35,21 @@
         </div>
 
         <div class="card-body">
-          <span class="card-tag">{{ post.tag }}</span>
+          <div class="card-meta-top">
+            @if (post.category) {
+              <span class="card-category">{{ categoryLabel(post.category) }}</span>
+            }
+            <span class="card-tag">{{ post.tag }}</span>
+          </div>
 
           <h3 class="card-title">{{ post.title }}</h3>
 
           <footer class="card-meta">
             <span class="card-author">{{ post.author }}</span>
             <span class="card-date">{{ post.publishDate }}</span>
+            @if (post.readingTimeMinutes) {
+              <span class="card-reading-time">~{{ post.readingTimeMinutes }} min read</span>
+            }
           </footer>
         </div>
       </article>

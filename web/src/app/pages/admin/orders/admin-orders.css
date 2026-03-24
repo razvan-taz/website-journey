@@ -1,0 +1,207 @@
+.admin-page {
+  max-width: 1200px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  color: #dadada;
+  font-size: 24px;
+  margin: 0;
+}
+
+.total-count {
+  color: #666;
+  font-size: 13px;
+}
+
+/* ── Tabs ─────────────────────────────────────────── */
+
+.tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.tab {
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #aaa;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+
+.tab:hover {
+  color: #dadada;
+}
+
+.tab-active {
+  color: #dadada;
+  border-bottom-color: #880824;
+}
+
+/* ── Table ────────────────────────────────────────── */
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #aaa;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+td {
+  padding: 12px;
+  color: #dadada;
+  font-size: 14px;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+tr:hover td {
+  background: #1a1a1a;
+}
+
+.mono {
+  font-family: monospace;
+  color: #aaa;
+  font-size: 13px;
+}
+
+.email-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions-cell {
+  white-space: nowrap;
+}
+
+.empty-row {
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+  padding: 24px;
+}
+
+/* ── Status Badges ────────────────────────────────── */
+
+.badge {
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-green {
+  background: #1a3a1a;
+  color: #6dbf6d;
+}
+
+.badge-yellow {
+  background: #3a3010;
+  color: #c8a840;
+}
+
+.badge-red {
+  background: #3a1010;
+  color: #e05a70;
+}
+
+.badge-grey {
+  background: #2a2a2a;
+  color: #888;
+}
+
+/* ── Action Button ────────────────────────────────── */
+
+.btn-action {
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid #444;
+  color: #aaa;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-action:hover {
+  border-color: #880824;
+  color: #dadada;
+}
+
+.btn-action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Pagination ───────────────────────────────────── */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.page-btn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid #444;
+  color: #aaa;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  border-color: #880824;
+  color: #dadada;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.page-info {
+  color: #888;
+  font-size: 13px;
+}
+
+/* ── States ───────────────────────────────────────── */
+
+.admin-loading,
+.admin-error {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.admin-error {
+  color: #e05a70;
+}

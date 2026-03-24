@@ -5,14 +5,14 @@
 }
 
 .back-link a {
-  color: #aaa;
+  color: #880824;
   text-decoration: none;
   font-size: 0.9rem;
-  transition: color 0.15s ease;
+  transition: opacity 0.15s ease;
 }
 
 .back-link a:hover {
-  color: #dadada;
+  opacity: 0.75;
 }
 
 /* ── State messages ───────────────────────────────── */
@@ -318,4 +318,189 @@
 .btn-submit-review:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ── Unverified email modal ───────────────────────── */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 32px 28px;
+  max-width: 400px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-title {
+  color: #dadada;
+  font-size: 18px;
+  margin: 0;
+}
+
+.modal-body {
+  color: #aaa;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.modal-success {
+  color: #6dbf6d;
+  font-size: 13px;
+  margin: 0;
+}
+
+.btn-resend {
+  padding: 10px 20px;
+  background: #880824;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-self: flex-start;
+}
+
+.btn-resend:hover:not(:disabled) {
+  background: #6a061c;
+}
+
+.btn-resend:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-modal-close {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #444;
+  color: #aaa;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: border-color 0.2s;
+}
+
+.btn-modal-close:hover {
+  border-color: #666;
+}
+
+/* ── Comments ──────────────────────────────────────── */
+
+.comments-section {
+  margin-top: 2.5rem;
+  max-width: 700px;
+}
+
+.comments-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.comment-form { margin-bottom: 1.5rem; }
+
+.comment-textarea, .comment-edit-textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.comment-textarea:focus, .comment-edit-textarea:focus { outline: none; border-color: #333; }
+
+.comment-error { color: #c0392b; font-size: 0.85rem; margin: 0.3rem 0; }
+
+.btn-comment-submit {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1.1rem;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-comment-submit:hover:not(:disabled) { background: #333; }
+.btn-comment-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.comment-signin-prompt { color: #888; font-size: 0.9rem; }
+.comments-empty { color: #888; font-size: 0.9rem; }
+
+.comments-list { display: flex; flex-direction: column; gap: 0.85rem; }
+
+.comment-item {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.comment-author { font-weight: 700; font-size: 0.9rem; }
+.comment-date { font-size: 0.8rem; color: #888; }
+
+.comment-content {
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.5;
+  margin: 0 0 0.35rem;
+  white-space: pre-wrap;
+}
+
+.btn-comment-edit {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.btn-comment-edit:hover { color: #111; }
+
+.comment-edit-actions { display: flex; gap: 0.5rem; margin-top: 0.4rem; }
+
+.btn-comment-save {
+  padding: 0.3rem 0.75rem;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.btn-comment-cancel {
+  padding: 0.3rem 0.75rem;
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
 }

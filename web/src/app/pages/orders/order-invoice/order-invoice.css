@@ -1,0 +1,134 @@
+.invoice-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.inv-loading, .inv-error { color: #666; padding: 1rem 0; }
+.inv-error { color: #c0392b; }
+
+.inv-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.btn-back {
+  color: #555;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.btn-back:hover { color: #111; }
+
+.btn-print {
+  padding: 0.55rem 1.25rem;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-print:hover { background: #333; }
+
+.invoice {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 2rem;
+  background: #fff;
+}
+
+.inv-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.inv-brand-name { font-size: 1.5rem; font-weight: 800; margin: 0 0 0.2rem; }
+.inv-brand-tagline { color: #888; font-size: 0.9rem; margin: 0; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.inv-meta { text-align: right; font-size: 0.9rem; line-height: 1.7; }
+.inv-meta p { margin: 0; }
+
+.inv-addresses { margin-bottom: 2rem; }
+
+.inv-address-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+}
+
+.inv-addresses address {
+  font-style: normal;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+
+.inv-table th {
+  text-align: left;
+  border-bottom: 2px solid #111;
+  padding: 0.5rem 0.5rem 0.5rem 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.inv-th-qty, .inv-th-unit, .inv-th-total { text-align: right; }
+
+.inv-table td {
+  padding: 0.6rem 0.5rem 0.6rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: top;
+}
+.inv-table td:nth-child(2),
+.inv-table td:nth-child(3),
+.inv-table td:nth-child(4) { text-align: right; }
+
+.inv-subtotal-row td, .inv-discount-row td {
+  border-bottom: none;
+  color: #555;
+  font-size: 0.9rem;
+  padding-top: 0.75rem;
+}
+.inv-subtotal-row td:first-child,
+.inv-discount-row td:first-child { text-align: right; }
+
+.inv-discount-row td:last-child { color: #c0392b; }
+
+.inv-total-row td {
+  border-top: 2px solid #111;
+  font-size: 1rem;
+  padding-top: 0.5rem;
+  border-bottom: none;
+}
+.inv-total-row td:first-child { text-align: right; }
+
+.inv-footer {
+  color: #888;
+  font-size: 0.85rem;
+  text-align: center;
+  margin: 0;
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .invoice-page { padding: 0; max-width: 100%; }
+  .invoice { border: none; border-radius: 0; padding: 0; }
+}

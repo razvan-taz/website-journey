@@ -1,0 +1,123 @@
+<div class="page-header">
+  <h1 class="page-title">Email Settings</h1>
+</div>
+
+@if (loading()) {
+  <p class="loading-text">Loading settings...</p>
+} @else {
+  <form class="settings-form" [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-group">
+      <label class="form-label" for="smtpHost">SMTP Host</label>
+      <input
+        id="smtpHost"
+        type="text"
+        class="form-input"
+        formControlName="smtpHost"
+        placeholder="smtp.example.com"
+      />
+      @if (form.get('smtpHost')?.invalid && form.get('smtpHost')?.touched) {
+        <span class="form-error">SMTP host is required.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="smtpPort">SMTP Port</label>
+      <input
+        id="smtpPort"
+        type="number"
+        class="form-input form-input--short"
+        formControlName="smtpPort"
+        placeholder="587"
+      />
+      @if (form.get('smtpPort')?.invalid && form.get('smtpPort')?.touched) {
+        <span class="form-error">A valid port number (1–65535) is required.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label ssl-label">
+        <input type="checkbox" formControlName="sslEnabled" class="ssl-checkbox" />
+        Use SSL/TLS (port 465) — uncheck for STARTTLS (port 587)
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="username">Username</label>
+      <input
+        id="username"
+        type="text"
+        class="form-input"
+        formControlName="username"
+        placeholder="you@example.com"
+        autocomplete="off"
+      />
+      @if (form.get('username')?.invalid && form.get('username')?.touched) {
+        <span class="form-error">Username is required.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="fromName">From Name</label>
+      <input
+        id="fromName"
+        type="text"
+        class="form-input"
+        formControlName="fromName"
+        placeholder="My App"
+      />
+      @if (form.get('fromName')?.invalid && form.get('fromName')?.touched) {
+        <span class="form-error">From name is required.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="fromAddress">From Address</label>
+      <input
+        id="fromAddress"
+        type="email"
+        class="form-input"
+        formControlName="fromAddress"
+        placeholder="noreply@example.com"
+      />
+      @if (form.get('fromAddress')?.invalid && form.get('fromAddress')?.touched) {
+        <span class="form-error">A valid email address is required.</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="password">SMTP Password</label>
+      <input
+        id="password"
+        type="password"
+        class="form-input"
+        formControlName="password"
+        placeholder="Leave blank to keep current password"
+        autocomplete="new-password"
+      />
+    </div>
+
+    @if (saveSuccess()) {
+      <p class="feedback-success">Settings saved successfully.</p>
+    }
+    @if (saveError()) {
+      <p class="feedback-error">{{ saveError() }}</p>
+    }
+
+    <div class="form-actions">
+      <button type="submit" class="btn-save" [disabled]="form.invalid || saving()">
+        {{ saving() ? 'Saving...' : 'Save Settings' }}
+      </button>
+    </div>
+    <div class="form-group test-email-group">
+      <button type="button" class="btn-test" (click)="sendTest()" [disabled]="testResult() === 'sending'">
+        {{ testResult() === 'sending' ? 'Sending...' : 'Send Test Email' }}
+      </button>
+      @if (testResult() === 'success') {
+        <span class="test-success">Test email sent to your from-address.</span>
+      }
+      @if (testResult() === 'error') {
+        <span class="test-error">Test failed — check your SMTP settings.</span>
+      }
+    </div>
+  </form>
+}

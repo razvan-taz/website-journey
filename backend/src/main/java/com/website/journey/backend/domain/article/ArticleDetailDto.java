@@ -12,9 +12,17 @@ public record ArticleDetailDto(
         String thumbnailUrl,
         String type,
         String tag,
+        String videoUrl,
+        boolean breakingNews,
         String createdAt,
         String updatedAt,
         ArticleSeoDto seo,
         List<RelatedArticleDto> relatedArticles,
-        boolean accessDenied
+        boolean accessDenied,
+        ArticleStatus status,
+        long viewCount,
+        String scheduledAt,
+        ArticleCategory category,
+        String tags,
+        Integer readingTimeMinutes
 ) {}

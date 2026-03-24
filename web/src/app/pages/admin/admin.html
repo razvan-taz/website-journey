@@ -1,16 +1,45 @@
-<div class="admin-layout">
+<div class="admin-layout" (click)="closePanel()">
   <aside class="admin-sidebar">
-    <h2 class="sidebar-title">Admin</h2>
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">Admin</h2>
+      <div class="notif-bell-wrap" (click)="$event.stopPropagation()">
+        <button class="notif-bell" (click)="toggleNotifPanel($event)" aria-label="Notifications">
+          🔔
+          @if (unreadCount() > 0) {
+            <span class="notif-badge">{{ unreadCount() }}</span>
+          }
+        </button>
+
+        @if (showNotifPanel()) {
+          <div class="notif-panel">
+            <div class="notif-panel-header">
+              <span class="notif-panel-title">Notifications</span>
+              <button class="notif-clear-all" (click)="clearAll()">Clear all</button>
+            </div>
+            @if (recentNotifications().length === 0) {
+              <p class="notif-empty">No notifications</p>
+            } @else {
+              <ul class="notif-list">
+                @for (n of recentNotifications(); track n.id) {
+                  <li class="notif-item" [class.notif-unread]="!n.read" (click)="markRead(n.id)">
+                    <span class="notif-icon">{{ typeIcon(n.type) }}</span>
+                    <div class="notif-body">
+                      <span class="notif-message">{{ n.message }}</span>
+                      <span class="notif-time">{{ n.receivedAt | date:'HH:mm' }}</span>
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
     <nav class="sidebar-nav">
-      <a routerLink="/admin/articles" routerLinkActive="active" class="sidebar-link">Articles</a>
-      <a routerLink="/admin/products" routerLinkActive="active" class="sidebar-link">Products</a>
-      <a routerLink="/admin/social-links" routerLinkActive="active" class="sidebar-link">Social Links</a>
-      <a routerLink="/admin/schedule" routerLinkActive="active" class="sidebar-link">Schedule</a>
-      <a routerLink="/admin/contact" routerLinkActive="active" class="sidebar-link">Contact</a>
-      <a routerLink="/admin/faq" routerLinkActive="active" class="sidebar-link">FAQ</a>
-      <a routerLink="/admin/site-pages" routerLinkActive="active" class="sidebar-link">Site Pages</a>
-      <a routerLink="/admin/twitch" routerLinkActive="active" class="sidebar-link">Twitch</a>
-      <a routerLink="/admin/nav-layout" routerLinkActive="active" class="sidebar-link">Nav Control</a>
+      @for (item of navItems; track item.route) {
+        <a [routerLink]="item.route" routerLinkActive="active" class="sidebar-link">{{ item.label }}</a>
+      }
     </nav>
   </aside>
   <main class="admin-content">

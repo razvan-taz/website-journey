@@ -1,5 +1,6 @@
 package com.website.journey.backend.domain.product;
 
+import com.website.journey.backend.websocket.WebSocketEventService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -10,10 +11,15 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class ProductService {
 
-    private final ProductRepository productRepository;
+    private static final int LOW_STOCK_THRESHOLD = 5;
 
-    public ProductService(ProductRepository productRepository) {
+    private final ProductRepository productRepository;
+    private final WebSocketEventService webSocketEventService;
+
+    public ProductService(ProductRepository productRepository,
+                          WebSocketEventService webSocketEventService) {
         this.productRepository = productRepository;
+        this.webSocketEventService = webSocketEventService;
     }
 
     @Transactional(readOnly = true)
@@ -44,7 +50,17 @@ public class ProductService {
                 .active(true)
                 .build();
 
-        return toDetailDto(productRepository.save(product));
+        Product saved = productRepository.save(product);
+
+        // Emit stock-updated event for new product
+        webSocketEventService.emitStockUpdated(saved.getId(), saved.getStock());
+
+        // Check low-stock threshold for newly created products
+        if (saved.getStock() <= LOW_STOCK_THRESHOLD) {
+            webSocketEventService.emitLowStock(saved.getId(), saved.getName(), saved.getStock());
+        }
+
+        return toDetailDto(saved);
     }
 
     @Transactional
@@ -53,6 +69,8 @@ public class ProductService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Product not found"));
 
+        int previousStock = product.getStock();
+
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
@@ -60,7 +78,22 @@ public class ProductService {
         product.setCategory(request.getCategory());
         product.setStock(request.getStock());
 
-        return toDetailDto(productRepository.save(product));
+        Product saved = productRepository.save(product);
+
+        int newStock = saved.getStock();
+
+        // Emit stock-updated event if stock changed
+        if (previousStock != newStock) {
+            webSocketEventService.emitStockUpdated(saved.getId(), newStock);
+
+            // Emit low-stock alert only when stock crosses the threshold
+            // (was above threshold before, now at or below it)
+            if (previousStock > LOW_STOCK_THRESHOLD && newStock <= LOW_STOCK_THRESHOLD) {
+                webSocketEventService.emitLowStock(saved.getId(), saved.getName(), newStock);
+            }
+        }
+
+        return toDetailDto(saved);
     }
 
     @Transactional

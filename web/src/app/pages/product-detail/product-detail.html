@@ -28,14 +28,20 @@
 
       <p class="product-price">{{ p.price | currency:'EUR':'symbol' }}</p>
 
-      <p class="product-stock" [class.out-of-stock]="p.stock === 0">
-        {{ p.stock > 0 ? 'In Stock' : 'Out of Stock' }}
-      </p>
+      @if (liveStock() !== null) {
+        <p class="product-stock" [class.out-of-stock]="liveStock()! === 0">
+          {{ liveStock()! > 0 ? 'In Stock' : 'Out of Stock' }}
+        </p>
+      } @else {
+        <p class="product-stock" [class.out-of-stock]="p.stock === 0">
+          {{ p.stock > 0 ? 'In Stock' : 'Out of Stock' }}
+        </p>
+      }
 
       <p class="product-description">{{ p.description }}</p>
 
       <div class="product-actions">
-        @if (p.stock > 0) {
+        @if ((liveStock() !== null ? liveStock()! : p.stock) > 0) {
           <button class="btn-add-to-cart" (click)="addToCart()">Add to Cart</button>
         }
         @if (isLoggedIn()) {
@@ -110,4 +116,66 @@
       <p class="review-notice">Only verified purchasers can leave a review.</p>
     }
   </section>
+}
+
+<!-- Comments section -->
+@if (product(); as p) {
+  <section class="comments-section">
+    <h2 class="comments-title">Comments</h2>
+    @if (isLoggedIn()) {
+      <div class="comment-form">
+        <textarea class="comment-textarea" rows="3" [value]="commentInput()" (input)="commentInput.set($any($event.target).value)" placeholder="You must have purchased this product to comment..."></textarea>
+        @if (commentError()) { <p class="comment-error">{{ commentError() }}</p> }
+        <button class="btn-comment-submit" (click)="submitProductComment()" [disabled]="commentSubmitting() || !commentInput().trim()">
+          {{ commentSubmitting() ? 'Posting...' : 'Post Comment' }}
+        </button>
+      </div>
+    } @else {
+      <p class="comment-signin-prompt">Sign in to leave a comment.</p>
+    }
+    @if (productComments().length === 0) {
+      <p class="comments-empty">No comments yet.</p>
+    } @else {
+      <div class="comments-list">
+        @for (c of productComments(); track c.id) {
+          <div class="comment-item">
+            <div class="comment-header">
+              <span class="comment-author">{{ c.authorName }}</span>
+              <span class="comment-date">{{ c.createdAt | date: 'mediumDate' }}</span>
+            </div>
+            @if (editingCommentId() === c.id) {
+              <textarea class="comment-edit-textarea" rows="2" [value]="editingContent()" (input)="editingContent.set($any($event.target).value)"></textarea>
+              <div class="comment-edit-actions">
+                <button class="btn-comment-save" (click)="saveCommentEdit(c.id)">Save</button>
+                <button class="btn-comment-cancel" (click)="cancelCommentEdit()">Cancel</button>
+              </div>
+            } @else {
+              <p class="comment-content">{{ c.content }}</p>
+              @if (isCurrentUser(c.authorName)) {
+                <button class="btn-comment-edit" (click)="startCommentEdit(c)">Edit</button>
+              }
+            }
+          </div>
+        }
+      </div>
+    }
+  </section>
+}
+
+<!-- Unverified email modal -->
+@if (showUnverifiedModal()) {
+  <div class="modal-backdrop" (click)="closeUnverifiedModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2 class="modal-title">Verify Your Email</h2>
+      <p class="modal-body">Please verify your email address to add items to your cart. Check your inbox for a verification email.</p>
+      @if (resendVerificationSuccess()) {
+        <p class="modal-success">Verification email sent! Check your inbox.</p>
+      } @else {
+        <button class="btn-resend" (click)="resendVerificationEmail()" [disabled]="resendingVerification()">
+          {{ resendingVerification() ? 'Sending...' : 'Resend verification email' }}
+        </button>
+      }
+      <button class="btn-modal-close" (click)="closeUnverifiedModal()">Close</button>
+    </div>
+  </div>
 }

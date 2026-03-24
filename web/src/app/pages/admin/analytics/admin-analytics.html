@@ -1,0 +1,57 @@
+<div class="analytics-page">
+  <h2 class="analytics-title">Analytics</h2>
+
+  @if (loading()) {
+    <p class="analytics-loading">Loading analytics...</p>
+  } @else if (error()) {
+    <p class="analytics-error">{{ error() }}</p>
+  } @else if (data(); as d) {
+    <div class="analytics-grid">
+      <section class="analytics-card">
+        <h3 class="analytics-card-title">Revenue</h3>
+        <div class="analytics-rows">
+          <div class="analytics-row">
+            <span class="analytics-label">This Month</span>
+            <span class="analytics-value">{{ d.revenue.thisMonth | currency: 'EUR' : 'symbol' : '1.2-2' }}</span>
+          </div>
+          <div class="analytics-row">
+            <span class="analytics-label">This Year</span>
+            <span class="analytics-value">{{ d.revenue.thisYear | currency: 'EUR' : 'symbol' : '1.2-2' }}</span>
+          </div>
+          <div class="analytics-row analytics-row-total">
+            <span class="analytics-label">All Time</span>
+            <span class="analytics-value">{{ d.revenue.total | currency: 'EUR' : 'symbol' : '1.2-2' }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="analytics-card">
+        <h3 class="analytics-card-title">New Users</h3>
+        <div class="analytics-rows">
+          <div class="analytics-row">
+            <span class="analytics-label">This Month</span>
+            <span class="analytics-value">{{ d.users.thisMonth | number }}</span>
+          </div>
+          <div class="analytics-row">
+            <span class="analytics-label">This Year</span>
+            <span class="analytics-value">{{ d.users.thisYear | number }}</span>
+          </div>
+          <div class="analytics-row analytics-row-total">
+            <span class="analytics-label">All Time</span>
+            <span class="analytics-value">{{ d.users.total | number }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="analytics-card analytics-card-single">
+        <h3 class="analytics-card-title">Completed Orders</h3>
+        <p class="analytics-big-number">{{ d.completedOrders | number }}</p>
+      </section>
+
+      <section class="analytics-card analytics-card-single">
+        <h3 class="analytics-card-title">Newsletter Subscribers</h3>
+        <p class="analytics-big-number">{{ d.newsletterSubscribers | number }}</p>
+      </section>
+    </div>
+  }
+</div>

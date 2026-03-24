@@ -1,5 +1,6 @@
 package com.website.journey.backend.domain.contact;
 
+import com.website.journey.backend.websocket.WebSocketEventService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -11,9 +12,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class ContactMessageService {
 
     private final ContactMessageRepository contactMessageRepository;
+    private final WebSocketEventService webSocketEventService;
 
-    public ContactMessageService(ContactMessageRepository contactMessageRepository) {
+    public ContactMessageService(ContactMessageRepository contactMessageRepository,
+                                 WebSocketEventService webSocketEventService) {
         this.contactMessageRepository = contactMessageRepository;
+        this.webSocketEventService = webSocketEventService;
     }
 
     @Transactional
@@ -25,6 +29,12 @@ public class ContactMessageService {
                 .read(false)
                 .build();
         contactMessageRepository.save(message);
+
+        // Notify admin via WebSocket — subject is derived from the start of the message
+        String subject = request.message() != null && request.message().length() > 50
+                ? request.message().substring(0, 50) + "..."
+                : request.message();
+        webSocketEventService.emitNewContactMessage(request.name(), request.email(), subject);
     }
 
     @Transactional(readOnly = true)

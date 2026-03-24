@@ -1,0 +1,30 @@
+.unsubscribe-page {
+  background: #111;
+  color: #dadada;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.unsubscribe-card {
+  max-width: 480px;
+  text-align: center;
+}
+
+.unsubscribe-title {
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.unsubscribe-title.success { color: #880824; }
+.unsubscribe-title.error   { color: #e05a70; }
+
+.unsubscribe-message,
+.unsubscribe-loading {
+  color: #aaa;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}

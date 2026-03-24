@@ -1,0 +1,56 @@
+.notifications-page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.notif-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.notif-loading, .notif-empty {
+  color: #888;
+  padding: 1rem 0;
+}
+
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.notif-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  background: #1a1a1a;
+  border: 1px solid #2e2e2e;
+}
+
+.notif-item.notif-unread {
+  background: #1f1f1f;
+  border-color: #880824;
+  box-shadow: 0 0 0 1px rgba(136, 8, 36, 0.2);
+}
+
+.notif-message {
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #dadada;
+  text-decoration: none;
+}
+
+a.notif-message:hover { text-decoration: underline; }
+
+.notif-date {
+  font-size: 0.8rem;
+  color: #888;
+  white-space: nowrap;
+  padding-top: 0.1rem;
+}

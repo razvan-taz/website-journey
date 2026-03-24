@@ -1,0 +1,120 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1 class="page-title">
+      Newsletter
+      @if (loadedDraftId()) {
+        <span class="draft-badge">Draft #{{ loadedDraftId() }}</span>
+      }
+    </h1>
+    <div class="header-actions">
+      @if (drafts().length > 0) {
+        <button class="btn-load-draft" (click)="toggleDraftPanel()">
+          Load Draft {{ showDraftPanel() ? '▲' : '▼' }} ({{ drafts().length }})
+        </button>
+      }
+      <a routerLink="/admin/newsletter-subscribers" class="btn-subscribers">Subscribers</a>
+    </div>
+  </div>
+
+  @if (showDraftPanel()) {
+    <div class="draft-panel">
+      <ul class="draft-panel-list">
+        @for (draft of drafts(); track draft.id) {
+          <li class="draft-panel-item" [class.draft-panel-active]="loadedDraftId() === draft.id">
+            <div class="draft-panel-info">
+              <span class="draft-panel-subject">{{ draft.subject || '(no subject)' }}</span>
+              <span class="draft-panel-date">{{ draft.updatedAt | date:'dd MMM yyyy, HH:mm' }}</span>
+            </div>
+            <div class="draft-panel-actions">
+              <button class="draft-panel-btn" (click)="loadDraft(draft)" [disabled]="loadedDraftId() === draft.id">
+                {{ loadedDraftId() === draft.id ? 'Loaded' : 'Load' }}
+              </button>
+              <button class="draft-panel-btn draft-panel-btn-delete" (click)="deleteDraft(draft.id)" [disabled]="deletingDraftId() === draft.id">
+                {{ deletingDraftId() === draft.id ? '...' : 'Delete' }}
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <p class="success-msg">{{ successMessage() }}</p>
+  }
+  @if (error()) {
+    <p class="admin-error">{{ error() }}</p>
+  }
+
+  <div class="send-form">
+    <div class="form-group">
+      <label class="form-label" for="nl-subject">Subject</label>
+      <input
+        id="nl-subject"
+        class="form-input"
+        type="text"
+        placeholder="Newsletter subject..."
+        [value]="subject()"
+        (input)="setSubject($any($event.target).value)"
+      />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="nl-body">Body (HTML)</label>
+      <textarea
+        id="nl-body"
+        class="form-textarea"
+        rows="16"
+        placeholder="Email body (HTML supported)..."
+        [value]="body()"
+        (input)="setBody($any($event.target).value)"
+      ></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button
+        class="btn-send"
+        (click)="send()"
+        [disabled]="sending() || savingDraft() || !subject().trim() || !body().trim()"
+      >
+        {{ sending() ? 'Sending...' : 'Send to All Subscribers' }}
+      </button>
+
+      <button
+        class="btn-preview"
+        type="button"
+        (click)="openPreview()"
+        [disabled]="!body().trim()"
+      >
+        Preview
+      </button>
+
+      <button
+        class="btn-draft"
+        (click)="saveDraft()"
+        [disabled]="savingDraft() || sending() || (!subject().trim() && !body().trim())"
+      >
+        {{ savingDraft() ? 'Saving...' : loadedDraftId() ? 'Update Draft' : 'Save Draft' }}
+      </button>
+
+      @if (loadedDraftId()) {
+        <button class="btn-new" (click)="newDraft()">New</button>
+      }
+    </div>
+  </div>
+
+  @if (showPreview()) {
+    <div class="preview-overlay" (click)="closePreview()">
+      <div class="preview-modal" (click)="$event.stopPropagation()">
+        <div class="preview-header">
+          <div>
+            <div class="preview-meta-label">Subject</div>
+            <div class="preview-subject">{{ subject() || '(no subject)' }}</div>
+          </div>
+          <button class="preview-close" (click)="closePreview()">✕</button>
+        </div>
+        <div class="preview-body" [innerHTML]="previewHtml()"></div>
+      </div>
+    </div>
+  }
+</div>

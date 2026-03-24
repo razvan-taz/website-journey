@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Refund Request Update</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;padding:40px 0;">
+    <tr>
+        <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+                <!-- Header -->
+                <tr>
+                    <td style="background-color:#1a1a2e;padding:32px 40px;text-align:center;">
+                        <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:1px;">Journey</h1>
+                    </td>
+                </tr>
+
+                <!-- Body -->
+                <tr>
+                    <td style="padding:40px 40px 24px;">
+                        <h2 style="margin:0 0 8px;color:#1a1a2e;font-size:20px;">Refund request update</h2>
+                        <p style="margin:0 0 24px;color:#555555;font-size:15px;line-height:1.6;">
+                            Hi <span th:text="${userName}">Customer</span>, we've reviewed your refund request for order
+                            <strong th:text="'#' + ${orderId}">#000000</strong>.
+                        </p>
+
+                        <p style="margin:0 0 16px;color:#555555;font-size:15px;line-height:1.6;">
+                            Unfortunately, we were unable to approve your refund request at this time.
+                        </p>
+
+                        <!-- Reason -->
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f5;border-radius:6px;margin-bottom:28px;">
+                            <tr>
+                                <td style="padding:16px 20px;">
+                                    <p style="margin:0;color:#888888;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Reason</p>
+                                    <p style="margin:4px 0 0;color:#333333;font-size:14px;" th:text="${rejectionReason}">No reason provided.</p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin:0 0 24px;color:#555555;font-size:15px;line-height:1.6;">
+                            If you believe this decision is incorrect or need further assistance, please contact our support team.
+                        </p>
+
+                        <!-- CTA -->
+                        <table width="100%" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td align="center">
+                                    <a th:href="${baseUrl + '/profile'}"
+                                       style="display:inline-block;background-color:#1a1a2e;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:6px;font-size:14px;font-weight:600;letter-spacing:0.5px;">
+                                        View Your Orders
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="background-color:#f4f4f5;padding:24px 40px;text-align:center;">
+                        <p style="margin:0;color:#aaaaaa;font-size:12px;line-height:1.6;">
+                            If you have any questions, please contact our support team.<br/>
+                            &copy; 2026 Journey. All rights reserved.
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

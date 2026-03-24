@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -30,4 +31,13 @@ public class CreateArticleRequest {
     private String thumbnailUrl;
     private String type;
     private String tag;
+    private String videoUrl;
+    private boolean breakingNews;
+    private ArticleCategory category;
+    private String tags;
+
+    @Builder.Default
+    private ArticleStatus status = ArticleStatus.PUBLISHED;
+
+    private LocalDateTime scheduledAt;
 }

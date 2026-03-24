@@ -1,4 +1,4 @@
-import { Component, inject, signal, DestroyRef, HostListener, ElementRef, afterNextRender } from '@angular/core';
+import { Component, inject, signal, effect, DestroyRef, HostListener, ElementRef, afterNextRender } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SignInModal } from './components/sign-in-modal/sign-in-modal';
@@ -7,16 +7,18 @@ import { CartDrawer } from './components/cart-drawer/cart-drawer';
 import { CookieConsent } from './components/cookie-consent/cookie-consent';
 import { ToastContainer } from './components/toast-container/toast-container';
 import { Footer } from './components/footer/footer';
+import { BreakingNewsBanner } from './components/breaking-news-banner/breaking-news-banner';
 import { AuthService } from './services/auth.service';
 import { CartService } from './services/cart.service';
 import { UiStateService } from './services/ui-state.service';
 import { SiteService, ScheduleEntry } from './services/site.service';
 import { NavLayoutService, NavLayoutItem, NavZone } from './services/nav-layout.service';
+import { NotificationService } from './services/notification.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, SignInModal, SearchOverlay, CartDrawer, CookieConsent, ToastContainer, Footer],
+  imports: [RouterOutlet, RouterLink, SignInModal, SearchOverlay, CartDrawer, CookieConsent, ToastContainer, Footer, BreakingNewsBanner],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
@@ -24,6 +26,7 @@ export class App {
   authService = inject(AuthService);
   cartService = inject(CartService);
   uiState = inject(UiStateService);
+  notificationService = inject(NotificationService);
   private siteService = inject(SiteService);
   private navLayoutService = inject(NavLayoutService);
   private destroyRef = inject(DestroyRef);
@@ -35,7 +38,7 @@ export class App {
   showMobileMenu = false;
 
   scheduleEntries = signal<ScheduleEntry[]>([]);
-  twitchStatus = this.siteService.twitchStatus;
+  liveStatus = this.siteService.liveStatus;
 
   constructor() {
     this.siteService.getSchedule()
@@ -45,7 +48,7 @@ export class App {
         error: () => {},
       });
 
-    this.siteService.getTwitchStatus()
+    this.siteService.getLiveStatus()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({ error: () => {} });
 
@@ -54,6 +57,12 @@ export class App {
       .subscribe({ error: () => {} });
 
     afterNextRender(() => this.measureNav());
+
+    effect(() => {
+      if (this.authService.isLoggedIn()) {
+        this.notificationService.fetchUnreadCount();
+      }
+    });
   }
 
   private measureNav() {

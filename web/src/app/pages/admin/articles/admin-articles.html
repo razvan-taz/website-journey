@@ -1,7 +1,26 @@
 <div class="admin-page">
   <div class="page-header">
     <h1 class="page-title">Articles</h1>
-    <a routerLink="/admin/articles/new" class="btn-create">+ New Article</a>
+    <div class="header-actions">
+      <a routerLink="/admin/articles/analytics" class="btn-analytics">Analytics</a>
+      <a routerLink="/admin/articles/new" class="btn-create">+ New Article</a>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab" [class.tab-active]="activeTab() === 'PUBLISHED'" (click)="setTab('PUBLISHED')">Published</button>
+    <button class="tab" [class.tab-active]="activeTab() === 'DRAFT'" (click)="setTab('DRAFT')">Drafts</button>
+    <button class="tab" [class.tab-active]="activeTab() === 'SCHEDULED'" (click)="setTab('SCHEDULED')">Scheduled</button>
+  </div>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Search by title..."
+      [value]="searchQuery()"
+      (input)="searchQuery.set($any($event.target).value)"
+    />
   </div>
 
   @if (loading()) {
@@ -12,6 +31,7 @@
     <table class="admin-table">
       <thead>
         <tr>
+          <th class="hits-col">Hits</th>
           <th>Title</th>
           <th>Author</th>
           <th>Date</th>
@@ -21,11 +41,17 @@
         </tr>
       </thead>
       <tbody>
-        @for (article of articles(); track article.slug) {
+        @for (article of filteredArticles(); track article.slug) {
           <tr>
+            <td class="hits-col hits-value">{{ formatHits(article.viewCount) }}</td>
             <td class="title-cell">{{ article.title }}</td>
             <td>{{ article.author }}</td>
-            <td>{{ article.publishDate }}</td>
+            <td>
+              {{ article.publishDate }}
+              @if (article.status === 'SCHEDULED' && article.scheduledAt) {
+                <span class="scheduled-badge">Scheduled</span>
+              }
+            </td>
             <td><span class="badge">{{ article.type }}</span></td>
             <td>{{ article.tag }}</td>
             <td class="actions-cell">
@@ -34,6 +60,11 @@
                 {{ deleting() === article.slug ? '...' : 'Delete' }}
               </button>
             </td>
+          </tr>
+        }
+        @if (filteredArticles().length === 0) {
+          <tr>
+            <td colspan="7" class="empty-row">No {{ activeTab() === 'PUBLISHED' ? 'published articles' : activeTab() === 'DRAFT' ? 'drafts' : 'scheduled articles' }}.</td>
           </tr>
         }
       </tbody>

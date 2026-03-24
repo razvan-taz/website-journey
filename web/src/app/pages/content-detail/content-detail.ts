@@ -1,16 +1,17 @@
 import { Component, DestroyRef, inject, signal, computed } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Title, Meta } from '@angular/platform-browser';
+import { Title, Meta, DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ArticleService, ArticleDetail } from '../../services/article.service';
 import { AuthService } from '../../services/auth.service';
 import { UiStateService } from '../../services/ui-state.service';
+import { CommentService, Comment } from '../../services/comment.service';
 
 @Component({
   selector: 'app-content-detail',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, DatePipe],
   templateUrl: './content-detail.html',
   styleUrl: './content-detail.css',
 })
@@ -18,16 +19,25 @@ export class ContentDetail {
   article = signal<ArticleDetail | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
+  linkCopied = signal(false);
 
   readingTime = computed(() => {
-    const body = this.article()?.body;
-    if (!body) return 1;
-    const words = body.replace(/<[^>]*>/g, '').split(/\s+/).filter(Boolean).length;
+    const article = this.article();
+    if (!article) return 1;
+    if (article.readingTimeMinutes != null) return article.readingTimeMinutes;
+    const words = (article.body ?? '').replace(/<[^>]*>/g, '').split(/\s+/).filter(Boolean).length;
     return Math.max(1, Math.ceil(words / 200));
+  });
+
+  safeVideoUrl = computed((): SafeResourceUrl | null => {
+    const url = this.article()?.videoUrl;
+    if (!url) return null;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   });
 
   private titleService = inject(Title);
   private metaService = inject(Meta);
+  private sanitizer = inject(DomSanitizer);
   private authService = inject(AuthService);
   private document = inject(DOCUMENT);
   private destroyRef = inject(DestroyRef);
@@ -35,6 +45,14 @@ export class ContentDetail {
   uiState = inject(UiStateService);
 
   private jsonLdScript: HTMLScriptElement | null = null;
+
+  private commentService = inject(CommentService);
+  comments = signal<Comment[]>([]);
+  commentInput = signal('');
+  commentSubmitting = signal(false);
+  commentError = signal<string | null>(null);
+  editingCommentId = signal<number | null>(null);
+  editingContent = signal('');
 
   constructor() {
     const route = inject(ActivatedRoute);
@@ -49,6 +67,9 @@ export class ContentDetail {
         next: (data) => {
           this.article.set(data);
           this.loading.set(false);
+          this.commentService.getArticleComments(data.id)
+            .pipe(takeUntilDestroyed())
+            .subscribe({ next: (c) => this.comments.set(c), error: () => {} });
 
           const seo = data.seo;
 
@@ -116,6 +137,58 @@ export class ContentDetail {
         this.jsonLdScript.remove();
         this.jsonLdScript = null;
       }
+    });
+  }
+
+  submitComment(): void {
+    const articleId = this.article()?.id;
+    if (!articleId || !this.commentInput().trim()) return;
+    this.commentSubmitting.set(true);
+    this.commentError.set(null);
+    this.commentService.addArticleComment(articleId, this.commentInput())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (c) => {
+          this.comments.update(list => [...list, c]);
+          this.commentInput.set('');
+          this.commentSubmitting.set(false);
+        },
+        error: (err) => {
+          this.commentError.set(err?.error?.message ?? 'Failed to submit comment.');
+          this.commentSubmitting.set(false);
+        },
+      });
+  }
+
+  startEdit(comment: Comment): void {
+    this.editingCommentId.set(comment.id);
+    this.editingContent.set(comment.content);
+  }
+
+  saveEdit(commentId: number): void {
+    if (!this.editingContent().trim()) return;
+    this.commentService.editComment(commentId, this.editingContent())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.comments.update(list => list.map(c => c.id === commentId ? updated : c));
+          this.editingCommentId.set(null);
+        },
+        error: () => {},
+      });
+  }
+
+  cancelEdit(): void { this.editingCommentId.set(null); }
+
+  isCurrentUser(authorName: string): boolean {
+    const user = this.authService.currentUser();
+    return !!user && user.name === authorName;
+  }
+
+  copyLink(): void {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      this.linkCopied.set(true);
+      setTimeout(() => this.linkCopied.set(false), 2000);
     });
   }
 }

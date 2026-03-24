@@ -9,11 +9,16 @@ import { CartService } from '../../services/cart.service';
 import { ReviewService, ReviewSummary, ReviewEligibility } from '../../services/review.service';
 import { WishlistService } from '../../services/wishlist.service';
 import { AuthService } from '../../services/auth.service';
+import { WebSocketService } from '../../services/websocket.service';
+import { CommentService, Comment } from '../../services/comment.service';
+import { DatePipe } from '@angular/common';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [RouterLink, CurrencyPipe, SlicePipe],
+  imports: [RouterLink, CurrencyPipe, SlicePipe, DatePipe],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css',
 })
@@ -26,12 +31,17 @@ export class ProductDetail {
   private reviewService = inject(ReviewService);
   private wishlistService = inject(WishlistService);
   private authService = inject(AuthService);
+  private wsService = inject(WebSocketService);
   private titleService = inject(Title);
   private metaService = inject(Meta);
   private document = inject(DOCUMENT);
   private destroyRef = inject(DestroyRef);
 
   isLoggedIn = this.authService.isLoggedIn;
+  showUnverifiedModal = signal(false);
+  resendingVerification = signal(false);
+  resendVerificationSuccess = signal(false);
+  liveStock = signal<number | null>(null);
   reviewSummary = signal<ReviewSummary | null>(null);
   reviewEligibility = signal<ReviewEligibility | null>(null);
   newReviewBody = signal('');
@@ -41,10 +51,24 @@ export class ProductDetail {
   wishlisted = signal(false);
 
   private jsonLdScript: HTMLScriptElement | null = null;
+  private destroy$ = new Subject<void>();
+
+  private commentService = inject(CommentService);
+  productComments = signal<Comment[]>([]);
+  commentInput = signal('');
+  commentSubmitting = signal(false);
+  commentError = signal<string | null>(null);
+  editingCommentId = signal<number | null>(null);
+  editingContent = signal('');
 
   constructor() {
     const route = inject(ActivatedRoute);
     const productService = inject(ProductService);
+
+    // Show modal when cart service blocks unverified add
+    this.cartService.unverifiedAddAttempt$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.showUnverifiedModal.set(true));
 
     const id = Number(route.snapshot.paramMap.get('id'));
 
@@ -94,6 +118,11 @@ export class ProductDetail {
           this.jsonLdScript.text = JSON.stringify(jsonLd);
           this.document.head.appendChild(this.jsonLdScript);
 
+          // Load comments
+          this.commentService.getProductComments(data.id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({ next: (c) => this.productComments.set(c), error: () => {} });
+
           // Load reviews
           this.reviewService.getReviews(data.id)
             .pipe(takeUntilDestroyed(this.destroyRef))
@@ -107,6 +136,18 @@ export class ProductDetail {
 
             this.wishlisted.set(this.wishlistService.isWishlisted(data.id));
           }
+
+          // Subscribe to real-time stock updates for this product
+          this.wsService.stockUpdates$()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (payload) => {
+                if (payload.productId === data.id) {
+                  this.liveStock.set(payload.availableStock);
+                }
+              },
+              error: () => {},
+            });
         },
         error: (err) => {
           if (err.status === 404) {
@@ -125,6 +166,25 @@ export class ProductDetail {
         this.jsonLdScript.remove();
         this.jsonLdScript = null;
       }
+      this.destroy$.next();
+      this.destroy$.complete();
+    });
+  }
+
+  closeUnverifiedModal(): void {
+    this.showUnverifiedModal.set(false);
+    this.resendVerificationSuccess.set(false);
+  }
+
+  resendVerificationEmail(): void {
+    if (this.resendingVerification()) return;
+    this.resendingVerification.set(true);
+    this.authService.resendVerification().subscribe({
+      next: () => {
+        this.resendVerificationSuccess.set(true);
+        this.resendingVerification.set(false);
+      },
+      error: () => this.resendingVerification.set(false),
     });
   }
 
@@ -152,6 +212,51 @@ export class ProductDetail {
         this.reviewSubmitting.set(false);
       },
     });
+  }
+
+  submitProductComment(): void {
+    const productId = this.product()?.id;
+    if (!productId || !this.commentInput().trim()) return;
+    this.commentSubmitting.set(true);
+    this.commentError.set(null);
+    this.commentService.addProductComment(productId, this.commentInput())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (c) => {
+          this.productComments.update(list => [...list, c]);
+          this.commentInput.set('');
+          this.commentSubmitting.set(false);
+        },
+        error: (err) => {
+          this.commentError.set(err?.error?.message ?? 'Failed to submit comment.');
+          this.commentSubmitting.set(false);
+        },
+      });
+  }
+
+  startCommentEdit(comment: Comment): void {
+    this.editingCommentId.set(comment.id);
+    this.editingContent.set(comment.content);
+  }
+
+  saveCommentEdit(commentId: number): void {
+    if (!this.editingContent().trim()) return;
+    this.commentService.editComment(commentId, this.editingContent())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.productComments.update(list => list.map(c => c.id === commentId ? updated : c));
+          this.editingCommentId.set(null);
+        },
+        error: () => {},
+      });
+  }
+
+  cancelCommentEdit(): void { this.editingCommentId.set(null); }
+
+  isCurrentUser(authorName: string): boolean {
+    const user = this.authService.currentUser();
+    return !!user && user.name === authorName;
   }
 
   toggleWishlist(): void {

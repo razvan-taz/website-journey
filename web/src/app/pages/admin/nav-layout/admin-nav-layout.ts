@@ -4,7 +4,7 @@ import { NavLayoutService, NavLayoutItem, NavZone } from '../../../services/nav-
 
 const ITEM_LABELS: Record<string, string> = {
   'logo':      'Logo',
-  'twitch':    'Twitch Status',
+  'live':      'Live Status',
   'nav-links': 'Nav Links',
   'schedule':  'Schedule',
   'search':    'Search',

@@ -1,0 +1,150 @@
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-title {
+  color: #dadada;
+  font-size: 22px;
+  margin: 0;
+}
+
+.loading-text {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.settings-form {
+  max-width: 480px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  color: #aaa;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  background: #161616;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #dadada;
+  font-size: 14px;
+  padding: 9px 12px;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-input--short {
+  max-width: 120px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #555;
+}
+
+.ssl-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #aaa;
+  font-size: 13px;
+  margin-bottom: 0;
+}
+
+.ssl-checkbox {
+  width: 15px;
+  height: 15px;
+  accent-color: #880824;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.form-error {
+  display: block;
+  color: #e87a8f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.feedback-success {
+  color: #6abf8a;
+  font-size: 14px;
+  margin: 0 0 16px;
+}
+
+.feedback-error {
+  color: #e87a8f;
+  font-size: 14px;
+  margin: 0 0 16px;
+}
+
+.form-actions {
+  margin-top: 8px;
+}
+
+.btn-save {
+  background: #880824;
+  border: none;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #a00a2c;
+}
+
+.btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.test-email-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.btn-test {
+  background: transparent;
+  border: 1px solid #444;
+  color: #aaa;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-test:hover:not(:disabled) {
+  border-color: #880824;
+  color: #dadada;
+}
+
+.btn-test:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.test-success {
+  color: #6abf8a;
+  font-size: 13px;
+}
+
+.test-error {
+  color: #e87a8f;
+  font-size: 13px;
+}

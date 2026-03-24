@@ -1,0 +1,60 @@
+.analytics-page { padding: 0.5rem 0 2rem; }
+
+.analytics-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.analytics-loading, .analytics-error { color: #666; padding: 1rem 0; }
+.analytics-error { color: #c0392b; }
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.analytics-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+}
+
+.analytics-card-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin: 0 0 1rem;
+}
+
+.analytics-rows { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.analytics-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+}
+
+.analytics-row-total {
+  border-top: 1px solid #eee;
+  padding-top: 0.6rem;
+  margin-top: 0.2rem;
+  font-weight: 700;
+}
+
+.analytics-label { color: #555; }
+.analytics-value { font-weight: 600; color: #111; }
+
+.analytics-card-single { display: flex; flex-direction: column; justify-content: center; }
+
+.analytics-big-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #111;
+  margin: 0.5rem 0 0;
+  line-height: 1;
+}

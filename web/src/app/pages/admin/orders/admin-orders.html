@@ -1,0 +1,74 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1 class="page-title">Orders</h1>
+    @if (totalElements() > 0) {
+      <span class="total-count">{{ totalElements() }} total</span>
+    }
+  </div>
+
+  <div class="tab-bar">
+    @for (tab of statusTabs; track tab.value) {
+      <button class="tab" [class.tab-active]="activeTab() === tab.value" (click)="setTab(tab.value)">
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <p class="admin-loading">Loading...</p>
+  } @else if (error()) {
+    <p class="admin-error">{{ error() }}</p>
+  } @else {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (order of orders(); track order.orderId) {
+          <tr>
+            <td class="mono">#{{ formatOrderId(order.orderId) }}</td>
+            <td class="email-cell">{{ order.customerEmail }}</td>
+            <td>{{ itemsSummary(order) }}</td>
+            <td>{{ order.total | currency:'EUR':'symbol' }}</td>
+            <td>
+              <span class="badge" [class]="statusBadgeClass(order.status)">{{ order.status }}</span>
+            </td>
+            <td>{{ order.createdAt | date:'dd MMM yyyy' }}</td>
+            <td class="actions-cell">
+              @if (getNextStatus(order.status); as next) {
+                <button
+                  class="btn-action"
+                  (click)="markAs(order)"
+                  [disabled]="updatingOrderId() === order.orderId"
+                >
+                  {{ updatingOrderId() === order.orderId ? '...' : 'Mark as ' + next }}
+                </button>
+              }
+            </td>
+          </tr>
+        }
+        @if (orders().length === 0) {
+          <tr>
+            <td colspan="7" class="empty-row">No orders found.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="page-btn" (click)="prevPage()" [disabled]="page() === 0">← Prev</button>
+        <span class="page-info">Page {{ page() + 1 }} of {{ totalPages() }}</span>
+        <button class="page-btn" (click)="nextPage()" [disabled]="page() >= totalPages() - 1">Next →</button>
+      </div>
+    }
+  }
+</div>

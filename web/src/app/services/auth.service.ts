@@ -7,6 +7,8 @@ export interface User {
   name: string;
   email: string;
   role: string;
+  emailVerified: boolean;
+  notificationsEnabled: boolean;
 }
 
 interface AuthResponse {
@@ -14,12 +16,16 @@ interface AuthResponse {
   name: string;
   email: string;
   role: string;
+  emailVerified?: boolean;
+  notificationsEnabled?: boolean;
 }
 
 interface UserProfileResponse {
   name: string;
   email: string;
   role: string;
+  emailVerified?: boolean;
+  notificationsEnabled?: boolean;
 }
 
 @Injectable({
@@ -51,7 +57,7 @@ export class AuthService {
         })
         .subscribe({
           next: (profile) =>
-            this._currentUser.set({ name: profile.name, email: profile.email, role: profile.role }),
+            this._currentUser.set({ name: profile.name, email: profile.email, role: profile.role, emailVerified: profile.emailVerified ?? true, notificationsEnabled: profile.notificationsEnabled ?? true }),
           error: () => {
             this._token.set(null);
             localStorage.removeItem('auth_token');
@@ -66,7 +72,7 @@ export class AuthService {
       .pipe(
         tap((response) => {
           this._token.set(response.token);
-          this._currentUser.set({ name: response.name, email: response.email, role: response.role });
+          this._currentUser.set({ name: response.name, email: response.email, role: response.role, emailVerified: response.emailVerified ?? true, notificationsEnabled: response.notificationsEnabled ?? true });
           if (isPlatformBrowser(this.platformId)) localStorage.setItem('auth_token', response.token);
         }),
         map(() => true),
@@ -80,7 +86,7 @@ export class AuthService {
       .pipe(
         tap((response) => {
           this._token.set(response.token);
-          this._currentUser.set({ name: response.name, email: response.email, role: response.role });
+          this._currentUser.set({ name: response.name, email: response.email, role: response.role, emailVerified: response.emailVerified ?? false, notificationsEnabled: response.notificationsEnabled ?? true });
           if (isPlatformBrowser(this.platformId)) localStorage.setItem('auth_token', response.token);
         }),
         map(() => true),
@@ -96,5 +102,21 @@ export class AuthService {
 
   getToken(): string | null {
     return this._token();
+  }
+
+  /** Update stored user fields (e.g. after profile edit). */
+  updateUser(partial: Partial<User>): void {
+    const current = this._currentUser();
+    if (current) this._currentUser.set({ ...current, ...partial });
+  }
+
+  resendVerification(): Observable<void> {
+    return this.http.post<void>('/api/auth/resend-verification', {});
+  }
+
+  updateProfile(name: string): Observable<UserProfileResponse> {
+    return this.http.put<UserProfileResponse>('/api/auth/profile', { name }).pipe(
+      tap((res) => this.updateUser({ name: res.name }))
+    );
   }
 }

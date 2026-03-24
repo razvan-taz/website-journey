@@ -29,6 +29,12 @@ public class StreamScheduleEntry {
     @Column(name = "day_name", nullable = false, length = 20)
     private String dayName;
 
+    @Column(name = "start_time", nullable = false, length = 10)
+    private String startTime;
+
+    @Column(name = "end_time", nullable = false, length = 50)
+    private String endTime;
+
     @Column(nullable = false, length = 500)
-    private String content;
+    private String description;
 }

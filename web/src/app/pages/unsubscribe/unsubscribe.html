@@ -1,0 +1,13 @@
+<div class="unsubscribe-page">
+  <div class="unsubscribe-card">
+    @if (loading()) {
+      <p class="unsubscribe-loading">Processing...</p>
+    } @else if (success()) {
+      <h2 class="unsubscribe-title success">Unsubscribed</h2>
+      <p class="unsubscribe-message">You have been removed from our newsletter. You will no longer receive emails from us.</p>
+    } @else {
+      <h2 class="unsubscribe-title error">Invalid Link</h2>
+      <p class="unsubscribe-message">This unsubscribe link is invalid or has already been used.</p>
+    }
+  </div>
+</div>

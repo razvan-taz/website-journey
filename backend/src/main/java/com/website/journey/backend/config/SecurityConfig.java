@@ -28,7 +28,9 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/register", "/api/auth/login",
+                                "/api/auth/verify", "/api/auth/forgot-password",
+                                "/api/auth/reset-password").permitAll()
                         .requestMatchers("/api/site/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
@@ -36,13 +38,22 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/products/*/reviews/eligibility").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/products/*/reviews").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/products/*/reviews/mine").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/articles/id/*/comments").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/articles/id/*/comments").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/products/*/comments").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/products/*/comments").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/comments/**").authenticated()
+                        .requestMatchers("/api/notifications/**").authenticated()
                         .requestMatchers("/api/wishlist/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/search/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/orders").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/orders/*/refund-request").authenticated()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/sitemap.xml").permitAll()
                         .requestMatchers("/robots.txt").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/newsletter/subscribe").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/newsletter/unsubscribe").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/discount/validate").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/payments/config").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()

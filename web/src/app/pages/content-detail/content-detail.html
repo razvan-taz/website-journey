@@ -1,4 +1,4 @@
-<p><a routerLink="/content">← Back to Content</a></p>
+<p><a routerLink="/content" class="back-link">← Back to Content</a></p>
 
 @if (loading()) {
   <p>Loading...</p>
@@ -20,6 +20,18 @@
 
   <img [src]="post.thumbnailUrl" [alt]="post.title" style="width:100%; max-width:900px; border-radius:12px; margin:16px 0;" />
 
+  @if (safeVideoUrl(); as videoUrl) {
+    <div class="video-wrapper">
+      <iframe
+        [src]="videoUrl"
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        title="{{ post.title }}"
+      ></iframe>
+    </div>
+  }
+
   @if (post.type === 'article') {
     @if (post.body) {
       <div class="article-body" [innerHTML]="post.body"></div>
@@ -35,16 +47,9 @@
   }
 
   <div class="share-bar">
-    <span class="share-label">Share:</span>
-    <a class="share-btn share-twitter"
-       [href]="'https://twitter.com/intent/tweet?text=' + post.title + '&url=' + post.seo.canonicalUrl"
-       target="_blank" rel="noopener noreferrer" aria-label="Share on X (Twitter)">𝕏</a>
-    <a class="share-btn share-facebook"
-       [href]="'https://www.facebook.com/sharer/sharer.php?u=' + post.seo.canonicalUrl"
-       target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">f</a>
-    <a class="share-btn share-linkedin"
-       [href]="'https://www.linkedin.com/shareArticle?mini=true&url=' + post.seo.canonicalUrl + '&title=' + post.title"
-       target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn">in</a>
+    <button class="btn-copy-link" (click)="copyLink()" aria-label="Copy article link">
+      {{ linkCopied() ? 'Copied!' : 'Copy article link' }}
+    </button>
   </div>
 
   @if (post.relatedArticles.length > 0) {
@@ -64,4 +69,57 @@
       </div>
     </section>
   }
+
+  <section class="comments-section">
+    <h2 class="comments-title">Comments</h2>
+
+    @if (isLoggedIn()) {
+      <div class="comment-form">
+        <textarea
+          class="comment-textarea"
+          rows="3"
+          [value]="commentInput()"
+          (input)="commentInput.set($any($event.target).value)"
+          placeholder="Share your thoughts..."
+        ></textarea>
+        @if (commentError()) {
+          <p class="comment-error">{{ commentError() }}</p>
+        }
+        <button class="btn-comment-submit" (click)="submitComment()" [disabled]="commentSubmitting() || !commentInput().trim()">
+          {{ commentSubmitting() ? 'Posting...' : 'Post Comment' }}
+        </button>
+      </div>
+    } @else {
+      <p class="comment-signin-prompt">
+        <button class="link-btn" (click)="uiState.openSignIn()">Sign in</button> to leave a comment.
+      </p>
+    }
+
+    @if (comments().length === 0) {
+      <p class="comments-empty">No comments yet. Be the first!</p>
+    } @else {
+      <div class="comments-list">
+        @for (c of comments(); track c.id) {
+          <div class="comment-item">
+            <div class="comment-header">
+              <span class="comment-author">{{ c.authorName }}</span>
+              <span class="comment-date">{{ c.createdAt | date: 'mediumDate' }}</span>
+            </div>
+            @if (editingCommentId() === c.id) {
+              <textarea class="comment-edit-textarea" rows="2" [value]="editingContent()" (input)="editingContent.set($any($event.target).value)"></textarea>
+              <div class="comment-edit-actions">
+                <button class="btn-comment-save" (click)="saveEdit(c.id)">Save</button>
+                <button class="btn-comment-cancel" (click)="cancelEdit()">Cancel</button>
+              </div>
+            } @else {
+              <p class="comment-content">{{ c.content }}</p>
+              @if (isCurrentUser(c.authorName)) {
+                <button class="btn-comment-edit" (click)="startEdit(c)">Edit</button>
+              }
+            }
+          </div>
+        }
+      </div>
+    }
+  </section>
 }

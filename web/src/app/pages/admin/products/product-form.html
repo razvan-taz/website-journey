@@ -30,7 +30,16 @@
       </div>
       <div class="form-group">
         <label>Image URL</label>
-        <input type="text" [value]="imageUrl()" (input)="imageUrl.set($any($event.target).value)" placeholder="https://..." />
+        <div class="input-with-action">
+          <input type="text" [value]="imageUrl()" (input)="imageUrl.set($any($event.target).value)" placeholder="https://..." />
+          <button type="button" class="btn-upload" (click)="imgUpload.click()" [disabled]="uploading()">
+            @if (uploading()) { <span class="upload-spinner"></span> } @else { Upload }
+          </button>
+          <input #imgUpload type="file" accept="image/*" class="hidden-file-input" (change)="onImageFileSelected($event)" />
+        </div>
+        @if (uploadError()) {
+          <p class="upload-error">{{ uploadError() }}</p>
+        }
       </div>
       <div class="form-group">
         <label>Description</label>

@@ -271,6 +271,11 @@
   font-style: italic;
 }
 
+.card-reading-time {
+  color: #888;
+  font-style: italic;
+}
+
 /* ── Card footer (price) ────────────────────────────────────── */
 
 .card-footer {

@@ -2,6 +2,7 @@ package com.website.journey.backend.domain.cart;
 
 import com.website.journey.backend.domain.product.Product;
 import com.website.journey.backend.domain.product.ProductRepository;
+import com.website.journey.backend.domain.user.EmailNotVerifiedException;
 import com.website.journey.backend.domain.user.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,16 +20,13 @@ import java.util.stream.Collectors;
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
     public CartService(CartRepository cartRepository,
-                       CartItemRepository cartItemRepository,
                        ProductRepository productRepository,
                        UserRepository userRepository) {
         this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
     }
@@ -58,8 +56,17 @@ public class CartService {
         return buildCartResponse(cart);
     }
 
+    private void checkEmailVerified(Long userId) {
+        userRepository.findById(userId).ifPresent(user -> {
+            if (!user.isEmailVerified()) {
+                throw new EmailNotVerifiedException("Please verify your email to use the cart");
+            }
+        });
+    }
+
     @Transactional
     public CartResponse addItem(Long userId, Long productId, Integer quantity) {
+        checkEmailVerified(userId);
         Cart cart = getOrCreateCart(userId);
 
         Optional<CartItem> existing = cart.getItems().stream()
@@ -87,6 +94,7 @@ public class CartService {
             return removeItem(userId, productId);
         }
 
+        checkEmailVerified(userId);
         Cart cart = getOrCreateCart(userId);
 
         CartItem item = cart.getItems().stream()

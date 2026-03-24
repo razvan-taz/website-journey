@@ -1,8 +1,38 @@
 <div class="admin-page">
   <div class="page-header">
     <h1 class="page-title">{{ isEdit() ? 'Edit Article' : 'New Article' }}</h1>
-    <a routerLink="/admin/articles" class="btn-back">← Back</a>
+    <div class="header-actions">
+      @if (!isEdit() && draftArticles().length > 0) {
+        <button class="btn-load-draft" (click)="toggleDraftPanel()">
+          Load Draft {{ showDraftPanel() ? '▲' : '▼' }} ({{ draftArticles().length }})
+        </button>
+      }
+      <a routerLink="/admin/articles" class="btn-back">← Back</a>
+    </div>
   </div>
+
+  @if (showDraftPanel()) {
+    <div class="draft-panel">
+      <ul class="draft-panel-list">
+        @for (draft of draftArticles(); track draft.slug) {
+          <li class="draft-panel-item">
+            <div class="draft-panel-info" (click)="loadDraft(draft.slug)">
+              <span class="draft-panel-title">{{ draft.title || '(untitled)' }}</span>
+              <span class="draft-panel-meta">{{ draft.publishDate }}</span>
+            </div>
+            <div class="draft-panel-actions">
+              <button class="draft-panel-btn" (click)="loadDraft(draft.slug)">Load</button>
+              <button
+                class="draft-panel-btn draft-panel-btn-delete"
+                (click)="deleteDraft(draft.slug)"
+                [disabled]="deletingDraftSlug() === draft.slug"
+              >{{ deletingDraftSlug() === draft.slug ? '...' : 'Delete' }}</button>
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+  }
 
   @if (loadingData()) {
     <p class="admin-loading">Loading...</p>
@@ -16,7 +46,7 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Slug</label>
+          <label>Slug <span class="field-hint-inline">— auto-generated from title</span></label>
           <input type="text" [value]="slug()" (input)="slug.set($any($event.target).value)" />
         </div>
         <div class="form-group">
@@ -26,32 +56,86 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Type</label>
-          <select [value]="type()" (change)="type.set($any($event.target).value)">
-            <option value="article">Article</option>
-            <option value="video">Video</option>
+          <label>Category</label>
+          <select [value]="category() ?? ''" (change)="category.set($any($event.target).value || null)">
+            <option value="">— None —</option>
+            <option value="NEWS">News</option>
+            <option value="GUIDE">Guide</option>
+            <option value="ARTICLE">Article</option>
+            <option value="VIDEO">Video</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Tag</label>
-          <input type="text" [value]="tag()" (input)="tag.set($any($event.target).value)" />
-        </div>
-        <div class="form-group">
-          <label>Publish Date</label>
-          <input type="date" [value]="publishDate()" (input)="publishDate.set($any($event.target).value)" />
+          <label>Tags <span class="field-hint-inline">— comma-separated</span></label>
+          <input type="text" [value]="tags()" (input)="tags.set($any($event.target).value)" placeholder="e.g. angular, tutorial, beginner" />
         </div>
       </div>
       <div class="form-group">
         <label>Thumbnail URL</label>
-        <input type="text" [value]="thumbnailUrl()" (input)="thumbnailUrl.set($any($event.target).value)" placeholder="https://..." />
+        <div class="input-with-action">
+          <input type="text" [value]="thumbnailUrl()" (input)="thumbnailUrl.set($any($event.target).value)" placeholder="https://..." />
+          <button type="button" class="btn-upload" (click)="thumbUpload.click()" [disabled]="uploading()">
+            @if (uploading()) { <span class="upload-spinner"></span> } @else { Upload }
+          </button>
+          <input #thumbUpload type="file" accept="image/*" class="hidden-file-input" (change)="onThumbnailFileSelected($event)" />
+        </div>
+        @if (uploadError()) {
+          <p class="upload-error">{{ uploadError() }}</p>
+        }
+        @if (thumbnailUrl()) {
+          <img class="thumb-preview" [src]="thumbnailUrl()" alt="Thumbnail preview" />
+        }
       </div>
+      @if (category() === 'VIDEO') {
+        <div class="form-group">
+          <label>Video URL (YouTube/Vimeo embed URL)</label>
+          <input type="text" [value]="videoUrl() ?? ''" (input)="videoUrl.set($any($event.target).value || null)" placeholder="https://www.youtube.com/embed/..." />
+        </div>
+      }
       <div class="form-group">
-        <label>Body (HTML)</label>
-        <textarea rows="16" [value]="body()" (input)="body.set($any($event.target).value)"></textarea>
+        <label>Body</label>
+        <quill-editor
+          [ngModel]="body()"
+          (ngModelChange)="onBodyChange($event)"
+          [modules]="quillModules"
+          format="html"
+          class="article-editor"
+        ></quill-editor>
+      </div>
+      <div class="form-group breaking-news-group">
+        <label class="breaking-news-label">
+          <input
+            type="checkbox"
+            [checked]="breakingNews()"
+            (change)="breakingNews.set($any($event.target).checked)"
+            class="breaking-news-checkbox"
+          />
+          Push as Breaking News
+        </label>
+        <p class="field-hint">When enabled, saving this article will broadcast a notification to all visitors.</p>
       </div>
       <div class="form-actions">
+        @if (draftSavedVisible()) {
+          <span class="draft-saved-indicator">Draft saved</span>
+        }
+        <select class="status-select" [value]="status()" (change)="status.set($any($event.target).value)">
+          <option value="DRAFT">Draft</option>
+          <option value="SCHEDULED">Scheduled</option>
+          <option value="PUBLISHED">Published</option>
+        </select>
+        @if (status() === 'SCHEDULED') {
+          <input
+            type="datetime-local"
+            class="schedule-input"
+            [value]="scheduledAt()"
+            (input)="scheduledAt.set($any($event.target).value)"
+          />
+        }
+        <button class="btn-draft" (click)="saveDraft()" [disabled]="loading()">
+          Save as Draft
+        </button>
         <button class="btn-save" (click)="save()" [disabled]="loading()">
-          {{ loading() ? 'Saving...' : (isEdit() ? 'Update Article' : 'Create Article') }}
+          {{ loading() ? 'Saving...' : isEdit() ? 'Update' : status() === 'SCHEDULED' ? 'Schedule' : 'Publish' }}
         </button>
       </div>
     </div>

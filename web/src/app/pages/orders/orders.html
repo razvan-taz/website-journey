@@ -1,0 +1,35 @@
+<div class="orders-page">
+  <h1 class="orders-title">My Orders</h1>
+
+  @if (!isLoggedIn()) {
+    <p class="orders-empty">Please sign in to view your orders.</p>
+  } @else if (loading()) {
+    <p class="orders-loading">Loading orders...</p>
+  } @else if (error()) {
+    <p class="orders-error">{{ error() }}</p>
+  } @else if (orders().length === 0) {
+    <p class="orders-empty">You haven't placed any orders yet.</p>
+  } @else {
+    <div class="orders-list">
+      @for (order of orders(); track order.orderId) {
+        <a class="order-card" [routerLink]="['/orders', order.orderId]">
+          <div class="order-card-header">
+            <span class="order-id">Order #{{ order.orderId }}</span>
+            <span class="order-status" [class]="'status-' + order.status.toLowerCase()">
+              {{ statusLabel(order.status) }}
+            </span>
+          </div>
+          <div class="order-card-body">
+            <span class="order-date">{{ order.createdAt | date: 'mediumDate' }}</span>
+            <span class="order-total">{{ order.total | currency: 'EUR' : 'symbol' }}</span>
+          </div>
+          <div class="order-items-preview">
+            @for (item of order.items; track item.productName) {
+              <span class="order-item-chip">{{ item.productName }} &times;{{ item.quantity }}</span>
+            }
+          </div>
+        </a>
+      }
+    </div>
+  }
+</div>

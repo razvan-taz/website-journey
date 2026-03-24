@@ -19,22 +19,18 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    out-of-order: true
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: your-email@gmail.com
-    password: your-app-password
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  # SMTP config is now managed in the database (email_config table).
+  # The DynamicMailSender loads settings at runtime via EmailConfigService.
+  # The spring.mail.* properties below are intentionally left absent.
 
 app:
-  mail:
-    from: noreply@journey.com
   base-url: http://localhost:4200
 
 stripe:

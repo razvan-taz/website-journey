@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed, effect, PLATFORM_ID } from '@angu
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';
+import { Subject } from 'rxjs';
 
 export interface CartItem {
   productId: number;
@@ -27,6 +28,9 @@ export class CartService {
   private _syncing = signal(false);
 
   private previousLoginState: boolean | null = null;
+
+  /** Emits when an unverified user tries to add to cart. Subscribe for modal trigger. */
+  readonly unverifiedAddAttempt$ = new Subject<void>();
 
   readonly items = this._items.asReadonly();
   readonly itemCount = computed(() =>
@@ -100,6 +104,11 @@ export class CartService {
   // ── Public API ────────────────────────────────────────────────────────────
 
   addItem(product: { productId: number; name: string; price: number; imageUrl: string }): void {
+    // Block unverified users from adding to cart
+    if (this.authService.isLoggedIn() && this.authService.currentUser()?.emailVerified === false) {
+      this.unverifiedAddAttempt$.next();
+      return;
+    }
     if (this.authService.isLoggedIn()) {
       this.http.post<ServerCartResponse>('/api/cart/items', {
         productId: product.productId,

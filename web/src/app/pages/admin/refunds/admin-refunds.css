@@ -1,0 +1,312 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  color: #dadada;
+  font-size: 22px;
+  margin: 0;
+}
+
+.page-count {
+  color: #666;
+  font-size: 13px;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #2a2a2a;
+  padding-bottom: 12px;
+}
+
+.filter-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #666;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.filter-tab:hover {
+  color: #aaa;
+}
+
+.filter-tab.active {
+  color: #dadada;
+  border-color: #444;
+}
+
+.loading-text,
+.empty-text {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.error-text {
+  color: #e87a8f;
+  font-size: 14px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.refunds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.refunds-table th {
+  text-align: left;
+  color: #666;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 12px 10px;
+  font-weight: 600;
+}
+
+.refunds-table td {
+  padding: 12px;
+  color: #aaa;
+  border-top: 1px solid #1a1a1a;
+  vertical-align: top;
+}
+
+.refunds-table tr:hover td {
+  background: #1a1a1a;
+}
+
+.cell-email {
+  color: #dadada;
+  font-size: 13px;
+}
+
+.cell-reason {
+  max-width: 220px;
+  word-break: break-word;
+  font-size: 13px;
+}
+
+.cell-date {
+  white-space: nowrap;
+  font-size: 12px;
+  color: #555;
+}
+
+.status-badge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-pending {
+  background: rgba(200, 150, 20, 0.15);
+  color: #c8961e;
+}
+
+.status-approved {
+  background: rgba(100, 180, 100, 0.15);
+  color: #6abf8a;
+}
+
+.status-rejected {
+  background: rgba(136, 8, 36, 0.15);
+  color: #e87a8f;
+}
+
+.cell-actions {
+  white-space: nowrap;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-approve {
+  background: rgba(100, 180, 100, 0.15);
+  border: 1px solid rgba(100, 180, 100, 0.3);
+  color: #6abf8a;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-approve:hover {
+  background: rgba(100, 180, 100, 0.25);
+}
+
+.btn-reject {
+  background: rgba(136, 8, 36, 0.1);
+  border: 1px solid rgba(136, 8, 36, 0.3);
+  color: #e87a8f;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-reject:hover {
+  background: rgba(136, 8, 36, 0.2);
+}
+
+.row-error {
+  color: #e87a8f;
+  font-size: 12px;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  gap: 4px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.page-btn {
+  background: transparent;
+  border: 1px solid #2a2a2a;
+  color: #aaa;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  border-color: #555;
+  color: #dadada;
+}
+
+.page-btn.active {
+  border-color: #555;
+  color: #dadada;
+  background: #1f1f1f;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Reject Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #1f1f1f;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 28px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.modal-title {
+  color: #dadada;
+  font-size: 18px;
+  margin: 0 0 16px;
+}
+
+.modal-label {
+  display: block;
+  color: #aaa;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.required {
+  color: #e87a8f;
+}
+
+.modal-textarea {
+  width: 100%;
+  background: #161616;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #dadada;
+  font-size: 14px;
+  padding: 10px 12px;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.modal-textarea:focus {
+  outline: none;
+  border-color: #555;
+}
+
+.modal-error {
+  color: #e87a8f;
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 1px solid #333;
+  color: #aaa;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  border-color: #555;
+}
+
+.btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-submit-reject {
+  background: #880824;
+  border: none;
+  color: #fff;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-submit-reject:hover:not(:disabled) {
+  background: #a00a2c;
+}
+
+.btn-submit-reject:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

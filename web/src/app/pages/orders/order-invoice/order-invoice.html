@@ -1,0 +1,77 @@
+<div class="invoice-page">
+  @if (loading()) {
+    <p class="inv-loading">Loading invoice...</p>
+  } @else if (error()) {
+    <p class="inv-error">{{ error() }}</p>
+  } @else if (order(); as o) {
+    <div class="inv-actions no-print">
+      <a class="btn-back" [routerLink]="['/orders', o.orderId]">&larr; Back to Order</a>
+      <button class="btn-print" (click)="print()">Download / Print</button>
+    </div>
+
+    <div class="invoice">
+      <div class="inv-top">
+        <div class="inv-brand">
+          <h1 class="inv-brand-name">Website Journey</h1>
+          <p class="inv-brand-tagline">Invoice</p>
+        </div>
+        <div class="inv-meta">
+          <p><strong>Invoice #</strong> {{ o.orderId }}</p>
+          <p><strong>Date:</strong> {{ o.createdAt | date: 'longDate' }}</p>
+          <p><strong>Status:</strong> {{ o.status }}</p>
+        </div>
+      </div>
+
+      <div class="inv-addresses">
+        <div class="inv-address-block">
+          <h3 class="inv-address-label">Bill To</h3>
+          <address>
+            {{ o.shippingAddress.name }}<br>
+            {{ o.shippingAddress.line1 }}<br>
+            {{ o.shippingAddress.city }}, {{ o.shippingAddress.state }} {{ o.shippingAddress.zip }}<br>
+            {{ o.shippingAddress.country }}
+          </address>
+        </div>
+      </div>
+
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th class="inv-th-name">Item</th>
+            <th class="inv-th-qty">Qty</th>
+            <th class="inv-th-unit">Unit Price</th>
+            <th class="inv-th-total">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of o.items; track item.productName) {
+            <tr>
+              <td>{{ item.productName }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.unitPrice | currency: 'EUR' : 'symbol' }}</td>
+              <td>{{ item.unitPrice * item.quantity | currency: 'EUR' : 'symbol' }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr class="inv-subtotal-row">
+            <td colspan="3">Subtotal</td>
+            <td>{{ subtotal(o.items) | currency: 'EUR' : 'symbol' }}</td>
+          </tr>
+          @if (o.discountAmount > 0) {
+            <tr class="inv-discount-row">
+              <td colspan="3">Discount ({{ o.discountCode }})</td>
+              <td>-{{ o.discountAmount | currency: 'EUR' : 'symbol' }}</td>
+            </tr>
+          }
+          <tr class="inv-total-row">
+            <td colspan="3"><strong>Total</strong></td>
+            <td><strong>{{ o.total | currency: 'EUR' : 'symbol' }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <p class="inv-footer">Thank you for your order. If you have any questions, please contact support.</p>
+    </div>
+  }
+</div>

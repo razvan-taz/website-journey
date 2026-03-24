@@ -1,0 +1,36 @@
+<div class="verify-page">
+  @if (state() === 'loading') {
+    <div class="verify-card">
+      <div class="verify-spinner"></div>
+      <p class="verify-text">Verifying your email...</p>
+    </div>
+  } @else if (state() === 'success') {
+    <div class="verify-card verify-success">
+      <span class="verify-icon">✓</span>
+      <h1 class="verify-heading">Email Verified!</h1>
+      <p class="verify-text">Your account is fully activated. You can now use all features.</p>
+      <a routerLink="/profile" class="verify-btn">Go to your account</a>
+    </div>
+  } @else {
+    <div class="verify-card verify-error">
+      <span class="verify-icon verify-icon-error">✕</span>
+      <h1 class="verify-heading">Link Invalid or Expired</h1>
+      <p class="verify-text">This verification link is invalid or has expired.</p>
+
+      @if (isLoggedIn()) {
+        @if (resendSuccess()) {
+          <p class="resend-success">Verification email sent! Check your inbox.</p>
+        } @else {
+          <button class="verify-btn" (click)="resend()" [disabled]="resending()">
+            {{ resending() ? 'Sending...' : 'Resend verification email' }}
+          </button>
+          @if (resendError()) {
+            <p class="resend-error">{{ resendError() }}</p>
+          }
+        }
+      } @else {
+        <p class="verify-hint">Please <a routerLink="/profile" class="verify-link">log in</a> to resend your verification email.</p>
+      }
+    </div>
+  }
+</div>

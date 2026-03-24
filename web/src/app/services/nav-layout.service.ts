@@ -16,7 +16,7 @@ export interface NavLayoutItem {
 
 const DEFAULTS: NavLayoutItem[] = [
   { itemKey: 'logo',      zone: 'above-left',   sortOrder: 0, heightPx: null, widthPx: null, offsetX: 0, offsetY: 0 },
-  { itemKey: 'twitch',    zone: 'above-left',   sortOrder: 1, heightPx: null, widthPx: null, offsetX: 0, offsetY: 0 },
+  { itemKey: 'live',      zone: 'above-left',   sortOrder: 1, heightPx: null, widthPx: null, offsetX: 0, offsetY: 0 },
   { itemKey: 'nav-links', zone: 'below-center', sortOrder: 0, heightPx: null, widthPx: null, offsetX: 0, offsetY: 0 },
   { itemKey: 'schedule',  zone: 'below-center', sortOrder: 1, heightPx: null, widthPx: null, offsetX: 0, offsetY: 0 },
   { itemKey: 'search',    zone: 'below-center', sortOrder: 2, heightPx: null, widthPx: null, offsetX: 0, offsetY: 0 },

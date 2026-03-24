@@ -7,13 +7,11 @@ import com.stripe.model.PaymentIntent;
 import com.stripe.model.StripeObject;
 import com.stripe.net.Webhook;
 import com.stripe.param.PaymentIntentCreateParams;
-import com.website.journey.backend.domain.order.Order;
 import com.website.journey.backend.domain.order.OrderRepository;
+import com.website.journey.backend.domain.order.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,9 +35,11 @@ public class PaymentController {
     private String webhookSecret;
 
     private final OrderRepository orderRepository;
+    private final OrderService orderService;
 
-    public PaymentController(OrderRepository orderRepository) {
+    public PaymentController(OrderRepository orderRepository, OrderService orderService) {
         this.orderRepository = orderRepository;
+        this.orderService = orderService;
     }
 
     @GetMapping("/config")
@@ -49,8 +49,7 @@ public class PaymentController {
 
     @PostMapping("/create-intent")
     public ResponseEntity<Map<String, String>> createIntent(
-            @RequestBody CreatePaymentIntentRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @RequestBody CreatePaymentIntentRequest request) {
         try {
             PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                     .setAmount((long) request.amount())
@@ -89,8 +88,8 @@ public class PaymentController {
                     PaymentIntent paymentIntent = (PaymentIntent) obj;
                     orderRepository.findByPaymentIntentId(paymentIntent.getId()).ifPresentOrElse(
                             order -> {
-                                order.setStatus("PAID");
-                                orderRepository.save(order);
+                                // Use orderService to update status so WebSocket event is emitted
+                                orderService.updateOrderStatus(order.getId(), "PAID");
                                 log.info("[Stripe] Order {} marked as PAID (paymentIntent={})",
                                         order.getId(), paymentIntent.getId());
                             },
@@ -103,8 +102,7 @@ public class PaymentController {
                 stripeObject.ifPresent(obj -> {
                     PaymentIntent paymentIntent = (PaymentIntent) obj;
                     orderRepository.findByPaymentIntentId(paymentIntent.getId()).ifPresent(order -> {
-                        order.setStatus("PAYMENT_FAILED");
-                        orderRepository.save(order);
+                        orderService.updateOrderStatus(order.getId(), "PAYMENT_FAILED");
                         log.warn("[Stripe] Order {} payment failed (paymentIntent={})",
                                 order.getId(), paymentIntent.getId());
                     });

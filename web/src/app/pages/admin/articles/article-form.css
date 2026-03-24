@@ -9,6 +9,115 @@
   margin-bottom: 24px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-load-draft {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #aaa;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-load-draft:hover {
+  border-color: #880824;
+  color: #dadada;
+}
+
+.draft-panel {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.draft-panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.draft-panel-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid #1f1f1f;
+  transition: background 0.15s;
+}
+
+.draft-panel-item:last-child {
+  border-bottom: none;
+}
+
+.draft-panel-item:hover {
+  background: #1a1a1a;
+}
+
+.draft-panel-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+}
+
+.draft-panel-title {
+  color: #dadada;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.draft-panel-meta {
+  color: #555;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.draft-panel-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.draft-panel-btn {
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #aaa;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.draft-panel-btn:hover:not(:disabled) {
+  border-color: #888;
+  color: #dadada;
+}
+
+.draft-panel-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.draft-panel-btn-delete:hover:not(:disabled) {
+  border-color: #e05a70;
+  color: #e05a70;
+}
+
 .page-title {
   color: #dadada;
   font-size: 24px;
@@ -16,14 +125,14 @@
 }
 
 .btn-back {
-  color: #aaa;
+  color: #880824;
   text-decoration: none;
   font-size: 14px;
-  transition: color 0.2s;
+  transition: opacity 0.2s;
 }
 
 .btn-back:hover {
-  color: #dadada;
+  opacity: 0.75;
 }
 
 .admin-loading {
@@ -87,6 +196,29 @@
 .form-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-draft {
+  padding: 10px 20px;
+  background: transparent;
+  color: #aaa;
+  border: 1px solid #444;
+  border-radius: 4px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-draft:hover {
+  border-color: #aaa;
+  color: #dadada;
+}
+
+.btn-draft:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .btn-save {
@@ -107,4 +239,233 @@
 .btn-save:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+.draft-saved-indicator {
+  color: #6dbf6d;
+  font-size: 13px;
+  margin-right: 4px;
+  animation: fadeOut 2s ease-in forwards;
+}
+
+@keyframes fadeOut {
+  0%   { opacity: 1; }
+  60%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── Quill Editor ─────────────────────────────────── */
+
+.article-editor {
+  display: block;
+}
+
+.article-editor .ql-toolbar {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-bottom: 1px solid #555;
+  border-radius: 4px 4px 0 0;
+}
+
+.article-editor .ql-toolbar .ql-stroke {
+  stroke: #aaa;
+}
+
+.article-editor .ql-toolbar .ql-fill {
+  fill: #aaa;
+}
+
+.article-editor .ql-toolbar .ql-picker {
+  color: #aaa;
+}
+
+.article-editor .ql-toolbar button:hover .ql-stroke,
+.article-editor .ql-toolbar .ql-active .ql-stroke {
+  stroke: #dadada;
+}
+
+.article-editor .ql-toolbar button:hover .ql-fill,
+.article-editor .ql-toolbar .ql-active .ql-fill {
+  fill: #dadada;
+}
+
+.article-editor .ql-toolbar .ql-picker-label:hover,
+.article-editor .ql-toolbar .ql-picker-item:hover,
+.article-editor .ql-toolbar .ql-selected {
+  color: #dadada;
+}
+
+.article-editor .ql-container {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  font-size: 14px;
+  min-height: 320px;
+}
+
+.article-editor .ql-editor {
+  color: #dadada;
+  line-height: 1.7;
+  min-height: 320px;
+}
+
+.article-editor .ql-editor.ql-blank::before {
+  color: #666;
+  font-style: italic;
+}
+
+.article-editor .ql-editor a {
+  color: #e05a70;
+}
+
+.article-editor .ql-editor blockquote {
+  border-left: 3px solid #880824;
+  color: #aaa;
+  padding-left: 12px;
+  margin-left: 0;
+}
+
+.article-editor .ql-editor h2,
+.article-editor .ql-editor h3 {
+  color: #dadada;
+}
+
+.article-editor .ql-picker-options {
+  background: #2a2a2a;
+  border: 1px solid #444;
+}
+
+/* ── Breaking News Toggle ─────────────────────────── */
+
+.breaking-news-group {
+  gap: 8px;
+}
+
+.breaking-news-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #dadada;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.breaking-news-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #880824;
+  cursor: pointer;
+}
+
+.field-hint {
+  margin: 4px 0 0;
+  color: #888;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.field-hint code {
+  background: #2a2a2a;
+  color: #aaa;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.field-hint-inline {
+  color: #666;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+/* ── Upload ───────────────────────────────────────── */
+
+.input-with-action {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.input-with-action input[type="text"] {
+  flex: 1;
+}
+
+.hidden-file-input {
+  display: none;
+}
+
+.btn-upload {
+  padding: 0 16px;
+  background: transparent;
+  border: 1px solid #444;
+  color: #aaa;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-upload:hover:not(:disabled) {
+  border-color: #880824;
+  color: #dadada;
+}
+
+.btn-upload:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.upload-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #555;
+  border-top-color: #aaa;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.upload-error {
+  color: #e05a70;
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+
+.thumb-preview {
+  margin-top: 8px;
+  width: 120px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #333;
+  display: block;
+}
+
+.status-select {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  color: #dadada;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.schedule-input {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  color: #dadada;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  color-scheme: dark;
 }

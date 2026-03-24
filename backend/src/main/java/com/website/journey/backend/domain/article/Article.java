@@ -2,6 +2,8 @@ package com.website.journey.backend.domain.article;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -51,6 +53,34 @@ public class Article {
 
     @Column(length = 100)
     private String tag;
+
+    @Column(name = "video_url", length = 500)
+    private String videoUrl;
+
+    @Column(name = "breaking_news", nullable = false)
+    private boolean breakingNews;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private ArticleCategory category;
+
+    @Column(length = 500)
+    private String tags;
+
+    @Column(name = "reading_time_minutes")
+    private Integer readingTimeMinutes;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private ArticleStatus status = ArticleStatus.PUBLISHED;
+
+    @Column(name = "view_count", nullable = false)
+    @Builder.Default
+    private long viewCount = 0L;
+
+    @Column(name = "scheduled_at")
+    private java.time.LocalDateTime scheduledAt;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

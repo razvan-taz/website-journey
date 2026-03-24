@@ -1,6 +1,6 @@
 .admin-page {
   width: 100%;
-  max-width: 640px;
+  max-width: 860px;
 }
 
 .page-header {
@@ -54,8 +54,13 @@
   font-weight: 600;
 }
 
-.content-input {
+.schedule-fields {
+  display: flex;
+  gap: 10px;
   flex: 1;
+}
+
+.schedule-input {
   background: #111;
   border: 1px solid #333;
   color: #dadada;
@@ -66,13 +71,27 @@
   transition: border-color 0.2s;
 }
 
-.content-input:focus {
+.schedule-input:focus {
   border-color: #880824;
   outline: none;
 }
 
-.content-input::placeholder {
+.schedule-input::placeholder {
   color: #555;
+}
+
+.start-time-input {
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.end-time-input {
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.description-input {
+  flex: 1;
 }
 
 .btn-save {

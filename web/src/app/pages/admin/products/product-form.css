@@ -16,14 +16,14 @@
 }
 
 .btn-back {
-  color: #aaa;
+  color: #880824;
   text-decoration: none;
   font-size: 14px;
-  transition: color 0.2s;
+  transition: opacity 0.2s;
 }
 
 .btn-back:hover {
-  color: #dadada;
+  opacity: 0.75;
 }
 
 .admin-loading {
@@ -107,4 +107,65 @@
 .btn-save:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* ── Upload ───────────────────────────────────────── */
+
+.input-with-action {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.input-with-action input[type="text"] {
+  flex: 1;
+}
+
+.hidden-file-input {
+  display: none;
+}
+
+.btn-upload {
+  padding: 0 16px;
+  background: transparent;
+  border: 1px solid #444;
+  color: #aaa;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-upload:hover:not(:disabled) {
+  border-color: #880824;
+  color: #dadada;
+}
+
+.btn-upload:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.upload-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #555;
+  border-top-color: #aaa;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.upload-error {
+  color: #e05a70;
+  font-size: 12px;
+  margin: 4px 0 0;
 }
