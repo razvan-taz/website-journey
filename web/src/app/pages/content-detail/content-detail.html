@@ -1,7 +1,17 @@
+<div class="read-progress-bar" [style.width.%]="readProgress()" aria-hidden="true"></div>
 <p><a routerLink="/content" class="back-link">← Back to Content</a></p>
 
 @if (loading()) {
-  <p>Loading...</p>
+  <div class="skeleton-article" aria-hidden="true">
+    <div class="skeleton-heading"></div>
+    <div class="skeleton-meta"></div>
+    <div class="skeleton-image"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line skeleton-line--short"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line skeleton-line--medium"></div>
+    <div class="skeleton-line"></div>
+  </div>
 } @else if (error() === 'not-found') {
   <h1>Not found</h1>
   <p>This article doesn't exist.</p>
@@ -13,12 +23,12 @@
   <p class="article-meta">
     <span>{{ post.author }}</span>
     <span>&middot;</span>
-    <span>{{ post.publishDate }}</span>
+    <span>{{ post.publishDate | date:'mediumDate' }}</span>
     <span>&middot;</span>
     <span>{{ readingTime() }} min read</span>
   </p>
 
-  <img [src]="post.thumbnailUrl" [alt]="post.title" style="width:100%; max-width:900px; border-radius:12px; margin:16px 0;" />
+  <img [src]="post.thumbnailUrl" [alt]="post.title" style="width:100%; max-width:900px; border-radius:12px; margin:16px 0;" loading="eager" />
 
   @if (safeVideoUrl(); as videoUrl) {
     <div class="video-wrapper">
@@ -34,21 +44,24 @@
 
   @if (post.type === 'article') {
     @if (post.body) {
-      <div class="article-body" [innerHTML]="post.body"></div>
+      <div class="article-body" appLazyImages [innerHTML]="post.body"></div>
     } @else {
-      <p><em>(Article body will go here.)</em></p>
+      <p class="article-empty">This article has no content yet.</p>
     }
   } @else {
     @if (post.body) {
-      <div class="article-body" [innerHTML]="post.body"></div>
+      <div class="article-body" appLazyImages [innerHTML]="post.body"></div>
     } @else {
-      <p><em>(No video content available.)</em></p>
+      <p class="article-empty">No content is available for this video.</p>
     }
   }
 
   <div class="share-bar">
     <button class="btn-copy-link" (click)="copyLink()" aria-label="Copy article link">
       {{ linkCopied() ? 'Copied!' : 'Copy article link' }}
+    </button>
+    <button class="btn-share-twitter" (click)="shareOnTwitter()" aria-label="Share on X (Twitter)">
+      Share on X
     </button>
   </div>
 
@@ -62,7 +75,7 @@
             <div class="related-info">
               <span class="related-author">{{ related.author }}</span>
               <h3 class="related-card-title">{{ related.title }}</h3>
-              <span class="related-date">{{ related.publishDate }}</span>
+              <span class="related-date">{{ related.publishDate | date:'mediumDate' }}</span>
             </div>
           </a>
         }
@@ -113,8 +126,13 @@
               </div>
             } @else {
               <p class="comment-content">{{ c.content }}</p>
-              @if (isCurrentUser(c.authorName)) {
-                <button class="btn-comment-edit" (click)="startEdit(c)">Edit</button>
+              @if (isCurrentUser(c.authorId)) {
+                <div class="comment-actions">
+                  <button class="btn-comment-edit" (click)="startEdit(c)">Edit</button>
+                  <button class="btn-comment-delete" (click)="deleteComment(c.id)" [disabled]="deletingCommentId() === c.id">
+                    {{ deletingCommentId() === c.id ? 'Deleting...' : 'Delete' }}
+                  </button>
+                </div>
               }
             }
           </div>

@@ -1,24 +1,21 @@
-import { Component, inject, signal, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { CurrencyPipe, SlicePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Title, Meta } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ProductService, ProductDetail as ProductDetailInterface } from '../../services/product.service';
+import { ProductService, ProductDetail as ProductDetailInterface, ProductImage, ProductListItem, ProductVariant } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { ReviewService, ReviewSummary, ReviewEligibility } from '../../services/review.service';
 import { WishlistService } from '../../services/wishlist.service';
 import { AuthService } from '../../services/auth.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { CommentService, Comment } from '../../services/comment.service';
-import { DatePipe } from '@angular/common';
-import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [RouterLink, CurrencyPipe, SlicePipe, DatePipe],
+  imports: [RouterLink, CurrencyPipe, DatePipe],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css',
 })
@@ -27,6 +24,7 @@ export class ProductDetail {
   loading = signal(true);
   error = signal<string | null>(null);
 
+  private productService = inject(ProductService);
   private cartService = inject(CartService);
   private reviewService = inject(ReviewService);
   private wishlistService = inject(WishlistService);
@@ -37,7 +35,22 @@ export class ProductDetail {
   private document = inject(DOCUMENT);
   private destroyRef = inject(DestroyRef);
 
+  // ── Gallery ────────────────────────────────────────
+  selectedImageIndex = signal(0);
+
+  galleryImages = computed<Array<{ id: number; url: string; displayOrder: number }>>(() => {
+    const p = this.product();
+    if (!p) return [];
+    const primary: ProductImage = { id: -1, url: p.imageUrl, displayOrder: -1 };
+    return [primary, ...(p.additionalImages ?? [])];
+  });
+
+  selectImage(index: number): void {
+    this.selectedImageIndex.set(index);
+  }
+
   isLoggedIn = this.authService.isLoggedIn;
+  currentUser = this.authService.currentUser;
   showUnverifiedModal = signal(false);
   resendingVerification = signal(false);
   resendVerificationSuccess = signal(false);
@@ -51,7 +64,72 @@ export class ProductDetail {
   wishlisted = signal(false);
 
   private jsonLdScript: HTMLScriptElement | null = null;
-  private destroy$ = new Subject<void>();
+
+  relatedProducts = signal<ProductListItem[]>([]);
+  stockNotifyStatus = signal<'idle' | 'submitting' | 'done' | 'error'>('idle');
+
+  // ── Variant selection ──────────────────────────────
+  selectedAttributes = signal<Record<string, string>>({});
+
+  uniqueAttributeKeys = computed(() => {
+    const variants = this.product()?.variants ?? [];
+    const keys = new Set<string>();
+    variants.forEach(v => Object.keys(v.attributes).forEach(k => keys.add(k)));
+    return Array.from(keys);
+  });
+
+  resolvedVariant = computed<ProductVariant | null>(() => {
+    const variants = this.product()?.variants ?? [];
+    if (!variants.length) return null;
+    const selected = this.selectedAttributes();
+    const keys = this.uniqueAttributeKeys();
+    if (!keys.every(k => !!selected[k])) return null;
+    return variants.find(v => keys.every(k => v.attributes[k] === selected[k])) ?? null;
+  });
+
+  hasVariants = computed(() => (this.product()?.variants?.length ?? 0) > 0);
+
+  allAttributesSelected = computed(() =>
+    this.uniqueAttributeKeys().every(k => !!this.selectedAttributes()[k])
+  );
+
+  effectiveStock = computed(() => {
+    const variant = this.resolvedVariant();
+    if (variant) return variant.stock;
+    if (!this.hasVariants()) {
+      const live = this.liveStock();
+      return live !== null ? live : (this.product()?.stock ?? 0);
+    }
+    return 0;
+  });
+
+  effectivePrice = computed(() => {
+    const p = this.product();
+    if (!p) return 0;
+    const variant = this.resolvedVariant();
+    return p.price + (variant?.priceModifier ?? 0);
+  });
+
+  optionsForKey(key: string): string[] {
+    const variants = this.product()?.variants ?? [];
+    const values = new Set<string>();
+    variants.forEach(v => { if (v.attributes[key]) values.add(v.attributes[key]); });
+    return Array.from(values);
+  }
+
+  isOptionAvailable(key: string, value: string): boolean {
+    const variants = this.product()?.variants ?? [];
+    const selected = this.selectedAttributes();
+    return variants.some(v =>
+      v.attributes[key] === value &&
+      v.stock > 0 &&
+      Object.keys(selected).every(k => k === key || !selected[k] || v.attributes[k] === selected[k])
+    );
+  }
+
+  selectAttribute(key: string, value: string): void {
+    this.selectedAttributes.update(s => ({ ...s, [key]: value }));
+  }
 
   private commentService = inject(CommentService);
   productComments = signal<Comment[]>([]);
@@ -60,19 +138,19 @@ export class ProductDetail {
   commentError = signal<string | null>(null);
   editingCommentId = signal<number | null>(null);
   editingContent = signal('');
+  deletingCommentId = signal<number | null>(null);
 
   constructor() {
     const route = inject(ActivatedRoute);
-    const productService = inject(ProductService);
 
     // Show modal when cart service blocks unverified add
     this.cartService.unverifiedAddAttempt$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.showUnverifiedModal.set(true));
 
     const id = Number(route.snapshot.paramMap.get('id'));
 
-    productService
+    this.productService
       .getProductById(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -117,6 +195,14 @@ export class ProductDetail {
           this.jsonLdScript.type = 'application/ld+json';
           this.jsonLdScript.text = JSON.stringify(jsonLd);
           this.document.head.appendChild(this.jsonLdScript);
+
+          // Load related products (same category, exclude current)
+          this.productService.getProducts(0, 6, data.category)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (r) => this.relatedProducts.set(r.content.filter(p => p.id !== data.id).slice(0, 4)),
+              error: () => {},
+            });
 
           // Load comments
           this.commentService.getProductComments(data.id)
@@ -166,8 +252,6 @@ export class ProductDetail {
         this.jsonLdScript.remove();
         this.jsonLdScript = null;
       }
-      this.destroy$.next();
-      this.destroy$.complete();
     });
   }
 
@@ -254,9 +338,23 @@ export class ProductDetail {
 
   cancelCommentEdit(): void { this.editingCommentId.set(null); }
 
-  isCurrentUser(authorName: string): boolean {
+  deleteComment(commentId: number): void {
+    if (this.deletingCommentId() !== null) return;
+    this.deletingCommentId.set(commentId);
+    this.commentService.deleteOwnComment(commentId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.productComments.update(list => list.filter(c => c.id !== commentId));
+          this.deletingCommentId.set(null);
+        },
+        error: () => this.deletingCommentId.set(null),
+      });
+  }
+
+  isCurrentUser(authorId: number): boolean {
     const user = this.authService.currentUser();
-    return !!user && user.name === authorName;
+    return !!user && user.id !== undefined && user.id === authorId;
   }
 
   toggleWishlist(): void {
@@ -268,14 +366,27 @@ export class ProductDetail {
     });
   }
 
+  notifyWhenInStock(): void {
+    const p = this.product();
+    if (!p || this.stockNotifyStatus() !== 'idle') return;
+    this.stockNotifyStatus.set('submitting');
+    this.productService.notifyWhenInStock(p.id).subscribe({
+      next: () => this.stockNotifyStatus.set('done'),
+      error: () => this.stockNotifyStatus.set('error'),
+    });
+  }
+
   addToCart(): void {
     const p = this.product();
     if (!p) return;
+    const variant = this.resolvedVariant();
     this.cartService.addItem({
       productId: p.id,
-      name: p.name,
-      price: p.price,
+      name: variant ? `${p.name} — ${variant.name}` : p.name,
+      price: this.effectivePrice(),
       imageUrl: p.imageUrl,
+      variantId: variant?.id,
+      variantName: variant?.name,
     });
   }
 }

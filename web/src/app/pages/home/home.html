@@ -61,7 +61,19 @@
     </div>
 
     @if (articlesLoading()) {
-      <p class="section-loading">Loading articles...</p>
+      <div class="card-grid">
+        @for (_ of [1,2,3]; track $index) {
+          <div class="card-skeleton">
+            <div class="skeleton card-skeleton-thumb"></div>
+            <div class="card-skeleton-body">
+              <div class="skeleton card-skeleton-tag"></div>
+              <div class="skeleton card-skeleton-title"></div>
+              <div class="skeleton card-skeleton-title card-skeleton-title--short"></div>
+              <div class="skeleton card-skeleton-meta"></div>
+            </div>
+          </div>
+        }
+      </div>
     } @else if (articles().length > 0) {
       <div class="card-grid">
         @for (article of articles(); track article.slug) {
@@ -109,7 +121,18 @@
     </div>
 
     @if (productsLoading()) {
-      <p class="section-loading">Loading products...</p>
+      <div class="card-grid card-grid--products">
+        @for (_ of [1,2,3]; track $index) {
+          <div class="card-skeleton">
+            <div class="skeleton card-skeleton-thumb card-skeleton-thumb--square"></div>
+            <div class="card-skeleton-body">
+              <div class="skeleton card-skeleton-tag"></div>
+              <div class="skeleton card-skeleton-title"></div>
+              <div class="skeleton card-skeleton-price"></div>
+            </div>
+          </div>
+        }
+      </div>
     } @else if (products().length > 0) {
       <div class="card-grid card-grid--products">
         @for (product of products(); track product.id) {

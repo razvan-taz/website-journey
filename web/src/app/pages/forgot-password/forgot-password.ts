@@ -1,21 +1,26 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Location } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   templateUrl: './forgot-password.html',
   styleUrl: './forgot-password.css',
 })
 export class ForgotPassword {
   private http = inject(HttpClient);
+  private location = inject(Location);
 
   email = signal('');
   submitting = signal(false);
   submitted = signal(false);
   error = signal<string | null>(null);
+
+  goBack(): void {
+    this.location.back();
+  }
 
   submit(): void {
     const email = this.email().trim();

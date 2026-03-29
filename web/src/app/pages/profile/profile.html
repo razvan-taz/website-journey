@@ -4,7 +4,12 @@
   <!-- Email verification banner -->
   @if (user()?.emailVerified === false) {
     <div class="verify-banner">
-      <span>⚠ Your email address is not verified.</span>
+      <span class="verify-banner-text">
+        <svg class="verify-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+          <path d="M12 2L1 21h22L12 2zm0 3.5L20.5 19H3.5L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
+        </svg>
+        Your email address is not verified.
+      </span>
       @if (resendVerificationSuccess()) {
         <span class="verify-banner-sent">Verification email sent!</span>
       } @else {
@@ -80,6 +85,14 @@
           <div class="pw-group">
             <label class="pw-label">New password <span class="pw-hint">(min. 8 characters)</span></label>
             <input type="password" class="name-input" [value]="newPassword()" (input)="newPassword.set($any($event.target).value)" autocomplete="new-password" />
+            @if (newPasswordStrength().score > 0) {
+              <div class="pw-strength">
+                <div class="pw-strength-bar">
+                  <div class="pw-strength-fill" [style.width.%]="newPasswordStrength().score * 20" [class]="'pw-strength-fill--' + newPasswordStrength().score"></div>
+                </div>
+                <span class="pw-strength-label" [class]="'pw-strength-label--' + newPasswordStrength().score">{{ newPasswordStrength().label }}</span>
+              </div>
+            }
           </div>
           <div class="pw-group">
             <label class="pw-label">Confirm new password</label>
@@ -128,6 +141,177 @@
     </div>
   </section>
 
+  <!-- Address Book -->
+  <section class="profile-section">
+    <div class="section-heading-row">
+      <h2 class="section-heading">Address Book</h2>
+      <button class="btn-add-address" (click)="openAddressForm()">+ Add Address</button>
+    </div>
+
+    @if (loadingAddresses()) {
+      <p class="section-loading">Loading addresses...</p>
+    } @else if (addresses().length === 0 && !showAddressForm()) {
+      <p class="section-empty">No saved addresses yet.</p>
+    } @else {
+      <div class="address-list">
+        @for (address of addresses(); track address.id) {
+          <div class="address-card" [class.address-card-default]="address.isDefault">
+            <div class="address-card-header">
+              <span class="address-label">{{ address.label }}</span>
+              @if (address.isDefault) {
+                <span class="address-default-badge">Default</span>
+              }
+            </div>
+            <div class="address-card-body">
+              <p class="address-line">{{ address.fullName }}</p>
+              <p class="address-line">{{ address.line1 }}</p>
+              @if (address.line2) {
+                <p class="address-line">{{ address.line2 }}</p>
+              }
+              <p class="address-line">{{ address.city }}, {{ address.state }} {{ address.postalCode }}</p>
+              <p class="address-line">{{ address.country }}</p>
+            </div>
+            <div class="address-card-actions">
+              <button class="btn-address-action" (click)="editAddress(address)">Edit</button>
+              @if (!address.isDefault) {
+                <button class="btn-address-action" (click)="setDefaultAddress(address.id)">Set as Default</button>
+              }
+              <button class="btn-address-delete" (click)="deleteAddress(address.id)">Delete</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (showAddressForm()) {
+      <div class="address-form">
+        <h3 class="address-form-title">{{ editingAddressId() ? 'Edit Address' : 'New Address' }}</h3>
+        <div class="address-form-grid">
+          <div class="form-field">
+            <label class="form-field-label">Label *</label>
+            <input class="form-field-input" type="text" placeholder="e.g. Home, Work"
+              [value]="addressForm().label" (input)="updateAddressForm('label', $any($event.target).value)" />
+          </div>
+          <div class="form-field">
+            <label class="form-field-label">Full Name *</label>
+            <input class="form-field-input" type="text" [value]="addressForm().fullName"
+              (input)="updateAddressForm('fullName', $any($event.target).value)" />
+          </div>
+          <div class="form-field form-field-full">
+            <label class="form-field-label">Address Line 1 *</label>
+            <input class="form-field-input" type="text" [value]="addressForm().line1"
+              (input)="updateAddressForm('line1', $any($event.target).value)" />
+          </div>
+          <div class="form-field form-field-full">
+            <label class="form-field-label">Address Line 2</label>
+            <input class="form-field-input" type="text" [value]="addressForm().line2 ?? ''"
+              (input)="updateAddressForm('line2', $any($event.target).value || null)" />
+          </div>
+          <div class="form-field">
+            <label class="form-field-label">City *</label>
+            <input class="form-field-input" type="text" [value]="addressForm().city"
+              (input)="updateAddressForm('city', $any($event.target).value)" />
+          </div>
+          <div class="form-field">
+            <label class="form-field-label">State *</label>
+            <input class="form-field-input" type="text" [value]="addressForm().state"
+              (input)="updateAddressForm('state', $any($event.target).value)" />
+          </div>
+          <div class="form-field">
+            <label class="form-field-label">Postal Code *</label>
+            <input class="form-field-input" type="text" [value]="addressForm().postalCode"
+              (input)="updateAddressForm('postalCode', $any($event.target).value)" />
+          </div>
+          <div class="form-field">
+            <label class="form-field-label">Country *</label>
+            <select class="form-field-input" [value]="addressForm().country"
+              (change)="updateAddressForm('country', $any($event.target).value)">
+              <option value="US">United States</option>
+              <option value="GB">United Kingdom</option>
+              <option value="CA">Canada</option>
+              <option value="AU">Australia</option>
+              <option value="DE">Germany</option>
+              <option value="FR">France</option>
+              <option value="ES">Spain</option>
+              <option value="IT">Italy</option>
+              <option value="NL">Netherlands</option>
+              <option value="BE">Belgium</option>
+              <option value="CH">Switzerland</option>
+              <option value="AT">Austria</option>
+              <option value="SE">Sweden</option>
+              <option value="NO">Norway</option>
+              <option value="DK">Denmark</option>
+              <option value="FI">Finland</option>
+              <option value="PL">Poland</option>
+              <option value="PT">Portugal</option>
+              <option value="IE">Ireland</option>
+              <option value="NZ">New Zealand</option>
+              <option value="JP">Japan</option>
+              <option value="KR">South Korea</option>
+              <option value="SG">Singapore</option>
+              <option value="BR">Brazil</option>
+              <option value="MX">Mexico</option>
+              <option value="RO">Romania</option>
+              <option value="HU">Hungary</option>
+              <option value="CZ">Czech Republic</option>
+              <option value="GR">Greece</option>
+              <option value="HR">Croatia</option>
+            </select>
+          </div>
+        </div>
+        <label class="address-default-check">
+          <input type="checkbox" [checked]="addressForm().isDefault"
+            (change)="updateAddressForm('isDefault', $any($event.target).checked)" />
+          Set as default address
+        </label>
+        @if (addressFormError()) {
+          <p class="name-error">{{ addressFormError() }}</p>
+        }
+        <div class="address-form-actions">
+          <button class="btn-name-save" (click)="saveAddress()" [disabled]="savingAddress()">
+            {{ savingAddress() ? 'Saving...' : (editingAddressId() ? 'Update' : 'Save Address') }}
+          </button>
+          <button class="btn-name-cancel" (click)="cancelAddressForm()" [disabled]="savingAddress()">Cancel</button>
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- Danger Zone -->
+  <section class="profile-section danger-zone">
+    <h2 class="section-heading">Danger Zone</h2>
+    <div class="danger-card">
+      <div class="danger-description">
+        <p class="danger-title">Delete your account</p>
+        <p class="danger-text">This will permanently delete your account. Your order history will be anonymized and cannot be recovered.</p>
+      </div>
+      @if (!showDeleteForm()) {
+        <button class="btn-danger" (click)="showDeleteForm.set(true)">Delete Account</button>
+      } @else {
+        <div class="delete-form">
+          <p class="delete-form-label">Enter your password to confirm:</p>
+          <input
+            class="delete-password-input"
+            type="password"
+            placeholder="Your current password"
+            [value]="deletePassword()"
+            (input)="deletePassword.set($any($event.target).value)"
+            autocomplete="current-password"
+          />
+          @if (deleteError()) {
+            <p class="delete-error">{{ deleteError() }}</p>
+          }
+          <div class="delete-form-actions">
+            <button class="btn-danger" (click)="confirmDeleteAccount()" [disabled]="deletingAccount() || !deletePassword().trim()">
+              {{ deletingAccount() ? 'Deleting...' : 'Confirm Delete' }}
+            </button>
+            <button class="btn-cancel-delete" (click)="cancelDeleteAccount()" [disabled]="deletingAccount()">Cancel</button>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
   <!-- Order History -->
   <section class="profile-section">
     <h2 class="section-heading">Order History</h2>
@@ -143,7 +327,7 @@
               <span class="order-id">#{{ order.orderId }}</span>
               <span class="order-status">{{ getDisplayStatus(order) }}</span>
               <span class="order-total">{{ order.total | currency:'EUR':'symbol' }}</span>
-              <span class="order-date">{{ order.createdAt | slice:0:10 }}</span>
+              <span class="order-date">{{ order.createdAt | date:'mediumDate' }}</span>
             </div>
             <ul class="order-items">
               @for (item of order.items; track item.productName) {

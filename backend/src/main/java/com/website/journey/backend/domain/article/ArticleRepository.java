@@ -34,6 +34,10 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     Page<Article> findByCategory(ArticleCategory category, Pageable pageable);
 
+    Page<Article> findByStatusAndCategory(ArticleStatus status, ArticleCategory category, Pageable pageable);
+
+    Page<Article> findByStatusAndTagIgnoreCase(ArticleStatus status, String tag, Pageable pageable);
+
     @Query("SELECT DISTINCT a.tag FROM Article a WHERE a.tag IS NOT NULL ORDER BY a.tag")
     List<String> findDistinctTags();
 

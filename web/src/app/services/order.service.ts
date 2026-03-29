@@ -20,6 +20,7 @@ export interface PlaceOrderRequest {
   total: number;
   discountCode?: string | null;
   discountAmount?: number;
+  shippingAmount?: number;
   paymentIntentId?: string;
 }
 
@@ -27,7 +28,9 @@ export interface OrderConfirmation {
   orderId: number;
   status: string;
   total: number;
+  shippingAmount?: number;
   createdAt: string;
+  items?: Array<{ name: string; price: number; quantity: number }>;
 }
 
 export interface OrderItem {
@@ -59,10 +62,12 @@ export interface OrderDetail {
   total: number;
   discountAmount: number;
   discountCode: string | null;
+  shippingAmount?: number;
   createdAt: string;
   updatedAt: string;
   shippingAddress: ShippingAddress;
   items: OrderItem[];
+  trackingNumber?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -83,5 +88,9 @@ export class OrderService {
 
   submitRefundRequest(orderId: number, reason: string): Observable<any> {
     return this.http.post<any>(`/api/orders/${orderId}/refund-request`, { reason });
+  }
+
+  cancelOrder(id: number): Observable<OrderDetail> {
+    return this.http.post<OrderDetail>(`/api/orders/${id}/cancel`, {});
   }
 }

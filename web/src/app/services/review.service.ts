@@ -10,6 +10,25 @@ export interface ReviewItem {
   createdAt: string;
 }
 
+export interface AdminReviewItem {
+  id: number;
+  productId: number;
+  productName: string;
+  userName: string;
+  body: string;
+  createdAt: string;
+}
+
+export interface AdminReviewPageResponse {
+  content: AdminReviewItem[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
 export interface ReviewSummary {
   totalReviews: number;
   reviews: ReviewItem[];
@@ -42,5 +61,15 @@ export class ReviewService {
 
   deleteReview(productId: number): Observable<void> {
     return this.http.delete<void>(`/api/products/${productId}/reviews/mine`);
+  }
+
+  // ── Admin ────────────────────────────────────────────
+
+  adminGetReviews(page: number, size: number): Observable<AdminReviewPageResponse> {
+    return this.http.get<AdminReviewPageResponse>(`/api/admin/reviews?page=${page}&size=${size}`);
+  }
+
+  adminDeleteReview(id: number): Observable<void> {
+    return this.http.delete<void>(`/api/admin/reviews/${id}`);
   }
 }

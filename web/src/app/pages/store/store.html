@@ -1,24 +1,72 @@
 @if (loading()) {
-  <p class="store-loading">Loading products...</p>
+  <div class="card-grid">
+    @for (_ of [1,2,3,4,5,6]; track $index) {
+      <div class="card-skeleton">
+        <div class="skeleton card-skeleton-thumb"></div>
+        <div class="card-skeleton-body">
+          <div class="skeleton card-skeleton-tag"></div>
+          <div class="skeleton card-skeleton-title"></div>
+          <div class="skeleton card-skeleton-title card-skeleton-title--short"></div>
+          <div class="skeleton card-skeleton-price"></div>
+        </div>
+      </div>
+    }
+  </div>
 } @else if (error()) {
   <p class="store-error">{{ error() }}</p>
 } @else {
   <h1 class="store-title">Store</h1>
 
-  <div class="category-filters">
-    @for (cat of categories; track cat) {
+  <div class="store-search-bar">
+    <input
+      type="text"
+      class="store-search-input"
+      placeholder="Search products..."
+      [value]="searchQuery()"
+      (input)="onSearchInput($any($event.target).value)"
+      aria-label="Search products"
+    />
+    @if (searchQuery()) {
       <button
-        class="filter-btn"
-        [class.active]="activeCategory() === cat"
-        (click)="setCategory(cat)"
-      >
-        {{ cat }}
-      </button>
+        type="button"
+        class="store-search-clear"
+        (click)="clearSearch()"
+        aria-label="Clear search"
+      >×</button>
     }
   </div>
 
+  <div class="store-filter-row">
+    <div class="category-filters">
+      @for (cat of categories(); track cat) {
+        <button
+          class="filter-btn"
+          [class.active]="activeCategory() === cat"
+          (click)="setCategory(cat)"
+        >
+          {{ cat }}
+        </button>
+      }
+    </div>
+    <label class="store-instock-filter">
+      <input type="checkbox" [checked]="inStockOnly()" (change)="toggleInStockOnly()" />
+      In stock only
+    </label>
+    <select class="store-sort-select" [value]="activeSort()" (change)="setSort($any($event.target).value)" aria-label="Sort products">
+      @for (opt of sortOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+
   @if (products().length === 0) {
-    <p class="store-empty">No products found in this category.</p>
+    <p class="store-empty">
+      @if (searchQuery()) {
+        No products found for "{{ searchQuery() }}".
+      } @else {
+        No products found in this category.
+      }
+    </p>
   } @else {
     <div class="card-grid">
       @for (product of products(); track product.id) {

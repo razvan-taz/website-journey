@@ -1,0 +1,244 @@
+.coupon-code {
+  font-family: monospace;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.coupon-cap {
+  color: #999;
+  font-size: 12px;
+}
+
+.coupon-limit {
+  color: #999;
+  font-size: 12px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-active {
+  background: rgba(109, 191, 109, 0.15);
+  color: #6dbf6d;
+}
+
+.status-inactive {
+  background: rgba(160, 160, 160, 0.15);
+  color: #999;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.btn-action {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: opacity 0.15s;
+}
+
+.btn-action:hover {
+  opacity: 0.8;
+}
+
+.btn-edit {
+  background: transparent;
+  border-color: #555;
+  color: #dadada;
+}
+
+.btn-deactivate {
+  background: transparent;
+  border-color: #e05a70;
+  color: #e05a70;
+}
+
+.btn-activate {
+  background: transparent;
+  border-color: #6dbf6d;
+  color: #6dbf6d;
+}
+
+.btn-delete {
+  background: transparent;
+  border-color: #c0392b;
+  color: #c0392b;
+}
+
+.admin-empty {
+  color: #888;
+  padding: 32px 0;
+  text-align: center;
+}
+
+/* ── Slide-in form panel ─────────────────────────── */
+
+.form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+.form-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 420px;
+  max-width: 100vw;
+  height: 100vh;
+  background: #1e1e1e;
+  border-left: 1px solid #333;
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.form-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #333;
+}
+
+.form-panel-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #dadada;
+  margin: 0;
+}
+
+.form-panel-close {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.form-panel-close:hover {
+  color: #dadada;
+}
+
+.form-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 13px;
+  color: #aaa;
+}
+
+.form-input {
+  padding: 8px 10px;
+  background: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #dadada;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #880824;
+}
+
+.form-input:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.form-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.form-checkbox-label input[type="checkbox"] {
+  accent-color: #880824;
+  width: 15px;
+  height: 15px;
+}
+
+.form-error {
+  color: #e05a70;
+  font-size: 13px;
+  margin: 0;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+.btn-save {
+  flex: 1;
+  padding: 10px 0;
+  background: #880824;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-save:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.btn-save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-cancel {
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #aaa;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  border-color: #888;
+  color: #dadada;
+}

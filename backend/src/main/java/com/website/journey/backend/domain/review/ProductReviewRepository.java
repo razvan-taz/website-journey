@@ -1,5 +1,7 @@
 package com.website.journey.backend.domain.review;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -14,4 +16,6 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, Lo
     Optional<ProductReview> findByProductIdAndUserId(Long productId, Long userId);
 
     long countByProductId(Long productId);
+
+    Page<ProductReview> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

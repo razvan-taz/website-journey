@@ -40,6 +40,9 @@ export class Contact {
         next: () => {
           this.success.set(true);
           this.submitting.set(false);
+          this.name.set('');
+          this.email.set('');
+          this.message.set('');
         },
         error: () => {
           this.error.set('Failed to send message. Please try again.');

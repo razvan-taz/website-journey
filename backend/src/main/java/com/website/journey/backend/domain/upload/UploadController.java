@@ -1,6 +1,7 @@
 package com.website.journey.backend.domain.upload;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.Tika;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,15 +35,24 @@ public class UploadController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File must not be empty");
         }
 
-        String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Invalid file type. Allowed types: JPEG, PNG, GIF, WebP");
-        }
-
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "File size exceeds the 10MB limit");
+        }
+
+        // Use Tika to detect the actual MIME type from file content, not the client-supplied header
+        String detectedType;
+        try {
+            Tika tika = new Tika();
+            detectedType = tika.detect(file.getInputStream(), file.getOriginalFilename());
+        } catch (IOException e) {
+            log.error("Failed to detect MIME type: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to process file");
+        }
+
+        if (!ALLOWED_MIME_TYPES.contains(detectedType)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid file type. Allowed types: JPEG, PNG, GIF, WebP");
         }
 
         String originalFilename = file.getOriginalFilename();

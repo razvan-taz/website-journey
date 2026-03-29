@@ -1,7 +1,19 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../services/toast.service';
+
+function passwordStrength(value: string): { score: number; label: string } {
+  if (!value) return { score: 0, label: '' };
+  let score = 0;
+  if (value.length >= 8) score++;
+  if (/[a-z]/.test(value)) score++;
+  if (/[A-Z]/.test(value)) score++;
+  if (/[0-9]/.test(value)) score++;
+  if (/[^a-zA-Z0-9]/.test(value)) score++;
+  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Strong'];
+  return { score, label: labels[score] };
+}
 
 @Component({
   selector: 'app-reset-password',
@@ -22,6 +34,7 @@ export class ResetPassword implements OnInit {
   done = signal(false);
   error = signal<string | null>(null);
   showPassword = signal(false);
+  newPasswordStrength = computed(() => passwordStrength(this.newPassword()));
 
   ngOnInit(): void {
     const t = this.route.snapshot.queryParamMap.get('token') ?? '';

@@ -1,0 +1,252 @@
+<div class="admin-page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">Coupons</h1>
+    </div>
+    <div class="page-header-right">
+      <button class="btn-create" (click)="openCreate()">+ New Coupon</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="admin-loading">Loading...</p>
+  } @else if (error()) {
+    <p class="admin-error">{{ error() }}</p>
+  } @else if (coupons().length === 0) {
+    <p class="admin-empty">No coupons yet. Create one to get started.</p>
+  } @else {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Type</th>
+          <th>Value</th>
+          <th>Min Order</th>
+          <th>Usage</th>
+          <th>Expires</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (coupon of coupons(); track coupon.id) {
+          <tr>
+            <td class="coupon-code">{{ coupon.code }}</td>
+            <td>{{ typeLabel(coupon.type) }}</td>
+            <td>
+              @if (coupon.type === 'FREE_SHIPPING') {
+                <span>—</span>
+              } @else if (coupon.type === 'PERCENTAGE' || coupon.type === 'PERCENTAGE_WITH_CAP' || coupon.type === 'FIRST_ORDER') {
+                <span>{{ coupon.value }}%</span>
+                @if (coupon.cap) {
+                  <span class="coupon-cap"> (max {{ coupon.cap }})</span>
+                }
+              } @else {
+                <span>{{ coupon.value }}</span>
+              }
+            </td>
+            <td>{{ coupon.minOrderValue ?? '—' }}</td>
+            <td>
+              {{ coupon.usageCount }}
+              @if (coupon.usageLimit) {
+                <span class="coupon-limit"> / {{ coupon.usageLimit }}</span>
+              } @else {
+                <span class="coupon-limit"> / ∞</span>
+              }
+            </td>
+            <td>
+              @if (coupon.expiresAt) {
+                {{ coupon.expiresAt | date:'dd MMM yyyy' }}
+              } @else {
+                <span>—</span>
+              }
+            </td>
+            <td>
+              <span class="status-badge" [class.status-active]="coupon.active" [class.status-inactive]="!coupon.active">
+                {{ coupon.active ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button class="btn-action btn-edit" (click)="openEdit(coupon)">Edit</button>
+              <button
+                class="btn-action"
+                [class.btn-deactivate]="coupon.active"
+                [class.btn-activate]="!coupon.active"
+                (click)="toggleActive(coupon)"
+              >
+                {{ coupon.active ? 'Deactivate' : 'Activate' }}
+              </button>
+              <button class="btn-action btn-delete" (click)="deleteCoupon(coupon)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
+
+<!-- Create / Edit Form Panel -->
+@if (showForm()) {
+  <div class="form-overlay" (click)="closeForm()"></div>
+  <div class="form-panel">
+    <div class="form-panel-header">
+      <h2 class="form-panel-title">{{ editingId() ? 'Edit Coupon' : 'New Coupon' }}</h2>
+      <button class="form-panel-close" (click)="closeForm()">✕</button>
+    </div>
+
+    <div class="form-body">
+      <div class="form-row">
+        <label class="form-label">Code *</label>
+        <input
+          class="form-input"
+          type="text"
+          [value]="form().code"
+          (input)="uppercaseCode($any($event.target).value)"
+          placeholder="e.g. SAVE10"
+          [disabled]="!!editingId()"
+        />
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Type *</label>
+        <select class="form-input" [value]="form().type" (change)="updateForm({ type: $any($event.target).value })">
+          @for (type of allTypes; track type) {
+            <option [value]="type">{{ typeLabels[type] }}</option>
+          }
+        </select>
+      </div>
+
+      @if (needsValue()) {
+        <div class="form-row">
+          <label class="form-label">
+            @if (form().type === 'PERCENTAGE' || form().type === 'PERCENTAGE_WITH_CAP') {
+              Percentage (%) *
+            } @else {
+              Amount *
+            }
+          </label>
+          <input
+            class="form-input"
+            type="number"
+            min="0"
+            step="0.01"
+            [value]="form().value ?? ''"
+            (input)="updateForm({ value: +$any($event.target).value || null })"
+          />
+        </div>
+      }
+
+      @if (needsCap()) {
+        <div class="form-row">
+          <label class="form-label">Maximum Discount Cap</label>
+          <input
+            class="form-input"
+            type="number"
+            min="0"
+            step="0.01"
+            [value]="form().cap ?? ''"
+            (input)="updateForm({ cap: +$any($event.target).value || null })"
+          />
+        </div>
+      }
+
+      @if (needsProduct()) {
+        <div class="form-row">
+          <label class="form-label">Target Product ID *</label>
+          <input
+            class="form-input"
+            type="number"
+            [value]="form().targetProductId ?? ''"
+            (input)="updateForm({ targetProductId: +$any($event.target).value || null })"
+          />
+        </div>
+      }
+
+      @if (needsCategory()) {
+        <div class="form-row">
+          <label class="form-label">Target Category *</label>
+          <input
+            class="form-input"
+            type="text"
+            [value]="form().targetCategory ?? ''"
+            (input)="updateForm({ targetCategory: $any($event.target).value || null })"
+            placeholder="e.g. Apparel"
+          />
+        </div>
+      }
+
+      <div class="form-row">
+        <label class="form-label">Minimum Order Value</label>
+        <input
+          class="form-input"
+          type="number"
+          min="0"
+          step="0.01"
+          [value]="form().minOrderValue ?? ''"
+          (input)="updateForm({ minOrderValue: +$any($event.target).value || null })"
+        />
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Usage Limit (total)</label>
+        <input
+          class="form-input"
+          type="number"
+          min="1"
+          [value]="form().usageLimit ?? ''"
+          (input)="updateForm({ usageLimit: +$any($event.target).value || null })"
+          placeholder="Unlimited"
+        />
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Usage Limit Per-User</label>
+        <input
+          class="form-input"
+          type="number"
+          min="1"
+          [value]="form().perUserLimit ?? ''"
+          (input)="updateForm({ perUserLimit: +$any($event.target).value || null })"
+          placeholder="Unlimited"
+        />
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Expiry Date</label>
+        <input
+          class="form-input"
+          type="datetime-local"
+          [value]="form().expiresAt ?? ''"
+          [min]="minExpiryDateTime"
+          (input)="updateForm({ expiresAt: $any($event.target).value || null })"
+        />
+      </div>
+
+      <div class="form-checkboxes">
+        <label class="form-checkbox-label">
+          <input type="checkbox" [checked]="form().firstOrderOnly" (change)="updateForm({ firstOrderOnly: $any($event.target).checked })" />
+          First order only
+        </label>
+        <label class="form-checkbox-label">
+          <input type="checkbox" [checked]="form().freeShipping" (change)="updateForm({ freeShipping: $any($event.target).checked })" />
+          Apply free shipping
+        </label>
+        <label class="form-checkbox-label">
+          <input type="checkbox" [checked]="form().active" (change)="updateForm({ active: $any($event.target).checked })" />
+          Active
+        </label>
+      </div>
+
+      @if (formError()) {
+        <p class="form-error">{{ formError() }}</p>
+      }
+
+      <div class="form-actions">
+        <button class="btn-save" (click)="save()" [disabled]="saving()">
+          {{ saving() ? 'Saving...' : (editingId() ? 'Update Coupon' : 'Create Coupon') }}
+        </button>
+        <button class="btn-cancel" (click)="closeForm()" [disabled]="saving()">Cancel</button>
+      </div>
+    </div>
+  </div>
+}

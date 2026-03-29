@@ -215,6 +215,8 @@
   margin-bottom: 24px;
   font-size: 13px;
   flex-wrap: wrap;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .shipping-summary-label {
@@ -229,6 +231,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
 }
 
 .btn-edit-shipping {
@@ -314,6 +318,59 @@
 
 .lock-icon {
   font-size: 11px;
+}
+
+/* ── Order save failure block ─────────────────────── */
+
+.order-save-error {
+  margin-top: 20px;
+  padding: 16px 18px;
+  background: #1f0a0d;
+  border: 1px solid #880824;
+  border-radius: 8px;
+  color: #dadada;
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.order-save-error strong {
+  color: #e05a70;
+}
+
+.order-save-error p {
+  margin: 0;
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+.payment-ref {
+  font-family: monospace;
+  font-size: 0.82rem;
+  background: #2a0d13;
+  color: #e05a70;
+  padding: 4px 8px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+.btn-contact-support {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 8px 16px;
+  background: #880824;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  align-self: flex-start;
+  transition: background 0.2s;
+}
+
+.btn-contact-support:hover {
+  background: #6a061c;
 }
 
 /* ── Order summary sidebar ────────────────────────── */
@@ -504,6 +561,35 @@
   color: #6fcf6f;
 }
 
+.summary-row--shipping .shipping-free {
+  color: #6fcf6f;
+}
+
+.summary-row--shipping .shipping-loading {
+  color: #555;
+}
+
+.form-group select {
+  background: #2a2a2a;
+  border: 1px solid #444;
+  color: #dadada;
+  padding: 10px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23777' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+.form-group select:focus {
+  border-color: #880824;
+}
+
 .summary-row--total {
   color: #dadada;
   font-size: 16px;
@@ -517,3 +603,119 @@
   color: #fff;
 }
 
+
+/* ── Saved address selector ────────────────────────── */
+
+.saved-addresses {
+  margin-bottom: 20px;
+  padding: 14px;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+
+.saved-addresses-label {
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 10px;
+}
+
+.saved-address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.saved-address-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 5px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.saved-address-card:hover {
+  border-color: #880824;
+}
+
+.saved-address-card--default {
+  border-color: #5a0818;
+}
+
+.saved-address-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #dadada;
+}
+
+.saved-address-detail {
+  font-size: 12px;
+  color: #888;
+}
+
+.btn-use-new-address {
+  background: transparent;
+  border: none;
+  color: #880824;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.btn-use-saved-address {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 14px;
+  text-decoration: underline;
+}
+
+/* ── Coupon applied (extended) ──────────────────────── */
+
+.coupon-applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(109, 191, 109, 0.08);
+  border: 1px solid rgba(109, 191, 109, 0.25);
+  border-radius: 5px;
+}
+
+.coupon-applied-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.coupon-applied-desc {
+  font-size: 11px;
+  color: #888;
+}
+
+.coupon-applied-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.coupon-free-shipping {
+  font-size: 12px;
+  color: #6dbf6d;
+  background: rgba(109, 191, 109, 0.15);
+  padding: 2px 7px;
+  border-radius: 10px;
+}

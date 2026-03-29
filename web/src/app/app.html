@@ -6,7 +6,7 @@
     <button class="mobile-hamburger" (click)="showMobileMenu = !showMobileMenu" aria-label="Toggle navigation menu">
       <span></span><span></span><span></span>
     </button>
-    <img src="logo.png" alt="TAZ" class="mobile-logo" />
+    <a routerLink="/"><img src="logo.png" alt="TAZ" class="mobile-logo" /></a>
     <div class="mobile-nav-icons">
       <button class="btn-cart" (click)="showCart = true" aria-label="Open cart">
         <span class="cart-icon">🛒</span>
@@ -25,9 +25,9 @@
     @for (item of zoneItems('above-left'); track item.itemKey) {
       @switch (item.itemKey) {
         @case ('logo') {
-          <img src="logo.png" alt="TAZ" class="nav-logo"
+          <a routerLink="/"><img src="logo.png" alt="TAZ" class="nav-logo"
             [style.height.px]="item.heightPx"
-            [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" />
+            [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /></a>
         }
         @case ('live') {
           @if (liveStatus()?.enabled) {
@@ -96,7 +96,7 @@
             } @else {
               <div class="user-display">
                 <a class="nav-bell" routerLink="/notifications" aria-label="Notifications">
-                  <span class="bell-icon">🔔</span>
+                  <svg class="bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                   @if (notificationService.unreadCount() > 0) {
                     <span class="bell-badge">{{ notificationService.unreadCount() }}</span>
                   }
@@ -116,7 +116,7 @@
   <div class="nav-zone nav-zone--above-center">
     @for (item of zoneItems('above-center'); track item.itemKey) {
       @switch (item.itemKey) {
-        @case ('logo') { <img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /> }
+        @case ('logo') { <a routerLink="/"><img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /></a> }
         @case ('live') {
           @if (liveStatus()?.enabled) {
             <div class="live-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
@@ -155,7 +155,7 @@
         @case ('signin') {
           <div class="nav-signin-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
             @if (!authService.isLoggedIn()) { <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button> }
-            @else { <div class="user-display"><a class="nav-bell" routerLink="/notifications" aria-label="Notifications"><span class="bell-icon">🔔</span>@if (notificationService.unreadCount() > 0) {<span class="bell-badge">{{ notificationService.unreadCount() }}</span>}</a><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
+            @else { <div class="user-display"><a class="nav-bell" routerLink="/notifications" aria-label="Notifications"><svg class="bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>@if (notificationService.unreadCount() > 0) {<span class="bell-badge">{{ notificationService.unreadCount() }}</span>}</a><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
           </div>
         }
       }
@@ -164,7 +164,7 @@
   <div class="nav-zone nav-zone--above-right">
     @for (item of zoneItems('above-right'); track item.itemKey) {
       @switch (item.itemKey) {
-        @case ('logo') { <img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /> }
+        @case ('logo') { <a routerLink="/"><img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /></a> }
         @case ('live') {
           @if (liveStatus()?.enabled) {
             <div class="live-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
@@ -203,7 +203,7 @@
         @case ('signin') {
           <div class="nav-signin-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
             @if (!authService.isLoggedIn()) { <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button> }
-            @else { <div class="user-display"><a class="nav-bell" routerLink="/notifications" aria-label="Notifications"><span class="bell-icon">🔔</span>@if (notificationService.unreadCount() > 0) {<span class="bell-badge">{{ notificationService.unreadCount() }}</span>}</a><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
+            @else { <div class="user-display"><a class="nav-bell" routerLink="/notifications" aria-label="Notifications"><svg class="bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>@if (notificationService.unreadCount() > 0) {<span class="bell-badge">{{ notificationService.unreadCount() }}</span>}</a><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
           </div>
         }
       }
@@ -214,7 +214,7 @@
   <div class="nav-zone nav-zone--below-left">
     @for (item of zoneItems('below-left'); track item.itemKey) {
       @switch (item.itemKey) {
-        @case ('logo') { <img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /> }
+        @case ('logo') { <a routerLink="/"><img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /></a> }
         @case ('live') {
           @if (liveStatus()?.enabled) {
             <div class="live-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
@@ -253,7 +253,7 @@
         @case ('signin') {
           <div class="nav-signin-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
             @if (!authService.isLoggedIn()) { <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button> }
-            @else { <div class="user-display"><a class="nav-bell" routerLink="/notifications" aria-label="Notifications"><span class="bell-icon">🔔</span>@if (notificationService.unreadCount() > 0) {<span class="bell-badge">{{ notificationService.unreadCount() }}</span>}</a><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
+            @else { <div class="user-display"><a class="nav-bell" routerLink="/notifications" aria-label="Notifications"><svg class="bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>@if (notificationService.unreadCount() > 0) {<span class="bell-badge">{{ notificationService.unreadCount() }}</span>}</a><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
           </div>
         }
       }
@@ -262,7 +262,7 @@
   <div class="nav-zone nav-zone--below-center">
     @for (item of zoneItems('below-center'); track item.itemKey) {
       @switch (item.itemKey) {
-        @case ('logo') { <img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /> }
+        @case ('logo') { <a routerLink="/"><img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /></a> }
         @case ('live') {
           @if (liveStatus()?.enabled) {
             <div class="live-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
@@ -301,7 +301,7 @@
         @case ('signin') {
           <div class="nav-signin-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
             @if (!authService.isLoggedIn()) { <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button> }
-            @else { <div class="user-display"><a class="nav-bell" routerLink="/notifications" aria-label="Notifications"><span class="bell-icon">🔔</span>@if (notificationService.unreadCount() > 0) {<span class="bell-badge">{{ notificationService.unreadCount() }}</span>}</a><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
+            @else { <div class="user-display"><a class="nav-bell" routerLink="/notifications" aria-label="Notifications"><svg class="bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>@if (notificationService.unreadCount() > 0) {<span class="bell-badge">{{ notificationService.unreadCount() }}</span>}</a><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
           </div>
         }
       }
@@ -310,7 +310,7 @@
   <div class="nav-zone nav-zone--below-right">
     @for (item of zoneItems('below-right'); track item.itemKey) {
       @switch (item.itemKey) {
-        @case ('logo') { <img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /> }
+        @case ('logo') { <a routerLink="/"><img src="logo.png" alt="TAZ" class="nav-logo" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)" /></a> }
         @case ('live') {
           @if (liveStatus()?.enabled) {
             <div class="live-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
@@ -349,7 +349,7 @@
         @case ('signin') {
           <div class="nav-signin-wrap" [style.height.px]="item.heightPx" [style.width.px]="item.widthPx" [style]="itemOffsetStyle(item)">
             @if (!authService.isLoggedIn()) { <button class="btn-sign-in" (click)="uiState.openSignIn()">Sign In</button> }
-            @else { <div class="user-display"><a class="nav-bell" routerLink="/notifications" aria-label="Notifications"><span class="bell-icon">🔔</span>@if (notificationService.unreadCount() > 0) {<span class="bell-badge">{{ notificationService.unreadCount() }}</span>}</a><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
+            @else { <div class="user-display"><a class="nav-bell" routerLink="/notifications" aria-label="Notifications"><svg class="bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>@if (notificationService.unreadCount() > 0) {<span class="bell-badge">{{ notificationService.unreadCount() }}</span>}</a><div class="user-avatar">{{ authService.currentUser()!.name[0].toUpperCase() }}</div><span class="user-name">{{ authService.currentUser()!.name }}</span><a class="btn-profile" routerLink="/profile">Profile</a><a class="btn-profile" routerLink="/wishlist">Wishlist</a><button class="btn-logout" (click)="authService.logout()">Logout</button></div> }
           </div>
         }
       }
@@ -403,3 +403,7 @@
 
 <app-cookie-consent />
 <app-toast-container />
+
+@if (showBackToTop()) {
+  <button class="back-to-top" (click)="scrollToTop()" aria-label="Back to top">↑</button>
+}

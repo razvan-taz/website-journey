@@ -4,11 +4,31 @@
   @if (!isLoggedIn()) {
     <p class="orders-empty">Please sign in to view your orders.</p>
   } @else if (loading()) {
-    <p class="orders-loading">Loading orders...</p>
+    <div class="orders-list">
+      @for (_ of [1,2,3]; track $index) {
+        <div class="order-skeleton">
+          <div class="order-skeleton-header">
+            <div class="skeleton order-skeleton-id"></div>
+            <div class="skeleton order-skeleton-status"></div>
+          </div>
+          <div class="order-skeleton-body">
+            <div class="skeleton order-skeleton-date"></div>
+            <div class="skeleton order-skeleton-total"></div>
+          </div>
+          <div class="order-skeleton-chips">
+            <div class="skeleton order-skeleton-chip"></div>
+            <div class="skeleton order-skeleton-chip"></div>
+          </div>
+        </div>
+      }
+    </div>
   } @else if (error()) {
     <p class="orders-error">{{ error() }}</p>
   } @else if (orders().length === 0) {
-    <p class="orders-empty">You haven't placed any orders yet.</p>
+    <div class="orders-empty-state">
+      <p class="orders-empty">No orders yet.</p>
+      <a class="orders-empty-cta" routerLink="/store">Browse the Store →</a>
+    </div>
   } @else {
     <div class="orders-list">
       @for (order of orders(); track order.orderId) {

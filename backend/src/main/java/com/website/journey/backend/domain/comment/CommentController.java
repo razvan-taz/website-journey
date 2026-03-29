@@ -73,6 +73,13 @@ public class CommentController {
         return ResponseEntity.ok(commentService.editComment(commentId, email, request));
     }
 
+    @DeleteMapping("/api/comments/{commentId}")
+    public ResponseEntity<Void> deleteOwn(@PathVariable Long commentId) {
+        String email = requireAuth();
+        commentService.deleteOwn(commentId, email);
+        return ResponseEntity.noContent().build();
+    }
+
     // --- Admin ---
 
     @GetMapping("/api/admin/comments")

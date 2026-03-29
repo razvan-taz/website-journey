@@ -70,7 +70,16 @@ public class ArticleService {
     // --- Admin endpoints (all statuses) ---
 
     @Transactional(readOnly = true)
-    public Page<ArticleListDto> findAllAdmin(String tag, ArticleCategory category, Pageable pageable) {
+    public Page<ArticleListDto> findAllAdmin(String tag, ArticleCategory category, ArticleStatus status, Pageable pageable) {
+        if (status != null && category != null) {
+            return articleRepository.findByStatusAndCategory(status, category, pageable).map(this::toListDto);
+        }
+        if (status != null && tag != null && !tag.isBlank()) {
+            return articleRepository.findByStatusAndTagIgnoreCase(status, tag, pageable).map(this::toListDto);
+        }
+        if (status != null) {
+            return articleRepository.findByStatus(status, pageable).map(this::toListDto);
+        }
         if (category != null) {
             return articleRepository.findByCategory(category, pageable).map(this::toListDto);
         }
@@ -198,7 +207,7 @@ public class ArticleService {
         return Jsoup.clean(html, Safelist.relaxed()
                 .addTags("iframe", "figure", "figcaption")
                 .addAttributes("iframe", "src", "width", "height", "allowfullscreen", "frameborder")
-                .addAttributes(":all", "class", "id", "style")
+                .addAttributes(":all", "class", "id")
                 .addProtocols("iframe", "src", "https"));
     }
 

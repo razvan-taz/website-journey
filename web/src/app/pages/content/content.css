@@ -217,6 +217,31 @@
   font-style: italic;
 }
 
+/* ── Skeleton cards ───────────────────────────────── */
+
+.card-skeleton {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #1e1e1e;
+}
+
+.card-skeleton-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.card-skeleton-body {
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.card-skeleton-tag   { height: 12px; width: 60px; }
+.card-skeleton-title { height: 16px; width: 100%; }
+.card-skeleton-title--short { width: 65%; }
+.card-skeleton-meta  { height: 12px; width: 80%; }
+
 /* ── Load More ────────────────────────────────────── */
 
 .load-more-container {

@@ -1,10 +1,36 @@
-<div class="notifications-page">
-  <h1 class="notif-title">Notifications</h1>
+<div class="notifications-page" [attr.aria-busy]="loading() || null">
+  <div class="notif-header">
+    <h1 class="notif-title">Notifications</h1>
+    <div class="notif-controls">
+      @if (!loading() && hasUnread()) {
+        <button class="btn-mark-all-read" (click)="markAllAsRead()">Mark all as read</button>
+      }
+      <div class="notif-pref">
+        <span class="notif-pref-label">Live alerts</span>
+        <button
+          class="toggle-btn"
+          [class.toggle-on]="livePrefs.breakingNewsEnabled()"
+          (click)="livePrefs.setBreakingNews(!livePrefs.breakingNewsEnabled())"
+          [attr.aria-pressed]="livePrefs.breakingNewsEnabled()"
+          aria-label="Toggle live notifications"
+        >
+          <span class="toggle-thumb"></span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   @if (loading()) {
-    <p class="notif-loading">Loading notifications...</p>
+    <div class="notif-list">
+      @for (_ of [1,2,3]; track $index) {
+        <div class="notif-item-skeleton">
+          <div class="skeleton notif-skeleton-msg"></div>
+          <div class="skeleton notif-skeleton-date"></div>
+        </div>
+      }
+    </div>
   } @else if (notifications().length === 0) {
-    <p class="notif-empty">You have no notifications.</p>
+    <p class="notif-empty">You're all caught up — nothing new.</p>
   } @else {
     <div class="notif-list">
       @for (n of notifications(); track n.id) {
@@ -14,7 +40,7 @@
           } @else {
             <span class="notif-message">{{ n.message }}</span>
           }
-          <span class="notif-date">{{ n.createdAt | date: 'medium' }}</span>
+          <span class="notif-date">{{ n.createdAt | date: 'mediumDate' }}</span>
         </div>
       }
     </div>

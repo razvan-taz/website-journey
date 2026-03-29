@@ -1,7 +1,16 @@
 <p class="back-link"><a routerLink="/store">← Back to Store</a></p>
 
 @if (loading()) {
-  <p class="detail-loading">Loading product...</p>
+  <div class="skeleton-product" aria-hidden="true">
+    <div class="skeleton-product-image"></div>
+    <div class="skeleton-product-info">
+      <div class="skeleton-product-title"></div>
+      <div class="skeleton-product-price"></div>
+      <div class="skeleton-product-line"></div>
+      <div class="skeleton-product-line skeleton-product-line--short"></div>
+      <div class="skeleton-product-btn"></div>
+    </div>
+  </div>
 } @else if (error() === 'not-found') {
   <h1 class="detail-heading">Product not found</h1>
   <p class="detail-message">This product doesn't exist or may have been removed.</p>
@@ -11,14 +20,31 @@
 } @else if (product(); as p) {
   <div class="product-layout">
     <div class="product-image-section">
-      <img
-        [src]="p.imageUrl"
-        [alt]="p.name"
-        class="product-image"
-        loading="eager"
-        width="600"
-        height="600"
-      />
+      <div class="gallery-main">
+        <img
+          [src]="galleryImages()[selectedImageIndex()].url"
+          [alt]="p.name"
+          class="product-image"
+          loading="eager"
+          width="600"
+          height="600"
+        />
+      </div>
+      @if (galleryImages().length > 1) {
+        <div class="gallery-thumbnails">
+          @for (img of galleryImages(); track img.id; let i = $index) {
+            <button
+              type="button"
+              class="gallery-thumb"
+              [class.active]="selectedImageIndex() === i"
+              (click)="selectImage(i)"
+              [attr.aria-label]="'View image ' + (i + 1)"
+            >
+              <img [src]="img.url" [alt]="p.name + ' image ' + (i + 1)" loading="lazy" />
+            </button>
+          }
+        </div>
+      }
     </div>
 
     <div class="product-details-section">
@@ -26,23 +52,74 @@
 
       <h1 class="product-name">{{ p.name }}</h1>
 
-      <p class="product-price">{{ p.price | currency:'EUR':'symbol' }}</p>
+      <p class="product-price">
+        {{ effectivePrice() | currency:'EUR':'symbol' }}
+        @if (resolvedVariant() && resolvedVariant()!.priceModifier !== 0) {
+          <span class="price-modifier">
+            ({{ resolvedVariant()!.priceModifier > 0 ? '+' : '' }}{{ resolvedVariant()!.priceModifier | currency:'EUR':'symbol' }})
+          </span>
+        }
+      </p>
 
-      @if (liveStock() !== null) {
-        <p class="product-stock" [class.out-of-stock]="liveStock()! === 0">
-          {{ liveStock()! > 0 ? 'In Stock' : 'Out of Stock' }}
-        </p>
-      } @else {
-        <p class="product-stock" [class.out-of-stock]="p.stock === 0">
-          {{ p.stock > 0 ? 'In Stock' : 'Out of Stock' }}
-        </p>
-      }
+      <p class="product-stock"
+         [class.out-of-stock]="effectiveStock() === 0"
+         [class.low-stock]="effectiveStock() > 0 && effectiveStock() <= 5 && (!hasVariants() || allAttributesSelected())">
+        @if (hasVariants() && !allAttributesSelected()) {
+          Select options to check availability
+        } @else if (effectiveStock() === 0) {
+          Out of Stock
+        } @else if (effectiveStock() <= 5) {
+          Only {{ effectiveStock() }} left!
+        } @else {
+          In Stock
+        }
+      </p>
 
       <p class="product-description">{{ p.description }}</p>
 
+      @if (hasVariants()) {
+        <div class="variant-selectors">
+          @for (key of uniqueAttributeKeys(); track key) {
+            <div class="variant-group">
+              <span class="variant-group-label">{{ key }}</span>
+              <div class="variant-options">
+                @for (val of optionsForKey(key); track val) {
+                  <button
+                    class="variant-option"
+                    [class.selected]="selectedAttributes()[key] === val"
+                    [class.unavailable]="!isOptionAvailable(key, val)"
+                    (click)="selectAttribute(key, val)"
+                  >{{ val }}</button>
+                }
+              </div>
+            </div>
+          }
+          @if (resolvedVariant(); as v) {
+            @if (v.sku) {
+              <p class="variant-sku">SKU: {{ v.sku }}</p>
+            }
+          }
+        </div>
+      }
+
       <div class="product-actions">
-        @if ((liveStock() !== null ? liveStock()! : p.stock) > 0) {
+        @if (effectiveStock() > 0 && (!hasVariants() || allAttributesSelected())) {
           <button class="btn-add-to-cart" (click)="addToCart()">Add to Cart</button>
+        } @else if (isLoggedIn() && (!hasVariants() || allAttributesSelected())) {
+          @if (stockNotifyStatus() === 'done') {
+            <p class="notify-stock-success">✓ You'll be notified when this is back in stock.</p>
+          } @else {
+            <button
+              class="btn-notify-stock"
+              (click)="notifyWhenInStock()"
+              [disabled]="stockNotifyStatus() === 'submitting'"
+            >
+              {{ stockNotifyStatus() === 'submitting' ? 'Registering...' : 'Notify me when available' }}
+            </button>
+            @if (stockNotifyStatus() === 'error') {
+              <p class="notify-stock-error">Something went wrong. Please try again.</p>
+            }
+          }
         }
         @if (isLoggedIn()) {
           <button
@@ -77,7 +154,7 @@
           <div class="review-card">
             <div class="review-header">
               <span class="review-author">{{ review.userName }}</span>
-              <span class="review-date">{{ review.createdAt | slice:0:10 }}</span>
+              <span class="review-date">{{ review.createdAt | date:'mediumDate' }}</span>
             </div>
             <p class="review-body">{{ review.body }}</p>
           </div>
@@ -89,7 +166,7 @@
 
     @if (reviewSuccess()) {
       <p class="review-success">✓ Your review has been submitted. Thank you!</p>
-    } @else if (isLoggedIn() && reviewEligibility()?.canReview) {
+    } @else if (isLoggedIn() && reviewEligibility()?.canReview && currentUser()?.emailVerified !== false) {
       <div class="review-form">
         <h3 class="review-form-title">Write a Review</h3>
         <textarea
@@ -110,11 +187,42 @@
           {{ reviewSubmitting() ? 'Submitting...' : 'Submit Review' }}
         </button>
       </div>
+    } @else if (isLoggedIn() && reviewEligibility()?.canReview && currentUser()?.emailVerified === false) {
+      <div class="review-verify-prompt">
+        <p>Please verify your email address before submitting a review.</p>
+        <button class="btn-resend" (click)="resendVerificationEmail()" [disabled]="resendingVerification()">
+          {{ resendingVerification() ? 'Sending...' : 'Resend verification email' }}
+        </button>
+        @if (resendVerificationSuccess()) {
+          <p class="review-success">Verification email sent! Check your inbox.</p>
+        }
+      </div>
     } @else if (isLoggedIn() && reviewEligibility()?.hasReviewed) {
       <p class="review-notice">You have already reviewed this product.</p>
     } @else if (isLoggedIn() && reviewEligibility() !== null) {
       <p class="review-notice">Only verified purchasers can leave a review.</p>
     }
+  </section>
+}
+
+<!-- Related products -->
+@if (relatedProducts().length > 0) {
+  <section class="related-section">
+    <h2 class="related-heading">You may also like</h2>
+    <div class="related-grid">
+      @for (rp of relatedProducts(); track rp.id) {
+        <a class="related-card" [routerLink]="['/store', rp.id]">
+          <div class="related-thumb">
+            <img [src]="rp.imageUrl" [alt]="rp.name" loading="lazy" width="300" height="300" />
+          </div>
+          <div class="related-body">
+            <span class="related-tag">{{ rp.category }}</span>
+            <h3 class="related-name">{{ rp.name }}</h3>
+            <span class="related-price">{{ rp.price | currency:'EUR':'symbol' }}</span>
+          </div>
+        </a>
+      }
+    </div>
   </section>
 }
 
@@ -124,7 +232,7 @@
     <h2 class="comments-title">Comments</h2>
     @if (isLoggedIn()) {
       <div class="comment-form">
-        <textarea class="comment-textarea" rows="3" [value]="commentInput()" (input)="commentInput.set($any($event.target).value)" placeholder="You must have purchased this product to comment..."></textarea>
+        <textarea class="comment-textarea" rows="3" [value]="commentInput()" (input)="commentInput.set($any($event.target).value)" placeholder="Leave a comment..."></textarea>
         @if (commentError()) { <p class="comment-error">{{ commentError() }}</p> }
         <button class="btn-comment-submit" (click)="submitProductComment()" [disabled]="commentSubmitting() || !commentInput().trim()">
           {{ commentSubmitting() ? 'Posting...' : 'Post Comment' }}
@@ -151,8 +259,13 @@
               </div>
             } @else {
               <p class="comment-content">{{ c.content }}</p>
-              @if (isCurrentUser(c.authorName)) {
-                <button class="btn-comment-edit" (click)="startCommentEdit(c)">Edit</button>
+              @if (isCurrentUser(c.authorId)) {
+                <div class="comment-actions">
+                  <button class="btn-comment-edit" (click)="startCommentEdit(c)">Edit</button>
+                  <button class="btn-comment-delete" (click)="deleteComment(c.id)" [disabled]="deletingCommentId() === c.id">
+                    {{ deletingCommentId() === c.id ? 'Deleting...' : 'Delete' }}
+                  </button>
+                </div>
               }
             }
           </div>

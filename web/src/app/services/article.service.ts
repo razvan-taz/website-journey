@@ -48,7 +48,7 @@ export interface ArticleDetail {
   thumbnailUrl: string;
   videoUrl: string | null;
   type: 'article' | 'video';
-  tag: string;
+  tag: string | null;
   body: string;
   breakingNews: boolean;
   createdAt: string;
@@ -82,7 +82,7 @@ export interface CreateArticleRequest {
   thumbnailUrl: string;
   videoUrl: string | null;
   type: string;
-  tag: string;
+  tag: string | null;
   breakingNews: boolean;
   status: 'DRAFT' | 'PUBLISHED' | 'SCHEDULED';
   scheduledAt: string | null;
@@ -105,10 +105,11 @@ export class ArticleService {
     return this.http.get<ArticlePageResponse>(BASE_URL, { params });
   }
 
-  getArticlesAdmin(page: number, size: number, tag?: string, category?: ArticleCategory): Observable<ArticlePageResponse> {
+  getArticlesAdmin(page: number, size: number, tag?: string, category?: ArticleCategory, status?: string): Observable<ArticlePageResponse> {
     const params: Record<string, string> = { page: page.toString(), size: size.toString() };
     if (tag) params['tag'] = tag;
     if (category) params['category'] = category;
+    if (status) params['status'] = status;
     return this.http.get<ArticlePageResponse>(`${BASE_URL}/admin`, { params });
   }
 

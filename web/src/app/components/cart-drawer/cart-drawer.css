@@ -122,8 +122,13 @@
   line-height: 1;
 }
 
-.qty-btn:hover {
+.qty-btn:hover:not(:disabled) {
   background: #880824;
+}
+
+.qty-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .qty-value {

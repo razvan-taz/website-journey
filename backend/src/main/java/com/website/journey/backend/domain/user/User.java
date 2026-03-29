@@ -48,6 +48,10 @@ public class User {
     @Column(name = "verification_token_expiry")
     private LocalDateTime verificationTokenExpiry;
 
+    @Column(name = "enabled", nullable = false)
+    @Builder.Default
+    private boolean enabled = true;
+
     @Column(name = "notifications_enabled", nullable = false)
     @Builder.Default
     private boolean notificationsEnabled = true;

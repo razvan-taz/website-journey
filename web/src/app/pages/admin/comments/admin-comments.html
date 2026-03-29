@@ -23,7 +23,7 @@
             <div class="ac-meta">
               <span class="ac-author">{{ c.authorName }}</span>
               <span class="ac-target">{{ c.targetType | lowercase }} #{{ c.targetId }}</span>
-              <span class="ac-date">{{ c.createdAt | date: 'medium' }}</span>
+              <span class="ac-date">{{ c.createdAt | date: 'mediumDate' }}</span>
             </div>
             <span class="ac-status" [class]="'ac-status-' + c.status.toLowerCase()">{{ c.status }}</span>
           </div>

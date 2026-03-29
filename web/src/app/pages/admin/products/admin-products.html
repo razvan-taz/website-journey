@@ -1,11 +1,52 @@
 <div class="admin-page">
   <div class="page-header">
-    <h1 class="page-title">Products</h1>
-    <a routerLink="/admin/products/new" class="btn-create">+ New Product</a>
+    <div class="page-header-left">
+      <h1 class="page-title">Products</h1>
+      @if (totalElements() > 0) {
+        <span class="total-count">{{ totalElements() }} total</span>
+      }
+      @if (lowStockCount() > 0) {
+        <span class="low-stock-badge">⚠ {{ lowStockCount() }} low stock</span>
+      }
+    </div>
+    <div class="page-header-right">
+      <label class="threshold-label">
+        Low stock threshold:
+        <input
+          class="threshold-input"
+          type="number"
+          min="0"
+          [value]="lowStockThreshold()"
+          (change)="updateThreshold(+$any($event.target).value)"
+        />
+      </label>
+      <a routerLink="/admin/products/new" class="btn-create">+ New Product</a>
+    </div>
   </div>
 
   @if (loading()) {
-    <p class="admin-loading">Loading...</p>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (_ of [1,2,3,4,5]; track $index) {
+          <tr class="skeleton-row">
+            <td><div class="skeleton sk-name"></div></td>
+            <td><div class="skeleton sk-short"></div></td>
+            <td><div class="skeleton sk-short"></div></td>
+            <td><div class="skeleton sk-short"></div></td>
+            <td><div class="skeleton sk-actions"></div></td>
+          </tr>
+        }
+      </tbody>
+    </table>
   } @else if (error()) {
     <p class="admin-error">{{ error() }}</p>
   } @else {
@@ -24,8 +65,14 @@
           <tr>
             <td class="title-cell">{{ product.name }}</td>
             <td>{{ product.category }}</td>
-            <td>${{ product.price.toFixed(2) }}</td>
-            <td>{{ product.stock }}</td>
+            <td>€{{ product.price.toFixed(2) }}</td>
+            <td>
+              <span [class]="'stock-cell ' + stockClass(product.stock)">
+                {{ product.stock }}
+                @if (product.stock === 0) { <span class="stock-label">out of stock</span> }
+                @else if (product.stock <= lowStockThreshold()) { <span class="stock-label">low</span> }
+              </span>
+            </td>
             <td class="actions-cell">
               <a [routerLink]="['/admin/products/edit', product.id]" class="btn-edit">Edit</a>
               <button class="btn-delete" (click)="delete(product.id, product.name)" [disabled]="deleting() === product.id">
@@ -34,7 +81,20 @@
             </td>
           </tr>
         }
+        @if (products().length === 0) {
+          <tr>
+            <td colspan="5" class="empty-row">No products yet. <a routerLink="/admin/products/new">Create your first one →</a></td>
+          </tr>
+        }
       </tbody>
     </table>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="page-btn" (click)="prevPage()" [disabled]="page() === 0">← Prev</button>
+        <span class="page-info">Page {{ page() + 1 }} of {{ totalPages() }}</span>
+        <button class="page-btn" (click)="nextPage()" [disabled]="page() >= totalPages() - 1">Next →</button>
+      </div>
+    }
   }
 </div>

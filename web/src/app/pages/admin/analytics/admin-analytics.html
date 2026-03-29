@@ -54,4 +54,78 @@
       </section>
     </div>
   }
+
+  <!-- Charts -->
+  <div class="charts-section">
+    @if (chartLoading()) {
+      <p class="analytics-loading">Loading charts...</p>
+    } @else if (chartError()) {
+      <p class="analytics-error">{{ chartError() }}</p>
+    } @else {
+      <div class="charts-grid">
+
+        <!-- Daily Revenue Bar Chart -->
+        <section class="chart-card">
+          <h3 class="analytics-card-title">Revenue — Last 30 Days</h3>
+          @if (dailyBars().length === 0) {
+            <p class="chart-empty">No order data in the last 30 days.</p>
+          } @else {
+            <div class="chart-svg-wrapper">
+              <svg
+                [attr.viewBox]="'0 0 ' + svgWidth() + ' ' + svgH"
+                [attr.width]="svgWidth()"
+                class="chart-svg"
+                preserveAspectRatio="none"
+                aria-label="Daily revenue bar chart"
+              >
+                @for (bar of dailyBars(); track bar.label; let i = $index) {
+                  <g>
+                    <rect
+                      [attr.x]="bar.x"
+                      [attr.y]="bar.y"
+                      [attr.width]="barW"
+                      [attr.height]="bar.h"
+                      class="chart-bar"
+                      rx="2"
+                    >
+                      <title>{{ bar.label }}: {{ bar.revenue | currency: 'EUR' : 'symbol' : '1.2-2' }} · {{ bar.orders }} order{{ bar.orders === 1 ? '' : 's' }}</title>
+                    </rect>
+                    @if (i % 5 === 0) {
+                      <text
+                        [attr.x]="bar.x + 7"
+                        [attr.y]="svgH - 4"
+                        class="chart-label"
+                        text-anchor="middle"
+                      >{{ bar.label }}</text>
+                    }
+                  </g>
+                }
+              </svg>
+            </div>
+          }
+        </section>
+
+        <!-- Top Products by Revenue -->
+        <section class="chart-card">
+          <h3 class="analytics-card-title">Top Products by Revenue</h3>
+          @if (topBars().length === 0) {
+            <p class="chart-empty">No product revenue data yet.</p>
+          } @else {
+            <div class="top-products-list">
+              @for (bar of topBars(); track bar.name) {
+                <div class="top-product-row">
+                  <div class="top-product-name" [title]="bar.name">{{ bar.name }}</div>
+                  <div class="top-product-bar-track">
+                    <div class="top-product-bar" [style.width.%]="bar.pct"></div>
+                  </div>
+                  <div class="top-product-value">{{ bar.revenue | currency: 'EUR' : 'symbol' : '1.0-0' }}</div>
+                </div>
+              }
+            </div>
+          }
+        </section>
+
+      </div>
+    }
+  </div>
 </div>

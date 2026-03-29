@@ -9,6 +9,7 @@ public record OrderDetailResponse(
         BigDecimal total,
         BigDecimal discountAmount,
         String discountCode,
+        BigDecimal shippingAmount,
         String createdAt,
         String updatedAt,
         ShippingAddress shippingAddress,

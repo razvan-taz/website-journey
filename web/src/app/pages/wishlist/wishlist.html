@@ -1,7 +1,21 @@
 <h1 class="wishlist-title">Wishlist</h1>
 
 @if (loading()) {
-  <p class="wishlist-state">Loading...</p>
+  <div class="wishlist-grid">
+    @for (_ of [1,2,3]; track $index) {
+      <div class="wishlist-card-skeleton">
+        <div class="skeleton wishlist-skeleton-thumb"></div>
+        <div class="wishlist-skeleton-body">
+          <div class="skeleton wishlist-skeleton-name"></div>
+          <div class="skeleton wishlist-skeleton-name wishlist-skeleton-name--short"></div>
+          <div class="wishlist-skeleton-footer">
+            <div class="skeleton wishlist-skeleton-price"></div>
+            <div class="skeleton wishlist-skeleton-stock"></div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
 } @else if (items().length === 0) {
   <p class="wishlist-state">Your wishlist is empty. <a routerLink="/store">Browse the store</a></p>
 } @else {
@@ -22,6 +36,12 @@
             </div>
           </div>
         </a>
+        <button
+          class="btn-add-to-cart"
+          (click)="addToCart(item)"
+          [disabled]="item.stock === 0"
+          [attr.aria-label]="item.stock === 0 ? 'Out of stock' : 'Add ' + item.name + ' to cart'"
+        >{{ item.stock === 0 ? 'Out of stock' : 'Add to Cart' }}</button>
         <button
           class="btn-remove"
           (click)="remove(item.productId)"

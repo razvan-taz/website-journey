@@ -39,7 +39,7 @@ public class DynamicMailSender implements JavaMailSender {
         sender.setHost(config.getSmtpHost());
         sender.setPort(config.getSmtpPort());
         sender.setUsername(config.getUsername());
-        sender.setPassword(config.getPassword());
+        sender.setPassword(emailConfigService.getDecryptedSmtpPassword());
 
         Properties props = sender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");

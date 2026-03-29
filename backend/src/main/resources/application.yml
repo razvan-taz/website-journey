@@ -32,11 +32,28 @@ spring:
 
 app:
   base-url: http://localhost:4200
+  mail:
+    from: noreply@journey.com
+
+# Encryption key for sensitive fields stored in the database (e.g. SMTP password).
+# Override ENCRYPTION_KEY in production with a strong random 32+ character secret.
+encryption:
+  secret-key: ${ENCRYPTION_KEY:default-dev-key-32-chars!!!!!!!!}
+
+# JWT configuration
+# Override JWT_SECRET in production with a strong secret (min 32 chars, ideally 64+)
+jwt:
+  secret: ${JWT_SECRET:change-me-in-production-use-a-long-secret-key-at-least-32-chars}
+  expiration-ms: 86400000
 
 stripe:
   secret-key: sk_test_YOUR_SECRET_KEY_HERE
   publishable-key: pk_test_YOUR_PUBLISHABLE_KEY_HERE
   webhook-secret: whsec_YOUR_WEBHOOK_SECRET_HERE
+
+# CORS allowed origins — comma-separated list, override in production
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
 
 server:
   port: 8080

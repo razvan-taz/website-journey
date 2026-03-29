@@ -17,7 +17,16 @@
       <div class="form-row">
         <div class="form-group">
           <label>Category</label>
-          <input type="text" [value]="category()" (input)="category.set($any($event.target).value)" />
+          @if (availableCategories().length > 0) {
+            <select [value]="category()" (change)="category.set($any($event.target).value)">
+              <option value="">— Select category —</option>
+              @for (cat of availableCategories(); track cat) {
+                <option [value]="cat">{{ cat }}</option>
+              }
+            </select>
+          } @else {
+            <input type="text" [value]="category()" (input)="category.set($any($event.target).value)" placeholder="Loading categories..." />
+          }
         </div>
         <div class="form-group">
           <label>Price</label>
@@ -41,6 +50,55 @@
           <p class="upload-error">{{ uploadError() }}</p>
         }
       </div>
+      @if (isEdit()) {
+        <div class="form-group">
+          <div class="gallery-label-row">
+            <label>Gallery Images</label>
+            <span class="gallery-note">(max 7 additional images)</span>
+          </div>
+
+          @if (additionalImages().length > 0) {
+            <div class="gallery-list">
+              @for (img of additionalImages(); track img.id) {
+                <div class="gallery-item">
+                  <img class="gallery-item-thumb" [src]="img.url" alt="Gallery image" loading="lazy" />
+                  <span class="gallery-item-url">{{ img.url }}</span>
+                  <button
+                    type="button"
+                    class="btn-gallery-delete"
+                    (click)="deleteGalleryImage(img.id)"
+                  >Delete</button>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="gallery-empty">No additional images yet.</p>
+          }
+
+          <div class="gallery-add-row">
+            <button
+              type="button"
+              class="btn-upload"
+              (click)="galleryUpload.click()"
+              [disabled]="galleryUploading() || additionalImages().length >= 7"
+            >
+              @if (galleryUploading()) { <span class="upload-spinner"></span> } @else { + Add Image }
+            </button>
+            <input
+              #galleryUpload
+              type="file"
+              accept="image/*"
+              class="hidden-file-input"
+              (change)="onGalleryFileSelected($event)"
+            />
+          </div>
+
+          @if (galleryError()) {
+            <p class="upload-error">{{ galleryError() }}</p>
+          }
+        </div>
+      }
+
       <div class="form-group">
         <label>Description</label>
         <textarea rows="8" [value]="description()" (input)="description.set($any($event.target).value)"></textarea>
@@ -51,5 +109,119 @@
         </button>
       </div>
     </div>
+
+    @if (isEdit()) {
+      <section class="variants-section">
+        <div class="variants-header">
+          <h2 class="variants-title">Variants</h2>
+          @if (!showVariantForm()) {
+            <button class="btn-add-variant" (click)="openAddVariant()">+ Add Variant</button>
+          }
+        </div>
+
+        @if (variants().length > 0) {
+          <table class="variants-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>SKU</th>
+                <th>Stock</th>
+                <th>Price Modifier</th>
+                <th>Attributes</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (v of variants(); track v.id) {
+                <tr>
+                  <td>{{ v.name }}</td>
+                  <td class="variant-sku-cell">{{ v.sku || '—' }}</td>
+                  <td>{{ v.stock }}</td>
+                  <td>{{ v.priceModifier > 0 ? '+' : '' }}{{ v.priceModifier | number:'1.2-2' }}</td>
+                  <td class="variant-attrs-cell">{{ attrSummary(v) || '—' }}</td>
+                  <td class="variant-actions-cell">
+                    <button class="btn-variant-edit" (click)="openEditVariant(v)">Edit</button>
+                    <button
+                      class="btn-variant-delete"
+                      (click)="deleteVariant(v)"
+                      [disabled]="deletingVariantId() === v.id"
+                    >{{ deletingVariantId() === v.id ? '...' : 'Delete' }}</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else if (!showVariantForm()) {
+          <p class="variants-empty">No variants yet. Add one to offer different options (size, color, etc.).</p>
+        }
+
+        @if (showVariantForm()) {
+          <div class="variant-form">
+            <h3 class="variant-form-title">{{ variantDraft().id !== null ? 'Edit Variant' : 'New Variant' }}</h3>
+
+            @if (variantError()) {
+              <p class="variant-error">{{ variantError() }}</p>
+            }
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Name</label>
+                <input type="text" [value]="variantDraft().name" (input)="variantDraft.update(d => ({ ...d, name: $any($event.target).value }))" placeholder="e.g. Red / Large" />
+              </div>
+              <div class="form-group">
+                <label>SKU</label>
+                <input type="text" [value]="variantDraft().sku" (input)="variantDraft.update(d => ({ ...d, sku: $any($event.target).value }))" placeholder="Optional" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Stock</label>
+                <input type="number" min="0" [value]="variantDraft().stock" (input)="variantDraft.update(d => ({ ...d, stock: +$any($event.target).value }))" />
+              </div>
+              <div class="form-group">
+                <label>Price Modifier (€)</label>
+                <input type="number" step="0.01" [value]="variantDraft().priceModifier" (input)="variantDraft.update(d => ({ ...d, priceModifier: +$any($event.target).value }))" placeholder="0.00 = same price" />
+              </div>
+            </div>
+
+            <div class="variant-attrs-section">
+              <div class="variant-attrs-header">
+                <span class="variant-attrs-label">Attributes</span>
+                <button type="button" class="btn-add-attr" (click)="addAttrRow()">+ Add</button>
+              </div>
+              @for (attr of variantDraft().attrs; track $index) {
+                <div class="attr-row">
+                  <input
+                    type="text"
+                    class="attr-key"
+                    placeholder="Key (e.g. Color)"
+                    [value]="attr.key"
+                    (input)="updateAttr($index, 'key', $any($event.target).value)"
+                  />
+                  <input
+                    type="text"
+                    class="attr-value"
+                    placeholder="Value (e.g. Red)"
+                    [value]="attr.value"
+                    (input)="updateAttr($index, 'value', $any($event.target).value)"
+                  />
+                  @if (variantDraft().attrs.length > 1) {
+                    <button type="button" class="btn-remove-attr" (click)="removeAttrRow($index)">×</button>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="variant-form-actions">
+              <button class="btn-variant-save" (click)="saveVariant()" [disabled]="variantSaving()">
+                {{ variantSaving() ? 'Saving...' : (variantDraft().id !== null ? 'Update Variant' : 'Create Variant') }}
+              </button>
+              <button class="btn-variant-cancel" (click)="cancelVariantForm()">Cancel</button>
+            </div>
+          </div>
+        }
+      </section>
+    }
   }
 </div>

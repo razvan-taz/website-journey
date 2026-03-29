@@ -11,6 +11,18 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
+function passwordStrength(value: string): { score: number; label: string } {
+  if (!value) return { score: 0, label: '' };
+  let score = 0;
+  if (value.length >= 8) score++;
+  if (/[a-z]/.test(value)) score++;
+  if (/[A-Z]/.test(value)) score++;
+  if (/[0-9]/.test(value)) score++;
+  if (/[^a-zA-Z0-9]/.test(value)) score++;
+  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Strong'];
+  return { score, label: labels[score] };
+}
+
 function passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
   const confirmPassword = group.get('confirmPassword')?.value;
@@ -122,6 +134,10 @@ export class SignInModal {
 
   get suConfirmPassword() {
     return this.signUpForm.get('confirmPassword')!;
+  }
+
+  get suPasswordStrength(): { score: number; label: string } {
+    return passwordStrength(this.suPassword.value ?? '');
   }
 
   get passwordMismatch(): boolean {

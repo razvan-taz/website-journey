@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal, computed } from '@angular/core';
+import { Component, DestroyRef, HostListener, inject, signal, computed } from '@angular/core';
 import { DOCUMENT, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Title, Meta, DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -7,11 +7,12 @@ import { ArticleService, ArticleDetail } from '../../services/article.service';
 import { AuthService } from '../../services/auth.service';
 import { UiStateService } from '../../services/ui-state.service';
 import { CommentService, Comment } from '../../services/comment.service';
+import { LazyImagesDirective } from '../../directives/lazy-images.directive';
 
 @Component({
   selector: 'app-content-detail',
   standalone: true,
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, LazyImagesDirective],
   templateUrl: './content-detail.html',
   styleUrl: './content-detail.css',
 })
@@ -32,8 +33,21 @@ export class ContentDetail {
   safeVideoUrl = computed((): SafeResourceUrl | null => {
     const url = this.article()?.videoUrl;
     if (!url) return null;
+    if (!this.isTrustedVideoUrl(url)) return null;
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   });
+
+  private isTrustedVideoUrl(url: string): boolean {
+    if (!url) return false;
+    const trustedPrefixes = [
+      'https://www.youtube.com/embed/',
+      'https://youtube.com/embed/',
+      'https://www.youtube-nocookie.com/embed/',
+      'https://player.vimeo.com/video/',
+      'https://www.dailymotion.com/embed/video/',
+    ];
+    return trustedPrefixes.some(prefix => url.startsWith(prefix));
+  }
 
   private titleService = inject(Title);
   private metaService = inject(Meta);
@@ -53,6 +67,17 @@ export class ContentDetail {
   commentError = signal<string | null>(null);
   editingCommentId = signal<number | null>(null);
   editingContent = signal('');
+  deletingCommentId = signal<number | null>(null);
+
+  readProgress = signal(0);
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    const doc = this.document.documentElement;
+    const scrolled = doc.scrollTop || this.document.body.scrollTop;
+    const total = doc.scrollHeight - doc.clientHeight;
+    this.readProgress.set(total > 0 ? Math.min(100, Math.round((scrolled / total) * 100)) : 0);
+  }
 
   constructor() {
     const route = inject(ActivatedRoute);
@@ -180,9 +205,22 @@ export class ContentDetail {
 
   cancelEdit(): void { this.editingCommentId.set(null); }
 
-  isCurrentUser(authorName: string): boolean {
+  deleteComment(commentId: number): void {
+    this.deletingCommentId.set(commentId);
+    this.commentService.deleteOwnComment(commentId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.comments.update(list => list.filter(c => c.id !== commentId));
+          this.deletingCommentId.set(null);
+        },
+        error: () => this.deletingCommentId.set(null),
+      });
+  }
+
+  isCurrentUser(authorId: number): boolean {
     const user = this.authService.currentUser();
-    return !!user && user.name === authorName;
+    return !!user && user.id !== undefined && user.id === authorId;
   }
 
   copyLink(): void {
@@ -190,5 +228,12 @@ export class ContentDetail {
       this.linkCopied.set(true);
       setTimeout(() => this.linkCopied.set(false), 2000);
     });
+  }
+
+  shareOnTwitter(): void {
+    const article = this.article();
+    const text = article ? encodeURIComponent(article.title) : '';
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener,noreferrer,width=550,height=420');
   }
 }

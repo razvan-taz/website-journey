@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -30,13 +28,13 @@ public class NewsletterController {
     }
 
     @PostMapping("/subscribe")
-    public ResponseEntity<Void> subscribe(@Valid @RequestBody SubscribeRequest request) {
-        if (newsletterRepository.existsByEmail(request.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Already subscribed");
+    public ResponseEntity<String> subscribe(@Valid @RequestBody SubscribeRequest request) {
+        if (!newsletterRepository.existsByEmail(request.getEmail())) {
+            newsletterRepository.save(NewsletterSubscriber.builder().email(request.getEmail()).build());
+            emailService.sendNewsletterConfirmation(request.getEmail());
         }
-        newsletterRepository.save(NewsletterSubscriber.builder().email(request.getEmail()).build());
-        emailService.sendNewsletterConfirmation(request.getEmail());
-        return ResponseEntity.ok().build();
+        // Always return 200 with a generic message to prevent email enumeration
+        return ResponseEntity.ok("If this email is not already subscribed, you will receive a confirmation shortly.");
     }
 
     @GetMapping("/unsubscribe")

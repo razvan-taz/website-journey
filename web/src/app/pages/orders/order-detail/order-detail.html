@@ -1,13 +1,37 @@
 <div class="order-detail-page">
   @if (loading()) {
-    <p class="od-loading">Loading order...</p>
+    <div class="od-skeleton">
+      <div class="skeleton od-sk-back"></div>
+      <div class="od-sk-title-row">
+        <div class="skeleton od-sk-title"></div>
+        <div class="skeleton od-sk-badge"></div>
+      </div>
+      <div class="skeleton od-sk-date"></div>
+      <div class="od-sk-grid">
+        <div class="od-sk-section">
+          @for (_ of [1,2,3]; track $index) {
+            <div class="skeleton od-sk-line"></div>
+          }
+        </div>
+        <div class="od-sk-section">
+          @for (_ of [1,2,3]; track $index) {
+            <div class="skeleton od-sk-line"></div>
+          }
+        </div>
+      </div>
+    </div>
   } @else if (error()) {
     <p class="od-error">{{ error() }}</p>
   } @else if (order(); as o) {
     <div class="od-header">
       <a class="od-back" routerLink="/orders">&larr; My Orders</a>
       <div class="od-title-row">
-        <h1 class="od-title">Order #{{ o.orderId }}</h1>
+        <h1 class="od-title">
+          Order #{{ o.orderId }}
+          <button class="btn-copy" (click)="copy(o.orderId.toString(), 'orderId')" title="Copy order ID" aria-label="Copy order ID">
+            {{ copiedField() === 'orderId' ? 'Copied!' : '⧉' }}
+          </button>
+        </h1>
         <span class="od-status" [class]="'status-' + o.status.toLowerCase()">{{ statusLabel(o.status) }}</span>
       </div>
       <p class="od-date">Placed on {{ o.createdAt | date: 'longDate' }}</p>
@@ -26,6 +50,12 @@
           }
         </div>
         <div class="od-totals">
+          @if (o.shippingAmount !== undefined) {
+            <div class="od-total-row">
+              <span>Shipping</span>
+              <span>{{ o.shippingAmount === 0 ? 'Free' : (o.shippingAmount | currency: 'EUR' : 'symbol') }}</span>
+            </div>
+          }
           @if (o.discountAmount > 0) {
             <div class="od-total-row">
               <span>Discount <small>({{ o.discountCode }})</small></span>
@@ -47,11 +77,35 @@
           {{ o.shippingAddress.city }}, {{ o.shippingAddress.state }} {{ o.shippingAddress.zip }}<br>
           {{ o.shippingAddress.country }}
         </address>
+
+        @if (o.trackingNumber && (o.status === 'SHIPPED' || o.status === 'DELIVERED')) {
+          <div class="od-tracking">
+            <span class="od-tracking-label">Tracking number</span>
+            <span class="od-tracking-value-wrap">
+              <a class="od-tracking-value od-tracking-link"
+                 [href]="'https://t.17track.net/en#nums=' + o.trackingNumber"
+                 target="_blank"
+                 rel="noopener noreferrer">{{ o.trackingNumber }}</a>
+              <button class="btn-copy" (click)="copy(o.trackingNumber!, 'tracking')" title="Copy tracking number" aria-label="Copy tracking number">
+                {{ copiedField() === 'tracking' ? 'Copied!' : '⧉' }}
+              </button>
+            </span>
+          </div>
+        }
       </section>
     </div>
 
     <div class="od-actions">
       <a class="btn-invoice" [routerLink]="['/orders', o.orderId, 'invoice']">View / Print Invoice</a>
+
+      @if (canCancelOrder(o.status)) {
+        <button class="btn-cancel" (click)="cancelOrder()" [disabled]="cancelling()">
+          {{ cancelling() ? 'Cancelling...' : 'Cancel Order' }}
+        </button>
+        @if (cancelError()) {
+          <p class="od-cancel-error">{{ cancelError() }}</p>
+        }
+      }
 
       @if (refundSuccess()) {
         <p class="od-refund-success">Refund request submitted successfully.</p>
@@ -65,6 +119,7 @@
               id="refund-reason"
               class="od-refund-textarea"
               rows="3"
+              maxlength="1000"
               [value]="refundReason()"
               (input)="refundReason.set($any($event.target).value)"
               placeholder="Please describe why you'd like a refund..."

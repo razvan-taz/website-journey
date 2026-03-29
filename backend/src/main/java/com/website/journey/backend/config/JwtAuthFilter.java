@@ -1,5 +1,6 @@
 package com.website.journey.backend.config;
 
+import com.website.journey.backend.domain.user.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,9 +19,11 @@ import java.util.List;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
-    public JwtAuthFilter(JwtUtil jwtUtil) {
+    public JwtAuthFilter(JwtUtil jwtUtil, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -34,20 +37,33 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 
+            if (token.isBlank()) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             if (jwtUtil.isTokenValid(token)) {
                 String email = jwtUtil.extractEmail(token);
-                String role = jwtUtil.extractRole(token);
-                Long userId = jwtUtil.extractUserId(token);
 
-                List<SimpleGrantedAuthority> authorities = List.of(
-                        new SimpleGrantedAuthority("ROLE_" + role)
-                );
+                // SH-003-02: verify the account is still enabled — catches disabled users whose JWTs haven't expired yet
+                boolean enabled = userRepository.findByEmail(email)
+                        .map(u -> u.isEnabled())
+                        .orElse(false);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(email, null, authorities);
-                authentication.setDetails(userId);
+                if (enabled) {
+                    String role = jwtUtil.extractRole(token);
+                    Long userId = jwtUtil.extractUserId(token);
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    List<SimpleGrantedAuthority> authorities = List.of(
+                            new SimpleGrantedAuthority("ROLE_" + role)
+                    );
+
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(email, null, authorities);
+                    authentication.setDetails(userId);
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         }
 

@@ -1,10 +1,16 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnDestroy, DestroyRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { retry } from 'rxjs';
 import { CartService } from '../../services/cart.service';
 import { OrderService } from '../../services/order.service';
 import { ToastService } from '../../services/toast.service';
+import { CouponService, CouponValidationResult } from '../../services/coupon.service';
+import { AddressService, Address } from '../../services/address.service';
+import { AuthService } from '../../services/auth.service';
+import { ShippingService } from '../../services/shipping.service';
 
 declare const Stripe: any;
 
@@ -15,12 +21,17 @@ declare const Stripe: any;
   templateUrl: './checkout.html',
   styleUrl: './checkout.css',
 })
-export class Checkout {
+export class Checkout implements OnDestroy {
   cartService = inject(CartService);
   private orderService = inject(OrderService);
   private router = inject(Router);
   private http = inject(HttpClient);
   private toast = inject(ToastService);
+  private couponService = inject(CouponService);
+  private addressService = inject(AddressService);
+  private authService = inject(AuthService);
+  private shippingService = inject(ShippingService);
+  private destroyRef = inject(DestroyRef);
 
   // ── Step ──────────────────────────────────────────
   step = signal<'shipping' | 'payment'>('shipping');
@@ -33,21 +44,32 @@ export class Checkout {
   zip = signal('');
   country = signal('US');
 
+  // ── Saved addresses ────────────────────────────────
+  savedAddresses = signal<Address[]>([]);
+  useNewAddress = signal(false);
+
+  // ── Shipping ──────────────────────────────────────
+  shippingAmount = signal(0);
+  shippingCurrency = signal('EUR');
+  shippingLoaded = signal(false);
+
   // ── Coupon ────────────────────────────────────────
   couponCode = signal('');
   couponApplying = signal(false);
   couponError = signal<string | null>(null);
-  appliedCoupon = signal<{ code: string; discountAmount: number } | null>(null);
+  appliedCoupon = signal<CouponValidationResult | null>(null);
 
   // ── State ─────────────────────────────────────────
   loading = signal(false);
   error = signal<string | null>(null);
   paymentReady = signal(false);
+  orderSaveFailedRef = signal<string | null>(null); // payment intent ID when order save fails
 
   // ── Stripe internals ──────────────────────────────
   private stripe: any = null;
   private elements: any = null;
   private clientSecret: string | null = null;
+  private mountTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   // ── Computed ──────────────────────────────────────
 
@@ -62,8 +84,56 @@ export class Checkout {
   orderTotal = computed(() => {
     const subtotal = this.cartService.subtotal();
     const discount = this.appliedCoupon()?.discountAmount ?? 0;
-    return Math.max(0, subtotal - discount);
+    const shipping = this.appliedCoupon()?.freeShipping ? 0 : this.shippingAmount();
+    return Math.max(0, subtotal - discount + shipping);
   });
+
+  hasSavedAddresses = computed(() => this.savedAddresses().length > 0 && !this.useNewAddress());
+
+  /** Masked payment intent reference shown to user on order-save failure */
+  maskedPaymentRef = computed(() => {
+    const ref = this.orderSaveFailedRef();
+    if (!ref) return null;
+    return ref.length > 8 ? `****${ref.slice(-8)}` : ref;
+  });
+
+  constructor() {
+    // Load shipping rate
+    this.shippingService.getShippingRate()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (rate) => {
+          this.shippingAmount.set(rate.price);
+          this.shippingCurrency.set(rate.currency);
+          this.shippingLoaded.set(true);
+        },
+        error: () => this.shippingLoaded.set(true),
+      });
+
+    // Load saved addresses for authenticated users
+    if (this.authService.currentUser()) {
+      this.addressService.getAddresses()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({ next: (list) => this.savedAddresses.set(list), error: () => {} });
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.elements?.destroy();
+    if (this.mountTimeoutId !== null) {
+      clearTimeout(this.mountTimeoutId);
+      this.mountTimeoutId = null;
+    }
+  }
+
+  selectSavedAddress(address: Address): void {
+    this.name.set(address.fullName);
+    this.line1.set(address.line1);
+    this.city.set(address.city);
+    this.state.set(address.state);
+    this.zip.set(address.postalCode);
+    this.country.set(address.country);
+  }
 
   // ── Coupon ────────────────────────────────────────
   applyCoupon(): void {
@@ -71,15 +141,27 @@ export class Checkout {
     if (!code || this.couponApplying()) return;
     this.couponApplying.set(true);
     this.couponError.set(null);
-    this.http.get<{ code: string; discountAmount: number }>('/api/discount/validate', {
-      params: { code, subtotal: this.cartService.subtotal().toString() }
-    }).subscribe({
-      next: (res) => { this.appliedCoupon.set(res); this.couponApplying.set(false); },
-      error: (err) => {
-        this.couponError.set(err.error?.message ?? 'Invalid coupon code.');
-        this.couponApplying.set(false);
-      },
-    });
+    const cartItems = this.cartService.items().map(item => ({
+      productId: item.productId,
+      quantity: item.quantity,
+      unitPrice: item.price,
+    }));
+    this.couponService.validateCoupon(code, cartItems)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          if (res.valid) {
+            this.appliedCoupon.set({ ...res, discountAmount: res.discountAmount ?? 0 });
+          } else {
+            this.couponError.set(res.error ?? 'Invalid coupon code.');
+          }
+          this.couponApplying.set(false);
+        },
+        error: () => {
+          this.couponError.set('Could not validate coupon. Please try again.');
+          this.couponApplying.set(false);
+        },
+      });
   }
 
   removeCoupon(): void {
@@ -102,6 +184,12 @@ export class Checkout {
     // Fetch publishable key then create intent
     this.http.get<{ publishableKey: string }>('/api/payments/config').subscribe({
       next: ({ publishableKey }) => {
+        if (!publishableKey || typeof publishableKey !== 'string') {
+          this.error.set('Payment service configuration invalid. Please try again.');
+          this.loading.set(false);
+          return;
+        }
+
         this.stripe = Stripe(publishableKey);
         const amountInCents = Math.round(this.orderTotal() * 100);
 
@@ -110,6 +198,12 @@ export class Checkout {
           currency: 'eur',
         }).subscribe({
           next: ({ clientSecret }) => {
+            if (!clientSecret || typeof clientSecret !== 'string') {
+              this.error.set('Could not initialise payment. Please try again.');
+              this.loading.set(false);
+              return;
+            }
+
             this.clientSecret = clientSecret;
             this.elements = this.stripe.elements({ clientSecret, appearance: this.stripeAppearance() });
             const paymentEl = this.elements.create('payment');
@@ -117,7 +211,8 @@ export class Checkout {
             this.loading.set(false);
 
             // Mount after Angular renders the payment step into the DOM
-            setTimeout(() => {
+            this.mountTimeoutId = setTimeout(() => {
+              this.mountTimeoutId = null;
               const container = document.getElementById('stripe-payment-element');
               if (container) {
                 paymentEl.mount(container);
@@ -186,21 +281,36 @@ export class Checkout {
       total: this.orderTotal(),
       discountCode: this.appliedCoupon()?.code ?? null,
       discountAmount: this.appliedCoupon()?.discountAmount ?? 0,
+      shippingAmount: this.appliedCoupon()?.freeShipping ? 0 : this.shippingAmount(),
       paymentIntentId,
-    }).subscribe({
+    }).pipe(
+      retry({ count: 2, delay: 1000 })
+    ).subscribe({
       next: (confirmation) => {
+        const items = this.cartService.items().map(item => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        }));
         this.cartService.clearCart();
-        this.router.navigate(['/order-confirmation'], { state: { confirmation } });
+        this.router.navigate(['/order-confirmation'], {
+          state: { confirmation: { ...confirmation, items } },
+        });
       },
       error: () => {
-        // Payment succeeded but order save failed — critical edge case
-        this.toast.error('Payment went through but we couldn\'t save your order. Contact support with reference: ' + paymentIntentId);
+        // Payment succeeded but order save failed after retries — show persistent error with masked reference
+        this.orderSaveFailedRef.set(paymentIntentId);
         this.loading.set(false);
       },
     });
   }
 
   goBackToShipping(): void {
+    if (this.mountTimeoutId !== null) {
+      clearTimeout(this.mountTimeoutId);
+      this.mountTimeoutId = null;
+    }
+    this.elements?.destroy();
     this.step.set('shipping');
     this.error.set(null);
     this.paymentReady.set(false);

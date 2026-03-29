@@ -1,5 +1,6 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ArticleService, ArticleListItem } from '../../../services/article.service';
 
@@ -8,12 +9,14 @@ type StatusTab = 'PUBLISHED' | 'DRAFT' | 'SCHEDULED';
 @Component({
   selector: 'app-admin-articles',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, DatePipe],
   templateUrl: './admin-articles.html',
   styleUrl: './admin-articles.css',
 })
 export class AdminArticles {
   private articleService = inject(ArticleService);
+  private destroyRef = inject(DestroyRef);
+
   articles = signal<ArticleListItem[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
@@ -21,10 +24,15 @@ export class AdminArticles {
   activeTab = signal<StatusTab>('PUBLISHED');
   searchQuery = signal('');
 
+  // Pagination state — matches admin-orders pattern
+  page = signal(0);
+  pageSize = 50;
+  totalPages = signal(0);
+  totalElements = signal(0);
+
   readonly filteredArticles = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
     return this.articles()
-      .filter(a => a.status === this.activeTab())
       .filter(a => !q || a.title.toLowerCase().includes(q));
   });
 
@@ -34,10 +42,16 @@ export class AdminArticles {
 
   load(): void {
     this.loading.set(true);
-    this.articleService.getArticlesAdmin(0, 200)
-      .pipe(takeUntilDestroyed())
+    this.error.set(null);
+    this.articleService.getArticlesAdmin(this.page(), this.pageSize, undefined, undefined, this.activeTab())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (r) => { this.articles.set(r.content); this.loading.set(false); },
+        next: (r) => {
+          this.articles.set(r.content);
+          this.totalPages.set(r.totalPages);
+          this.totalElements.set(r.totalElements);
+          this.loading.set(false);
+        },
         error: () => { this.error.set('Failed to load.'); this.loading.set(false); }
       });
   }
@@ -45,6 +59,20 @@ export class AdminArticles {
   setTab(tab: StatusTab): void {
     this.activeTab.set(tab);
     this.searchQuery.set('');
+    this.page.set(0);
+    this.load();
+  }
+
+  prevPage(): void {
+    if (this.page() <= 0) return;
+    this.page.update(p => p - 1);
+    this.load();
+  }
+
+  nextPage(): void {
+    if (this.page() >= this.totalPages() - 1) return;
+    this.page.update(p => p + 1);
+    this.load();
   }
 
   delete(slug: string): void {

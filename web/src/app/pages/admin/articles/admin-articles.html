@@ -23,6 +23,10 @@
     />
   </div>
 
+  @if (totalElements() > 0) {
+    <span class="total-count">{{ totalElements() }} total</span>
+  }
+
   @if (loading()) {
     <p class="admin-loading">Loading...</p>
   } @else if (error()) {
@@ -47,7 +51,7 @@
             <td class="title-cell">{{ article.title }}</td>
             <td>{{ article.author }}</td>
             <td>
-              {{ article.publishDate }}
+              {{ article.publishDate | date: 'mediumDate' }}
               @if (article.status === 'SCHEDULED' && article.scheduledAt) {
                 <span class="scheduled-badge">Scheduled</span>
               }
@@ -69,5 +73,13 @@
         }
       </tbody>
     </table>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="page-btn" (click)="prevPage()" [disabled]="page() === 0">← Prev</button>
+        <span class="page-info">Page {{ page() + 1 }} of {{ totalPages() }}</span>
+        <button class="page-btn" (click)="nextPage()" [disabled]="page() >= totalPages() - 1">Next →</button>
+      </div>
+    }
   }
 </div>

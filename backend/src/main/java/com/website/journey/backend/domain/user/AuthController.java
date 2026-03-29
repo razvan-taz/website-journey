@@ -1,10 +1,12 @@
 package com.website.journey.backend.domain.user;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -77,4 +79,17 @@ public class AuthController {
         userService.changePassword(auth.getName(), request.currentPassword(), request.newPassword());
         return ResponseEntity.noContent().build();
     }
+
+    public record DeleteAccountRequest(@NotBlank String password) {}
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteAccount(@Valid @RequestBody DeleteAccountRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
+        }
+        userService.deleteAccount(auth.getName(), request.password());
+        return ResponseEntity.noContent().build();
+    }
+
 }

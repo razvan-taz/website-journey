@@ -1,6 +1,6 @@
-import { Component, inject, signal, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CurrencyPipe, SlicePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -8,11 +8,29 @@ import { AuthService } from '../../services/auth.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { RefundService } from '../../services/refund.service';
 import { CartService } from '../../services/cart.service';
+import { AddressService, Address, AddressRequest } from '../../services/address.service';
+
+function passwordStrength(value: string): { score: number; label: string } {
+  if (!value) return { score: 0, label: '' };
+  let score = 0;
+  if (value.length >= 8) score++;
+  if (/[a-z]/.test(value)) score++;
+  if (/[A-Z]/.test(value)) score++;
+  if (/[0-9]/.test(value)) score++;
+  if (/[^a-zA-Z0-9]/.test(value)) score++;
+  const labels = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Strong'];
+  return { score, label: labels[score] };
+}
+
+const EMPTY_ADDRESS_FORM = (): AddressRequest => ({
+  label: '', fullName: '', line1: '', line2: null,
+  city: '', state: '', postalCode: '', country: 'US', isDefault: false,
+});
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [RouterLink, CurrencyPipe, SlicePipe, FormsModule],
+  imports: [RouterLink, CurrencyPipe, DatePipe, FormsModule],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
@@ -23,6 +41,7 @@ export class Profile {
   private destroyRef = inject(DestroyRef);
   private refundService = inject(RefundService);
   private cartService = inject(CartService);
+  private addressService = inject(AddressService);
 
   user = this.authService.currentUser;
   isAdmin = this.authService.isAdmin;
@@ -44,6 +63,7 @@ export class Profile {
   newPassword = signal('');
   confirmPassword = signal('');
   savingPassword = signal(false);
+  newPasswordStrength = computed(() => passwordStrength(this.newPassword()));
   passwordError = signal<string | null>(null);
   passwordSuccess = signal(false);
 
@@ -57,6 +77,21 @@ export class Profile {
   savingNotifPref = signal(false);
   notifPrefError = signal<string | null>(null);
 
+  // Address book
+  addresses = signal<Address[]>([]);
+  loadingAddresses = signal(true);
+  showAddressForm = signal(false);
+  editingAddressId = signal<number | null>(null);
+  addressForm = signal<AddressRequest>(EMPTY_ADDRESS_FORM());
+  savingAddress = signal(false);
+  addressFormError = signal<string | null>(null);
+
+  // Account deletion
+  showDeleteForm = signal(false);
+  deletePassword = signal('');
+  deletingAccount = signal(false);
+  deleteError = signal<string | null>(null);
+
   // Refund modal state
   refundingOrderId = signal<number | null>(null);
   refundReason = signal('');
@@ -65,6 +100,13 @@ export class Profile {
   refundedOrders = signal<Set<number>>(new Set());
 
   constructor() {
+    this.addressService.getAddresses()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (list) => { this.addresses.set(list); this.loadingAddresses.set(false); },
+        error: () => this.loadingAddresses.set(false),
+      });
+
     this.http.get<any[]>('/api/orders/mine')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -93,6 +135,92 @@ export class Profile {
           error: () => {},
         });
     }
+  }
+
+  openAddressForm(): void {
+    this.addressForm.set(EMPTY_ADDRESS_FORM());
+    this.editingAddressId.set(null);
+    this.addressFormError.set(null);
+    this.showAddressForm.set(true);
+  }
+
+  editAddress(address: Address): void {
+    this.addressForm.set({
+      label: address.label,
+      fullName: address.fullName,
+      line1: address.line1,
+      line2: address.line2,
+      city: address.city,
+      state: address.state,
+      postalCode: address.postalCode,
+      country: address.country,
+      isDefault: address.isDefault,
+    });
+    this.editingAddressId.set(address.id);
+    this.addressFormError.set(null);
+    this.showAddressForm.set(true);
+  }
+
+  cancelAddressForm(): void {
+    this.showAddressForm.set(false);
+    this.addressFormError.set(null);
+  }
+
+  updateAddressForm(field: keyof AddressRequest, value: any): void {
+    this.addressForm.update(f => ({ ...f, [field]: value }));
+  }
+
+  saveAddress(): void {
+    const form = this.addressForm();
+    if (!form.label || !form.fullName || !form.line1 || !form.city || !form.state || !form.postalCode || !form.country) {
+      this.addressFormError.set('Please fill in all required fields.');
+      return;
+    }
+    if (this.savingAddress()) return;
+    this.savingAddress.set(true);
+    this.addressFormError.set(null);
+
+    const id = this.editingAddressId();
+    const op = id
+      ? this.addressService.updateAddress(id, form)
+      : this.addressService.createAddress(form);
+
+    op.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (saved) => {
+        if (id) {
+          this.addresses.update(list => list.map(a => a.id === id ? saved : a));
+        } else {
+          if (saved.isDefault) {
+            this.addresses.update(list => list.map(a => ({ ...a, isDefault: false })));
+          }
+          this.addresses.update(list => [saved, ...list]);
+        }
+        this.savingAddress.set(false);
+        this.cancelAddressForm();
+      },
+      error: (err) => {
+        this.addressFormError.set(err?.error?.message ?? 'Failed to save address.');
+        this.savingAddress.set(false);
+      },
+    });
+  }
+
+  deleteAddress(id: number): void {
+    this.addressService.deleteAddress(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.addresses.update(list => list.filter(a => a.id !== id)),
+        error: () => {},
+      });
+  }
+
+  setDefaultAddress(id: number): void {
+    this.addressService.setDefault(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.addresses.update(list => list.map(a => ({ ...a, isDefault: a.id === id }))),
+        error: () => {},
+      });
   }
 
   resendVerification(): void {
@@ -224,6 +352,30 @@ export class Profile {
         error: () => {
           this.notifPrefError.set('Failed to update preference.');
           this.savingNotifPref.set(false);
+        },
+      });
+  }
+
+  cancelDeleteAccount(): void {
+    this.showDeleteForm.set(false);
+    this.deletePassword.set('');
+    this.deleteError.set(null);
+  }
+
+  confirmDeleteAccount(): void {
+    if (this.deletingAccount()) return;
+    this.deletingAccount.set(true);
+    this.deleteError.set(null);
+    this.authService.deleteAccount(this.deletePassword())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.authService.logout();
+          this.cartService.clearCart();
+        },
+        error: (err) => {
+          this.deleteError.set(err?.error?.message ?? 'Failed to delete account. Check your password.');
+          this.deletingAccount.set(false);
         },
       });
   }

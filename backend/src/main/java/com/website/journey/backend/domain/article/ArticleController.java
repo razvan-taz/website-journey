@@ -51,8 +51,9 @@ public class ArticleController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String tag,
-            @RequestParam(required = false) ArticleCategory category) {
-        return ResponseEntity.ok(articleService.findAllAdmin(tag, category, PageRequest.of(page, size)));
+            @RequestParam(required = false) ArticleCategory category,
+            @RequestParam(required = false) ArticleStatus status) {
+        return ResponseEntity.ok(articleService.findAllAdmin(tag, category, status, PageRequest.of(page, size)));
     }
 
     @GetMapping("/admin/{slug}")

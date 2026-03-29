@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, of, tap } from 'rxjs';
 
 export interface User {
+  id?: number;
   name: string;
   email: string;
   role: string;
@@ -13,6 +14,7 @@ export interface User {
 
 interface AuthResponse {
   token: string;
+  id?: number;
   name: string;
   email: string;
   role: string;
@@ -21,6 +23,7 @@ interface AuthResponse {
 }
 
 interface UserProfileResponse {
+  id?: number;
   name: string;
   email: string;
   role: string;
@@ -57,7 +60,7 @@ export class AuthService {
         })
         .subscribe({
           next: (profile) =>
-            this._currentUser.set({ name: profile.name, email: profile.email, role: profile.role, emailVerified: profile.emailVerified ?? true, notificationsEnabled: profile.notificationsEnabled ?? true }),
+            this._currentUser.set({ id: profile.id, name: profile.name, email: profile.email, role: profile.role, emailVerified: profile.emailVerified ?? true, notificationsEnabled: profile.notificationsEnabled ?? true }),
           error: () => {
             this._token.set(null);
             localStorage.removeItem('auth_token');
@@ -72,7 +75,7 @@ export class AuthService {
       .pipe(
         tap((response) => {
           this._token.set(response.token);
-          this._currentUser.set({ name: response.name, email: response.email, role: response.role, emailVerified: response.emailVerified ?? true, notificationsEnabled: response.notificationsEnabled ?? true });
+          this._currentUser.set({ id: response.id, name: response.name, email: response.email, role: response.role, emailVerified: response.emailVerified ?? true, notificationsEnabled: response.notificationsEnabled ?? true });
           if (isPlatformBrowser(this.platformId)) localStorage.setItem('auth_token', response.token);
         }),
         map(() => true),
@@ -86,7 +89,7 @@ export class AuthService {
       .pipe(
         tap((response) => {
           this._token.set(response.token);
-          this._currentUser.set({ name: response.name, email: response.email, role: response.role, emailVerified: response.emailVerified ?? false, notificationsEnabled: response.notificationsEnabled ?? true });
+          this._currentUser.set({ id: response.id, name: response.name, email: response.email, role: response.role, emailVerified: response.emailVerified ?? false, notificationsEnabled: response.notificationsEnabled ?? true });
           if (isPlatformBrowser(this.platformId)) localStorage.setItem('auth_token', response.token);
         }),
         map(() => true),
@@ -118,5 +121,9 @@ export class AuthService {
     return this.http.put<UserProfileResponse>('/api/auth/profile', { name }).pipe(
       tap((res) => this.updateUser({ name: res.name }))
     );
+  }
+
+  deleteAccount(password: string): Observable<void> {
+    return this.http.delete<void>('/api/auth/me', { body: { password } });
   }
 }

@@ -40,7 +40,7 @@ export class AdminSocialLinks {
 
   displayName(platform: string): string {
     const names: Record<string, string> = {
-      LIVE: 'Live',
+      LIVE: 'Twitch',
       DISCORD: 'Discord',
       TWITTER: 'Twitter / X',
       YOUTUBE: 'YouTube',

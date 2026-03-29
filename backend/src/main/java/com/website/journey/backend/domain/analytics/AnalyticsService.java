@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class AnalyticsService {
@@ -48,5 +49,30 @@ public class AnalyticsService {
                 newsletterSubscribers,
                 new AnalyticsDto.UserStats(usersThisMonth, usersThisYear, usersTotal)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public ChartsDto getCharts() {
+        LocalDateTime start = LocalDateTime.now().minusDays(29)
+                .withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+        List<ChartsDto.DailyPoint> daily = orderRepository.dailyRevenueAndOrdersSince(start)
+                .stream()
+                .map(row -> new ChartsDto.DailyPoint(
+                        row[0].toString(),
+                        new BigDecimal(row[1].toString()),
+                        ((Number) row[2]).longValue()
+                ))
+                .toList();
+
+        List<ChartsDto.TopProduct> top = orderRepository.topProductsByRevenue()
+                .stream()
+                .map(row -> new ChartsDto.TopProduct(
+                        (String) row[0],
+                        new BigDecimal(row[1].toString())
+                ))
+                .toList();
+
+        return new ChartsDto(daily, top);
     }
 }

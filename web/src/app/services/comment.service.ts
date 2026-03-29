@@ -38,6 +38,10 @@ export class CommentService {
     return this.http.put<Comment>(`/api/comments/${commentId}`, { content });
   }
 
+  deleteOwnComment(commentId: number): Observable<void> {
+    return this.http.delete<void>(`/api/comments/${commentId}`);
+  }
+
   // Admin
   getAdminComments(status?: string, page = 0, size = 20): Observable<any> {
     const params: Record<string, string> = { page: page.toString(), size: size.toString() };

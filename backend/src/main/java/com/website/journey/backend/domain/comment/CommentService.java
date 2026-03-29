@@ -79,6 +79,21 @@ public class CommentService {
         return toDto(commentRepository.save(comment));
     }
 
+    @Transactional
+    public void deleteOwn(Long commentId, String userEmail) {
+        var user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment not found"));
+
+        if (!comment.getAuthorId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only delete your own comments");
+        }
+
+        commentRepository.deleteById(commentId);
+    }
+
     // --- Admin methods ---
 
     @Transactional(readOnly = true)

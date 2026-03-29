@@ -1,4 +1,4 @@
-import { Component, inject, signal, DestroyRef, computed } from '@angular/core';
+import { Component, inject, signal, DestroyRef, computed, HostListener } from '@angular/core';
 import { RouterLink, RouterOutlet, RouterLinkActive } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -15,7 +15,9 @@ export interface AdminNotification extends AdminNotificationPayload {
 const ADMIN_NAV_ITEMS = [
   { label: 'Analytics',      route: '/admin/analytics' },
   { label: 'Articles',       route: '/admin/articles' },
+  { label: 'Categories',     route: '/admin/categories' },
   { label: 'Comments',       route: '/admin/comments' },
+  { label: 'Coupons',        route: '/admin/coupons' },
   { label: 'Contact',        route: '/admin/contact' },
   { label: 'Email Settings', route: '/admin/email-settings' },
   { label: 'FAQ',            route: '/admin/faq' },
@@ -25,9 +27,12 @@ const ADMIN_NAV_ITEMS = [
   { label: 'Orders',         route: '/admin/orders' },
   { label: 'Products',       route: '/admin/products' },
   { label: 'Refunds',        route: '/admin/refunds' },
+  { label: 'Reviews',        route: '/admin/reviews' },
   { label: 'Schedule',       route: '/admin/schedule' },
+  { label: 'Shipping',       route: '/admin/shipping' },
   { label: 'Social Links',   route: '/admin/social-links' },
   { label: 'ToS & Privacy',  route: '/admin/site-pages' },
+  { label: 'Users',          route: '/admin/users' },
 ].sort((a, b) => a.label.localeCompare(b.label));
 
 let notifIdCounter = 0;
@@ -71,12 +76,18 @@ export class Admin {
 
   notifications = signal<AdminNotification[]>([]);
   showNotifPanel = signal(false);
+  sidebarOpen = signal(false);
 
   unreadCount = computed(() => this.notifications().filter(n => !n.read).length);
   recentNotifications = computed(() => this.notifications().slice(0, 10));
 
   readonly navItems = ADMIN_NAV_ITEMS;
   typeIcon = typeIcon;
+
+  @HostListener('window:resize')
+  onResize() {
+    if (window.innerWidth > 768) this.sidebarOpen.set(false);
+  }
 
   constructor() {
     if (this.authService.isAdmin()) {

@@ -9,9 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
@@ -24,14 +23,22 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         String path = request.getRequestURI();
-        return !path.startsWith("/api/auth/");
+        return !isRateLimitedPath(path);
+    }
+
+    private boolean isRateLimitedPath(String path) {
+        return path.startsWith("/api/auth/")
+                || path.equals("/api/payments/create-intent")
+                || path.equals("/api/coupons/validate")
+                || path.equals("/api/contact")
+                || path.equals("/api/newsletter/subscribe");
     }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String ip = getClientIp(request);
-        WindowCounter counter = counters.computeIfAbsent(ip, k -> new WindowCounter());
+        WindowCounter counter = counters.computeIfAbsent(ip, k -> new WindowCounter(WINDOW_MS, MAX_REQUESTS));
 
         if (!counter.tryAcquire()) {
             response.setStatus(429);
@@ -44,24 +51,49 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     private String getClientIp(HttpServletRequest request) {
+        String remoteAddr = request.getRemoteAddr();
         String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
+        if (forwarded != null && !forwarded.isBlank() && isPrivateOrLoopback(remoteAddr)) {
             return forwarded.split(",")[0].trim();
         }
-        return request.getRemoteAddr();
+        return remoteAddr;
+    }
+
+    private boolean isPrivateOrLoopback(String ip) {
+        if (ip == null) return false;
+        if (ip.equals("0:0:0:0:0:0:0:1") || ip.equals("::1")) return true;
+        if (ip.startsWith("127.") || ip.startsWith("10.") || ip.startsWith("192.168.")) return true;
+        if (ip.startsWith("172.")) {
+            String[] parts = ip.split("\\.");
+            if (parts.length == 4) {
+                try {
+                    int second = Integer.parseInt(parts[1]);
+                    return second >= 16 && second <= 31;
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        return false;
     }
 
     private static class WindowCounter {
-        private final AtomicInteger count = new AtomicInteger(0);
-        private volatile long windowStart = Instant.now().toEpochMilli();
+        private final AtomicLong counter = new AtomicLong(0);
+        private volatile long windowStart = System.currentTimeMillis();
+        private final long windowMs;
+        private final long maxRequests;
 
-        boolean tryAcquire() {
-            long now = Instant.now().toEpochMilli();
-            if (now - windowStart > WINDOW_MS) {
+        WindowCounter(long windowMs, long maxRequests) {
+            this.windowMs = windowMs;
+            this.maxRequests = maxRequests;
+        }
+
+        public synchronized boolean tryAcquire() {
+            long now = System.currentTimeMillis();
+            if (now - windowStart >= windowMs) {
                 windowStart = now;
-                count.set(0);
+                counter.set(1);
+                return true;
             }
-            return count.incrementAndGet() <= MAX_REQUESTS;
+            return counter.incrementAndGet() <= maxRequests;
         }
     }
 }

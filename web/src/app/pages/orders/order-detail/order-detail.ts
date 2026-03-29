@@ -24,6 +24,9 @@ export class OrderDetailComponent {
   refundSuccess = signal(false);
   refundError = signal<string | null>(null);
   showRefundForm = signal(false);
+  cancelError = signal<string | null>(null);
+  cancelling = signal(false);
+  copiedField = signal<string | null>(null);
 
   constructor() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -45,6 +48,34 @@ export class OrderDetailComponent {
 
   canRequestRefund(status: string): boolean {
     return ['PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED'].includes(status);
+  }
+
+  canCancelOrder(status: string): boolean {
+    return status === 'PENDING' || status === 'PROCESSING';
+  }
+
+  cancelOrder() {
+    const o = this.order();
+    if (!o) return;
+    if (!confirm('Are you sure you want to cancel this order? This cannot be undone.')) return;
+    this.cancelling.set(true);
+    this.cancelError.set(null);
+    this.orderService.cancelOrder(o.orderId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => { this.order.set(updated); this.cancelling.set(false); },
+        error: (err) => {
+          this.cancelError.set(err?.error?.message ?? 'Failed to cancel order.');
+          this.cancelling.set(false);
+        },
+      });
+  }
+
+  copy(text: string, field: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      this.copiedField.set(field);
+      setTimeout(() => this.copiedField.set(null), 1500);
+    });
   }
 
   submitRefund() {

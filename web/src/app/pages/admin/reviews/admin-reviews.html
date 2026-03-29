@@ -1,0 +1,62 @@
+<div class="admin-page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">Review Moderation</h1>
+      @if (totalElements() > 0) {
+        <span class="total-count">{{ totalElements() }} total</span>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="admin-loading">Loading...</p>
+  } @else if (error()) {
+    <p class="admin-error">{{ error() }}</p>
+  } @else {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>User</th>
+          <th>Review</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (review of reviews(); track review.id) {
+          <tr>
+            <td class="product-cell">{{ review.productName }}</td>
+            <td class="user-cell">{{ review.userName }}</td>
+            <td class="review-cell">
+              <span [title]="review.body">{{ truncate(review.body) }}</span>
+            </td>
+            <td>{{ review.createdAt | date:'dd MMM yyyy' }}</td>
+            <td class="actions-cell">
+              <button
+                class="btn-delete"
+                (click)="deleteReview(review)"
+                [disabled]="deletingId() === review.id"
+              >
+                {{ deletingId() === review.id ? '...' : 'Delete' }}
+              </button>
+            </td>
+          </tr>
+        }
+        @if (reviews().length === 0) {
+          <tr>
+            <td colspan="5" class="empty-row">No reviews yet.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button class="page-btn" (click)="prevPage()" [disabled]="page() === 0">← Prev</button>
+        <span class="page-info">Page {{ page() + 1 }} of {{ totalPages() }}</span>
+        <button class="page-btn" (click)="nextPage()" [disabled]="page() >= totalPages() - 1">Next →</button>
+      </div>
+    }
+  }
+</div>

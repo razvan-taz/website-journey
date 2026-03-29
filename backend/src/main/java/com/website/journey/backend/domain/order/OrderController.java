@@ -58,4 +58,14 @@ public class OrderController {
         Long userId = orderService.resolveUserId(auth.getName());
         return ResponseEntity.ok(orderService.getOrderDetail(orderId, userId));
     }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<OrderDetailResponse> cancelOrder(@PathVariable Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
+        }
+        Long userId = orderService.resolveUserId(auth.getName());
+        return ResponseEntity.ok(orderService.cancelOrder(id, userId));
+    }
 }

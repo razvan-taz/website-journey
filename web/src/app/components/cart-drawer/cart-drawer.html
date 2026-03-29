@@ -20,7 +20,7 @@
             <span class="item-price">{{ item.price | currency:'EUR':'symbol' }}</span>
           </div>
           <div class="item-qty">
-            <button class="qty-btn" (click)="decrement(item.productId, item.quantity)" aria-label="Decrease quantity">−</button>
+            <button class="qty-btn" (click)="decrement(item.productId, item.quantity)" [disabled]="item.quantity <= 1" [attr.title]="item.quantity <= 1 ? 'Use × to remove item' : null" aria-label="Decrease quantity">−</button>
             <span class="qty-value">{{ item.quantity }}</span>
             <button class="qty-btn" (click)="increment(item.productId, item.quantity)" aria-label="Increase quantity">+</button>
           </div>

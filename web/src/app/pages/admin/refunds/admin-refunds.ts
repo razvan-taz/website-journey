@@ -1,5 +1,5 @@
 import { Component, inject, signal, DestroyRef } from '@angular/core';
-import { SlicePipe } from '@angular/common';
+import { SlicePipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RefundService, RefundRequest, RefundPage } from '../../../services/refund.service';
@@ -9,7 +9,7 @@ type StatusFilter = '' | 'PENDING' | 'APPROVED' | 'REJECTED';
 @Component({
   selector: 'app-admin-refunds',
   standalone: true,
-  imports: [SlicePipe, FormsModule],
+  imports: [SlicePipe, DatePipe, FormsModule],
   templateUrl: './admin-refunds.html',
   styleUrl: './admin-refunds.css',
 })

@@ -1,5 +1,17 @@
 @if (loading() && posts().length === 0) {
-  <p class="feed-loading">Loading articles...</p>
+  <div class="card-grid">
+    @for (_ of [1,2,3,4,5,6]; track $index) {
+      <div class="card-skeleton">
+        <div class="skeleton card-skeleton-thumb"></div>
+        <div class="card-skeleton-body">
+          <div class="skeleton card-skeleton-tag"></div>
+          <div class="skeleton card-skeleton-title"></div>
+          <div class="skeleton card-skeleton-title card-skeleton-title--short"></div>
+          <div class="skeleton card-skeleton-meta"></div>
+        </div>
+      </div>
+    }
+  </div>
 } @else if (error()) {
   <p class="feed-error">{{ error() }}</p>
 } @else {
@@ -46,7 +58,7 @@
 
           <footer class="card-meta">
             <span class="card-author">{{ post.author }}</span>
-            <span class="card-date">{{ post.publishDate }}</span>
+            <span class="card-date">{{ post.publishDate | date:'mediumDate' }}</span>
             @if (post.readingTimeMinutes) {
               <span class="card-reading-time">~{{ post.readingTimeMinutes }} min read</span>
             }

@@ -130,6 +130,11 @@ nav::after {
   display: block;
 }
 
+a:has(.nav-logo),
+a:has(.mobile-logo) {
+  display: contents;
+}
+
 .nav-links-group {
   display: flex;
   gap: 12px;
@@ -530,11 +535,18 @@ main {
   justify-content: center;
   text-decoration: none;
   cursor: pointer;
+  color: #dadada;
+  transition: color 0.5s ease;
+}
+
+.nav-bell:hover {
+  color: #880824;
 }
 
 .bell-icon {
-  font-size: 1rem;
-  line-height: 1;
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 
 .bell-badge {
@@ -553,4 +565,41 @@ main {
   justify-content: center;
   padding: 0 3px;
   line-height: 1;
+}
+
+/* ── Back to top button ───────────────────────────── */
+
+.back-to-top {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 44px;
+  height: 44px;
+  background: #880824;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.back-to-top:hover {
+  background: #6a061c;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .back-to-top {
+    bottom: 20px;
+    right: 20px;
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
 }

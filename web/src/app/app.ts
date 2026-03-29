@@ -14,6 +14,7 @@ import { UiStateService } from './services/ui-state.service';
 import { SiteService, ScheduleEntry } from './services/site.service';
 import { NavLayoutService, NavLayoutItem, NavZone } from './services/nav-layout.service';
 import { NotificationService } from './services/notification.service';
+import { ToastService } from './services/toast.service';
 
 @Component({
   selector: 'app-root',
@@ -29,6 +30,7 @@ export class App {
   notificationService = inject(NotificationService);
   private siteService = inject(SiteService);
   private navLayoutService = inject(NavLayoutService);
+  private toastService = inject(ToastService);
   private destroyRef = inject(DestroyRef);
   private elRef = inject(ElementRef);
 
@@ -36,6 +38,7 @@ export class App {
   showCart = false;
   showSchedule = false;
   showMobileMenu = false;
+  showBackToTop = signal(false);
 
   scheduleEntries = signal<ScheduleEntry[]>([]);
   liveStatus = this.siteService.liveStatus;
@@ -55,6 +58,13 @@ export class App {
     this.navLayoutService.loadNavLayout()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({ error: () => {} });
+
+    this.cartService.guestCartMerged$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(count => {
+        const label = count === 1 ? '1 item' : `${count} items`;
+        this.toastService.info(`${label} from your previous session added to your cart.`);
+      });
 
     afterNextRender(() => this.measureNav());
 
@@ -82,6 +92,15 @@ export class App {
     const oy = item.offsetY ?? 0;
     if (!ox && !oy) return {};
     return { transform: `translate(${ox}px, ${-oy}px)` };
+  }
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    this.showBackToTop.set(window.scrollY > 400);
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   @HostListener('document:click')

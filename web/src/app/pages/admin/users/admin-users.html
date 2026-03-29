@@ -1,0 +1,74 @@
+<div class="admin-users">
+  <h2 class="au-title">User Management</h2>
+
+  <div class="au-toolbar">
+    <input
+      class="au-search"
+      type="search"
+      placeholder="Search by name or email..."
+      [value]="searchQuery()"
+      (input)="onSearch($any($event.target).value)"
+    />
+    <span class="au-count">{{ totalElements() }} users</span>
+  </div>
+
+  @if (loading()) {
+    <p class="au-loading">Loading...</p>
+  } @else if (users().length === 0) {
+    <p class="au-empty">No users found.</p>
+  } @else {
+    <div class="au-table-wrap">
+      <table class="au-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Verified</th>
+            <th>Orders</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr [class.au-row--disabled]="!user.enabled">
+              <td class="au-cell-name">{{ user.name }}</td>
+              <td class="au-cell-email">{{ user.email }}</td>
+              <td>
+                <span class="au-badge" [class.au-badge--admin]="user.role === 'ADMIN'">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td>
+                <span class="au-badge" [class.au-badge--disabled]="!user.enabled">
+                  {{ user.enabled ? 'Active' : 'Disabled' }}
+                </span>
+              </td>
+              <td>{{ user.emailVerified ? '✓' : '—' }}</td>
+              <td>{{ user.orderCount }}</td>
+              <td>{{ user.createdAt | date:'mediumDate' }}</td>
+              <td class="au-actions">
+                <button class="au-btn" (click)="toggleEnabled(user)" [disabled]="isCurrentUser(user)" [title]="isCurrentUser(user) ? 'You cannot disable your own account' : ''">
+                  {{ user.enabled ? 'Disable' : 'Enable' }}
+                </button>
+                <button class="au-btn au-btn--role" (click)="toggleRole(user)">
+                  Make {{ user.role === 'ADMIN' ? 'User' : 'Admin' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages > 1) {
+      <div class="au-pagination">
+        <button class="au-page-btn" [disabled]="page() === 0" (click)="loadPage(page() - 1)">← Prev</button>
+        <span class="au-page-info">Page {{ page() + 1 }} of {{ totalPages }}</span>
+        <button class="au-page-btn" [disabled]="page() + 1 >= totalPages" (click)="loadPage(page() + 1)">Next →</button>
+      </div>
+    }
+  }
+</div>

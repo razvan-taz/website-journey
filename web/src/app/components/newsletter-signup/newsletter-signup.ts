@@ -22,7 +22,7 @@ export class NewsletterSignup {
     this.submitting.set(true);
     this.error.set(null);
     this.http.post('/api/newsletter/subscribe', { email }).subscribe({
-      next: () => { this.success.set(true); this.submitting.set(false); },
+      next: () => { this.success.set(true); this.submitting.set(false); this.email.set(''); },
       error: (err) => {
         this.error.set(err.status === 409 ? 'You\'re already subscribed!' : 'Something went wrong. Try again.');
         this.submitting.set(false);

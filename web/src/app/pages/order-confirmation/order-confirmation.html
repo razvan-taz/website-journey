@@ -14,15 +14,57 @@
           <span class="detail-label">Status</span>
           <span class="detail-value status-badge">{{ displayStatus }}</span>
         </div>
+        @if (confirmation()!.shippingAmount !== undefined) {
+          <div class="detail-row">
+            <span class="detail-label">Shipping</span>
+            <span class="detail-value">{{ confirmation()!.shippingAmount === 0 ? 'Free' : (confirmation()!.shippingAmount! | currency:'EUR':'symbol') }}</span>
+          </div>
+        }
         <div class="detail-row">
           <span class="detail-label">Total</span>
           <span class="detail-value">{{ confirmation()!.total | currency:'EUR':'symbol' }}</span>
         </div>
+        @if (confirmation()!.items?.length) {
+          @for (item of confirmation()!.items!; track item.name) {
+            <div class="detail-row">
+              <span class="detail-label">{{ item.name }}</span>
+              <span class="detail-value">{{ item.quantity }} &times; {{ item.price | currency:'EUR':'symbol' }}</span>
+            </div>
+          }
+        }
       </div>
 
       <div class="confirmation-actions">
         <a routerLink="/store" class="btn-continue">Continue Shopping</a>
         <a routerLink="/" class="btn-home">Go Home</a>
+      </div>
+    </div>
+  </div>
+}
+
+@if (paymentVerifying()) {
+  <div class="confirmation-page">
+    <div class="confirmation-card">
+      <div class="confirmation-icon confirm-icon--pending">⏳</div>
+      <h1 class="confirmation-title">Payment Received</h1>
+      <p class="confirmation-subtitle">Your payment went through successfully. We're processing your order now — you'll receive a confirmation email shortly.</p>
+      <div class="confirmation-actions">
+        <a routerLink="/orders" class="btn-continue">View My Orders</a>
+        <a routerLink="/store" class="btn-home">Continue Shopping</a>
+      </div>
+    </div>
+  </div>
+}
+
+@if (paymentRedirectFailed()) {
+  <div class="confirmation-page">
+    <div class="confirmation-card">
+      <div class="confirmation-icon confirm-icon--error">✕</div>
+      <h1 class="confirmation-title">Payment Not Completed</h1>
+      <p class="confirmation-subtitle">Your payment was not completed. No charge was made. You can return to checkout and try again.</p>
+      <div class="confirmation-actions">
+        <a routerLink="/checkout" class="btn-continue">Return to Checkout</a>
+        <a routerLink="/store" class="btn-home">Back to Store</a>
       </div>
     </div>
   </div>

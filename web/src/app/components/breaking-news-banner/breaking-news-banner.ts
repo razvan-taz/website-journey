@@ -2,6 +2,7 @@ import { Component, inject, signal, DestroyRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WebSocketService, BreakingNewsPayload } from '../../services/websocket.service';
+import { LivePrefsService } from '../../services/live-prefs.service';
 
 @Component({
   selector: 'app-breaking-news-banner',
@@ -13,6 +14,7 @@ import { WebSocketService, BreakingNewsPayload } from '../../services/websocket.
 export class BreakingNewsBanner {
   private wsService = inject(WebSocketService);
   private destroyRef = inject(DestroyRef);
+  livePrefs = inject(LivePrefsService);
 
   article = signal<BreakingNewsPayload | null>(null);
   dismissed = signal(false);
@@ -22,6 +24,7 @@ export class BreakingNewsBanner {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (payload) => {
+          if (!this.livePrefs.breakingNewsEnabled()) return;
           this.article.set(payload);
           this.dismissed.set(false);
         },

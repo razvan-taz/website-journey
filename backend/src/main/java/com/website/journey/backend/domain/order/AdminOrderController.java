@@ -1,6 +1,8 @@
 package com.website.journey.backend.domain.order;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/orders")
@@ -39,4 +43,15 @@ public class AdminOrderController {
         orderService.updateOrderStatusAdmin(id, request.getStatus());
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/bulk-status")
+    public ResponseEntity<Void> bulkUpdateStatus(@Valid @RequestBody BulkStatusRequest request) {
+        orderService.bulkUpdateOrderStatusAdmin(request.orderIds(), request.status());
+        return ResponseEntity.ok().build();
+    }
+
+    public record BulkStatusRequest(
+            @NotEmpty List<Long> orderIds,
+            @NotBlank String status
+    ) {}
 }

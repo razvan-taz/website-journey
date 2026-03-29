@@ -1,8 +1,11 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { RxStomp, RxStompConfig } from '@stomp/rx-stomp';
 import { Observable, EMPTY } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import { map, filter, distinctUntilChanged, skip } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 export interface WsEnvelope<T> {
   type: string;
@@ -42,20 +45,35 @@ export interface BreakingNewsPayload {
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
   private platformId = inject(PLATFORM_ID);
+  private authService = inject(AuthService);
   private rxStomp = new RxStomp();
   private connected = false;
 
   constructor() {
     if (!isPlatformBrowser(this.platformId)) return;
     this.connect();
+
+    toObservable(this.authService.isLoggedIn)
+      .pipe(skip(1), distinctUntilChanged())
+      .subscribe(() => {
+        this.rxStomp.deactivate().then(() => {
+          this.connected = false;
+          this.connect();
+        });
+      });
   }
 
   private connect(): void {
     // Dynamic import of SockJS to avoid SSR issues
     import('sockjs-client').then((SockJSModule) => {
       const SockJS = SockJSModule.default;
+      const token = this.authService.getToken();
+      const connectHeaders: Record<string, string> = token
+        ? { Authorization: `Bearer ${token}` }
+        : {};
       const config: RxStompConfig = {
-        webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+        webSocketFactory: () => new SockJS(environment.wsUrl),
+        connectHeaders,
         reconnectDelay: 5000,
         heartbeatIncoming: 0,
         heartbeatOutgoing: 20000,

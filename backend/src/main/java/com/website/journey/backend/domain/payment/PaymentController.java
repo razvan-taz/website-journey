@@ -11,7 +11,10 @@ import com.website.journey.backend.domain.order.OrderRepository;
 import com.website.journey.backend.domain.order.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 import java.util.Optional;
@@ -50,6 +54,28 @@ public class PaymentController {
     @PostMapping("/create-intent")
     public ResponseEntity<Map<String, String>> createIntent(
             @RequestBody CreatePaymentIntentRequest request) {
+
+        // Ownership check: if an orderId is provided, verify it belongs to the authenticated user
+        if (request.orderId() != null && !request.orderId().isBlank()) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Long authenticatedUserId = (authentication != null && authentication.getDetails() instanceof Long)
+                    ? (Long) authentication.getDetails()
+                    : null;
+
+            if (authenticatedUserId != null) {
+                try {
+                    Long orderId = Long.parseLong(request.orderId());
+                    orderRepository.findById(orderId).ifPresent(order -> {
+                        if (order.getUserId() != null && !order.getUserId().equals(authenticatedUserId)) {
+                            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+                        }
+                    });
+                } catch (NumberFormatException ignored) {
+                    // orderId is not a numeric order id — treat as opaque metadata, skip ownership check
+                }
+            }
+        }
+
         try {
             PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                     .setAmount((long) request.amount())
@@ -88,6 +114,11 @@ public class PaymentController {
                     PaymentIntent paymentIntent = (PaymentIntent) obj;
                     orderRepository.findByPaymentIntentId(paymentIntent.getId()).ifPresentOrElse(
                             order -> {
+                                if ("PAID".equals(order.getStatus())) {
+                                    log.info("[Stripe] Order {} already PAID — skipping duplicate webhook (paymentIntent={})",
+                                            order.getId(), paymentIntent.getId());
+                                    return;
+                                }
                                 // Use orderService to update status so WebSocket event is emitted
                                 orderService.updateOrderStatus(order.getId(), "PAID");
                                 log.info("[Stripe] Order {} marked as PAID (paymentIntent={})",

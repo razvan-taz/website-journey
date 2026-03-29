@@ -92,3 +92,22 @@
   padding: 1rem 0;
   margin-top: 0.5rem;
 }
+
+.view-all {
+  border-top: 1px solid #2a2a2a;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  text-align: center;
+}
+
+.view-all-link {
+  color: #880824;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.view-all-link:hover {
+  opacity: 0.75;
+}

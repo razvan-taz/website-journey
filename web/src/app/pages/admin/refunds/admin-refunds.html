@@ -38,7 +38,7 @@
             <td>#{{ r.orderId }}</td>
             <td class="cell-email">{{ r.userEmail }}</td>
             <td class="cell-reason" [title]="r.reason">{{ r.reason | slice:0:60 }}{{ r.reason.length > 60 ? '…' : '' }}</td>
-            <td class="cell-date">{{ r.requestedAt | slice:0:10 }}</td>
+            <td class="cell-date">{{ r.requestedAt | date:'mediumDate' }}</td>
             <td>
               <span class="status-badge" [class]="'status-' + r.status.toLowerCase()">{{ r.status }}</span>
             </td>

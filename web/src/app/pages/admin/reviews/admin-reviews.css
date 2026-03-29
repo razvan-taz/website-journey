@@ -1,0 +1,168 @@
+.admin-page {
+  max-width: 1200px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.page-title {
+  color: #dadada;
+  font-size: 24px;
+  margin: 0;
+}
+
+.total-count {
+  color: #666;
+  font-size: 13px;
+}
+
+/* ── Table ────────────────────────────────────────── */
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #aaa;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+td {
+  padding: 12px;
+  color: #dadada;
+  font-size: 14px;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+tr:hover td {
+  background: #1a1a1a;
+}
+
+.product-cell {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #aaa;
+  font-size: 13px;
+}
+
+.user-cell {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-cell {
+  max-width: 340px;
+  color: #bbb;
+  font-size: 13px;
+}
+
+.review-cell span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.actions-cell {
+  white-space: nowrap;
+}
+
+.empty-row {
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+  padding: 24px;
+}
+
+/* ── Delete Button ────────────────────────────────── */
+
+.btn-delete {
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid #3a1010;
+  color: #e05a70;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+
+.btn-delete:hover:not(:disabled) {
+  border-color: #e05a70;
+  background: rgba(224, 90, 112, 0.08);
+}
+
+.btn-delete:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Pagination ───────────────────────────────────── */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.page-btn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid #444;
+  color: #aaa;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  border-color: #880824;
+  color: #dadada;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.page-info {
+  color: #888;
+  font-size: 13px;
+}
+
+/* ── States ───────────────────────────────────────── */
+
+.admin-loading,
+.admin-error {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.admin-error {
+  color: #e05a70;
+}

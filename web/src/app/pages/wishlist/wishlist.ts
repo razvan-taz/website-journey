@@ -3,6 +3,8 @@ import { RouterLink } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WishlistService, WishlistItem } from '../../services/wishlist.service';
+import { CartService } from '../../services/cart.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-wishlist',
@@ -16,6 +18,8 @@ export class Wishlist {
   loading = signal(true);
 
   private wishlistService = inject(WishlistService);
+  private cartService = inject(CartService);
+  private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
 
   constructor() {
@@ -36,5 +40,16 @@ export class Wishlist {
       .subscribe({
         next: () => this.items.update(list => list.filter(i => i.productId !== productId)),
       });
+  }
+
+  addToCart(item: WishlistItem): void {
+    if (item.stock <= 0) return;
+    this.cartService.addItem({
+      productId: item.productId,
+      name: item.name,
+      price: item.price,
+      imageUrl: item.imageUrl,
+    });
+    this.toast.success(`${item.name} added to cart.`);
   }
 }

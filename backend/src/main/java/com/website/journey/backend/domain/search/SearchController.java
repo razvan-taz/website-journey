@@ -19,8 +19,26 @@ public class SearchController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SearchResultDto>> search(
-            @RequestParam(defaultValue = "") String q) {
-        return ResponseEntity.ok(searchService.search(q));
+    public ResponseEntity<SearchResponseDto> search(
+            @RequestParam(defaultValue = "") String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        List<SearchResultDto> rawResults = searchService.search(q);
+
+        List<SearchItemDto> wrappedResults = rawResults.stream()
+                .map(item -> new SearchItemDto(item, null, null))
+                .toList();
+
+        SearchResponseDto response = new SearchResponseDto(
+                wrappedResults,
+                null,
+                q,
+                page,
+                size,
+                rawResults.size()
+        );
+
+        return ResponseEntity.ok(response);
     }
 }

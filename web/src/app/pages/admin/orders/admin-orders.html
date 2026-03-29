@@ -1,9 +1,14 @@
 <div class="admin-page">
   <div class="page-header">
-    <h1 class="page-title">Orders</h1>
-    @if (totalElements() > 0) {
-      <span class="total-count">{{ totalElements() }} total</span>
-    }
+    <div class="page-header-left">
+      <h1 class="page-title">Orders</h1>
+      @if (totalElements() > 0) {
+        <span class="total-count">{{ totalElements() }} total</span>
+      }
+    </div>
+    <button class="btn-export" (click)="exportCsv()" [disabled]="orders().length === 0">
+      ↓ Export CSV
+    </button>
   </div>
 
   <div class="tab-bar">
@@ -14,6 +19,21 @@
     }
   </div>
 
+  @if (someSelected()) {
+    <div class="bulk-bar">
+      <span class="bulk-count">{{ selectedIds().size }} selected</span>
+      <select class="bulk-select" [value]="bulkStatus()" (change)="onBulkStatusChange($event)">
+        @for (opt of bulkStatusOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+      <button class="btn-bulk-apply" (click)="applyBulkAction()" [disabled]="bulkUpdating()">
+        {{ bulkUpdating() ? 'Updating...' : 'Apply' }}
+      </button>
+      <button class="btn-bulk-clear" (click)="clearSelection()">Clear</button>
+    </div>
+  }
+
   @if (loading()) {
     <p class="admin-loading">Loading...</p>
   } @else if (error()) {
@@ -22,18 +42,25 @@
     <table class="admin-table">
       <thead>
         <tr>
+          <th class="col-check">
+            <input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll()" aria-label="Select all" />
+          </th>
           <th>Order ID</th>
           <th>Customer</th>
           <th>Items</th>
           <th>Total</th>
           <th>Status</th>
           <th>Date</th>
+          <th>Tracking</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         @for (order of orders(); track order.orderId) {
-          <tr>
+          <tr [class.row-selected]="selectedIds().has(order.orderId)">
+            <td class="col-check">
+              <input type="checkbox" [checked]="selectedIds().has(order.orderId)" (change)="toggleSelect(order.orderId)" [attr.aria-label]="'Select order ' + order.orderId" />
+            </td>
             <td class="mono">#{{ formatOrderId(order.orderId) }}</td>
             <td class="email-cell">{{ order.customerEmail }}</td>
             <td>{{ itemsSummary(order) }}</td>
@@ -42,6 +69,34 @@
               <span class="badge" [class]="statusBadgeClass(order.status)">{{ order.status }}</span>
             </td>
             <td>{{ order.createdAt | date:'dd MMM yyyy' }}</td>
+            <td class="tracking-cell">
+              @if (editingTrackingId() === order.orderId) {
+                <div class="tracking-edit">
+                  <input
+                    class="tracking-input"
+                    type="text"
+                    [value]="trackingDraft()"
+                    (input)="trackingDraft.set($any($event.target).value)"
+                    placeholder="Tracking #"
+                  />
+                  <button class="btn-tracking-save" (click)="saveTracking(order)" [disabled]="savingTrackingId() === order.orderId">✓</button>
+                  <button class="btn-tracking-cancel" (click)="cancelEditTracking()">✕</button>
+                </div>
+              } @else if (order.trackingNumber) {
+                <span class="tracking-value" (click)="startEditTracking(order)" title="Click to edit tracking number">
+                  <a class="tracking-link"
+                     [href]="'https://t.17track.net/en#nums=' + order.trackingNumber"
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     (click)="$event.stopPropagation()"
+                     title="Track on 17track">{{ order.trackingNumber }}</a>
+                </span>
+              } @else if (order.status === 'SHIPPED' || order.status === 'DELIVERED') {
+                <button class="btn-add-tracking" (click)="startEditTracking(order)">+ Add</button>
+              } @else {
+                <span class="tracking-na">—</span>
+              }
+            </td>
             <td class="actions-cell">
               @if (getNextStatus(order.status); as next) {
                 <button
@@ -57,7 +112,9 @@
         }
         @if (orders().length === 0) {
           <tr>
-            <td colspan="7" class="empty-row">No orders found.</td>
+            <td colspan="9" class="empty-row">
+              No {{ activeTab() === 'ALL' ? '' : activeTab().replace('_', ' ').toLowerCase() + ' ' }}orders yet.
+            </td>
           </tr>
         }
       </tbody>

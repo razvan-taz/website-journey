@@ -1,3 +1,82 @@
+/* ── Reading progress bar ───────────────────────────── */
+
+.read-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: #880824;
+  z-index: 9999;
+  transition: width 0.1s linear;
+  pointer-events: none;
+}
+
+/* ── Skeleton loader ────────────────────────────────── */
+
+@keyframes shimmer {
+  from { background-position: -600px 0; }
+  to { background-position: 600px 0; }
+}
+
+.skeleton-article {
+  max-width: 860px;
+  padding-top: 16px;
+}
+
+.skeleton-heading,
+.skeleton-meta,
+.skeleton-image,
+.skeleton-line {
+  background: linear-gradient(90deg, #1e1e1e 25%, #2a2a2a 50%, #1e1e1e 75%);
+  background-size: 1200px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.skeleton-heading { height: 36px; width: 70%; }
+.skeleton-meta { height: 16px; width: 35%; margin-bottom: 20px; }
+.skeleton-image { height: 400px; width: 100%; border-radius: 12px; margin-bottom: 24px; }
+.skeleton-line { height: 14px; width: 100%; }
+.skeleton-line--short { width: 50%; }
+.skeleton-line--medium { width: 75%; }
+
+/* ── Twitter share button ────────────────────────────── */
+
+.btn-share-twitter {
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.btn-share-twitter:hover {
+  background: #222;
+}
+
+/* ── Article body: normalize inline images ─────────── */
+
+::ng-deep .article-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  display: block;
+  margin: 8px 0;
+}
+
+/* ── Article empty / no-content fallback ────────────── */
+
+.article-empty {
+  color: #888;
+  font-style: italic;
+  padding: 1rem 0;
+}
+
 /* ── Back link ──────────────────────────────────────── */
 
 .back-link {
@@ -268,16 +347,22 @@
   white-space: pre-wrap;
 }
 
-.btn-comment-edit {
+.comment-actions { display: flex; gap: 1rem; margin-top: 0.25rem; }
+
+.btn-comment-edit,
+.btn-comment-delete {
   background: none;
   border: none;
-  color: #888;
   font-size: 0.8rem;
   cursor: pointer;
   padding: 0;
   text-decoration: underline;
 }
+.btn-comment-edit { color: #888; }
 .btn-comment-edit:hover { color: #dadada; }
+.btn-comment-delete { color: #7a3a3a; }
+.btn-comment-delete:hover:not(:disabled) { color: #e05a70; }
+.btn-comment-delete:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .comment-edit-actions { display: flex; gap: 0.5rem; margin-top: 0.4rem; }
 

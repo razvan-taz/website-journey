@@ -19,4 +19,9 @@ public class AnalyticsController {
     public ResponseEntity<AnalyticsDto> getAnalytics() {
         return ResponseEntity.ok(analyticsService.getAnalytics());
     }
+
+    @GetMapping("/charts")
+    public ResponseEntity<ChartsDto> getCharts() {
+        return ResponseEntity.ok(analyticsService.getCharts());
+    }
 }

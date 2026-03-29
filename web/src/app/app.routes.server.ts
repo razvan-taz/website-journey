@@ -9,6 +9,15 @@ export const serverRoutes: ServerRoute[] = [
   // Dynamic public pages — render on the server per request
   { path: 'content/:id', renderMode: RenderMode.Server },
 
+  // Store — client-side only (requires live backend; SSR would fail with relative API URLs)
+  { path: 'store', renderMode: RenderMode.Client },
+  { path: 'store/**', renderMode: RenderMode.Client },
+
+  // Checkout — client-side only (payment UI, no SSR benefit)
+  { path: 'checkout', renderMode: RenderMode.Client },
+  { path: 'order-confirmation', renderMode: RenderMode.Client },
+  { path: 'search', renderMode: RenderMode.Client },
+
   // Dynamic authenticated pages
   { path: 'orders', renderMode: RenderMode.Client },
   { path: 'orders/**', renderMode: RenderMode.Client },

@@ -37,6 +37,14 @@ public class EmailService {
 
     public record OrderItemDetail(String name, int quantity, BigDecimal price) {}
 
+    /** Returns a masked version of an email address for safe logging (e.g. "j****@example.com"). */
+    private static String maskEmail(String email) {
+        if (email == null) return "[null]";
+        int atIndex = email.indexOf('@');
+        if (atIndex <= 0) return "****";
+        return email.charAt(0) + "****" + email.substring(atIndex);
+    }
+
     private String fromAddress() {
         try {
             EmailConfig config = emailConfigService.getConfig();
@@ -77,11 +85,11 @@ public class EmailService {
             helper.setText(html, true);
 
             mailSender.send(message);
-            log.info("Order confirmation email sent to {} for order {}", toEmail, orderId);
+            log.info("Order confirmation email sent to {} for order {}", maskEmail(toEmail), orderId);
         } catch (MessagingException e) {
-            log.warn("Failed to send order confirmation email to {} for order {}: {}", toEmail, orderId, e.getMessage());
+            log.warn("Failed to send order confirmation email to {} for order {}: {}", maskEmail(toEmail), orderId, e.getMessage());
         } catch (Exception e) {
-            log.warn("Unexpected error sending order confirmation email to {} for order {}: {}", toEmail, orderId, e.getMessage());
+            log.warn("Unexpected error sending order confirmation email to {} for order {}: {}", maskEmail(toEmail), orderId, e.getMessage());
         }
     }
 
@@ -105,11 +113,11 @@ public class EmailService {
             helper.setText(html, true);
 
             mailSender.send(message);
-            log.info("Password reset email sent to {}", toEmail);
+            log.info("Password reset email sent to {}", maskEmail(toEmail));
         } catch (MessagingException e) {
-            log.warn("Failed to send password reset email to {}: {}", toEmail, e.getMessage());
+            log.warn("Failed to send password reset email to {}: {}", maskEmail(toEmail), e.getMessage());
         } catch (Exception e) {
-            log.warn("Unexpected error sending password reset email to {}: {}", toEmail, e.getMessage());
+            log.warn("Unexpected error sending password reset email to {}: {}", maskEmail(toEmail), e.getMessage());
         }
     }
 
@@ -131,11 +139,11 @@ public class EmailService {
             helper.setText(html, true);
 
             mailSender.send(message);
-            log.info("Newsletter confirmation email sent to {}", toEmail);
+            log.info("Newsletter confirmation email sent to {}", maskEmail(toEmail));
         } catch (MessagingException e) {
-            log.warn("Failed to send newsletter confirmation email to {}: {}", toEmail, e.getMessage());
+            log.warn("Failed to send newsletter confirmation email to {}: {}", maskEmail(toEmail), e.getMessage());
         } catch (Exception e) {
-            log.warn("Unexpected error sending newsletter confirmation email to {}: {}", toEmail, e.getMessage());
+            log.warn("Unexpected error sending newsletter confirmation email to {}: {}", maskEmail(toEmail), e.getMessage());
         }
     }
 
@@ -158,11 +166,11 @@ public class EmailService {
             helper.setText(html, true);
 
             mailSender.send(message);
-            log.info("Refund approved email sent to {} for order {}", toEmail, orderId);
+            log.info("Refund approved email sent to {} for order {}", maskEmail(toEmail), orderId);
         } catch (MessagingException e) {
-            log.warn("Failed to send refund approved email to {} for order {}: {}", toEmail, orderId, e.getMessage());
+            log.warn("Failed to send refund approved email to {} for order {}: {}", maskEmail(toEmail), orderId, e.getMessage());
         } catch (Exception e) {
-            log.warn("Unexpected error sending refund approved email to {} for order {}: {}", toEmail, orderId, e.getMessage());
+            log.warn("Unexpected error sending refund approved email to {} for order {}: {}", maskEmail(toEmail), orderId, e.getMessage());
         }
     }
 
@@ -185,11 +193,11 @@ public class EmailService {
             helper.setText(html, true);
 
             mailSender.send(message);
-            log.info("Refund rejected email sent to {} for order {}", toEmail, orderId);
+            log.info("Refund rejected email sent to {} for order {}", maskEmail(toEmail), orderId);
         } catch (MessagingException e) {
-            log.warn("Failed to send refund rejected email to {} for order {}: {}", toEmail, orderId, e.getMessage());
+            log.warn("Failed to send refund rejected email to {} for order {}: {}", maskEmail(toEmail), orderId, e.getMessage());
         } catch (Exception e) {
-            log.warn("Unexpected error sending refund rejected email to {} for order {}: {}", toEmail, orderId, e.getMessage());
+            log.warn("Unexpected error sending refund rejected email to {} for order {}: {}", maskEmail(toEmail), orderId, e.getMessage());
         }
     }
 
@@ -211,11 +219,11 @@ public class EmailService {
             helper.setText(html, true);
 
             mailSender.send(message);
-            log.info("Email verification sent to {}", toEmail);
+            log.info("Email verification sent to {}", maskEmail(toEmail));
         } catch (MessagingException e) {
-            log.warn("Failed to send email verification to {}: {}", toEmail, e.getMessage());
+            log.warn("Failed to send email verification to {}: {}", maskEmail(toEmail), e.getMessage());
         } catch (Exception e) {
-            log.warn("Unexpected error sending email verification to {}: {}", toEmail, e.getMessage());
+            log.warn("Unexpected error sending email verification to {}: {}", maskEmail(toEmail), e.getMessage());
         }
     }
 
@@ -233,11 +241,11 @@ public class EmailService {
             helper.setSubject(subject);
             helper.setText(fullBody, true);
             mailSender.send(message);
-            log.info("Newsletter sent to {}", toEmail);
+            log.info("Newsletter sent to {}", maskEmail(toEmail));
         } catch (MessagingException e) {
-            log.warn("Failed to send newsletter to {}: {}", toEmail, e.getMessage());
+            log.warn("Failed to send newsletter to {}: {}", maskEmail(toEmail), e.getMessage());
         } catch (Exception e) {
-            log.warn("Unexpected error sending newsletter to {}: {}", toEmail, e.getMessage());
+            log.warn("Unexpected error sending newsletter to {}: {}", maskEmail(toEmail), e.getMessage());
         }
     }
 
@@ -254,11 +262,68 @@ public class EmailService {
                     + "<p>Your email configuration is working correctly.</p>"
                     + "</body></html>", true);
             mailSender.send(message);
-            log.info("Test email sent to {}", toEmail);
+            log.info("Test email sent successfully");
         } catch (MessagingException e) {
             throw new RuntimeException("SMTP test failed: " + e.getMessage(), e);
         } catch (Exception e) {
             throw new RuntimeException("SMTP test failed: " + e.getMessage(), e);
+        }
+    }
+
+    @Async
+    public void sendOrderCancellation(String toEmail, String userName, String orderId, BigDecimal total) {
+        try {
+            String subject = "Your order #" + orderId + " has been cancelled";
+            String html = "<html><body style='font-family:sans-serif;background:#111;color:#dadada;padding:32px'>"
+                    + "<h2 style='color:#880824'>Order Cancelled</h2>"
+                    + "<p>Hi " + userName + ",</p>"
+                    + "<p>Your order <strong>#" + orderId + "</strong> has been cancelled.</p>"
+                    + "<p>Order total: <strong>€" + total + "</strong></p>"
+                    + "<p>If a payment was taken, a full refund has been initiated and should appear within 5-10 business days.</p>"
+                    + "<a href='" + baseUrl + "/orders' style='display:inline-block;padding:12px 24px;background:#880824;color:#fff;text-decoration:none;border-radius:4px;margin:16px 0'>View Orders</a>"
+                    + "<p style='color:#666;font-size:13px'>If you have any questions, please contact support.</p>"
+                    + "</body></html>";
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromAddress());
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(html, true);
+
+            mailSender.send(message);
+            log.info("Order cancellation email sent to {} for order {}", maskEmail(toEmail), orderId);
+        } catch (MessagingException e) {
+            log.warn("Failed to send order cancellation email to {} for order {}: {}", maskEmail(toEmail), orderId, e.getMessage());
+        } catch (Exception e) {
+            log.warn("Unexpected error sending order cancellation email to {} for order {}: {}", maskEmail(toEmail), orderId, e.getMessage());
+        }
+    }
+
+    @Async
+    public void sendBackInStockEmail(String toEmail, String productName, Long productId) {
+        try {
+            String productUrl = baseUrl + "/store/" + productId;
+            String html = "<html><body style='font-family:sans-serif;background:#111;color:#dadada;padding:32px'>"
+                    + "<h2 style='color:#880824'>Back in Stock!</h2>"
+                    + "<p><strong>" + productName + "</strong> is back in stock and available for purchase.</p>"
+                    + "<a href='" + productUrl + "' style='display:inline-block;padding:12px 24px;background:#880824;color:#fff;text-decoration:none;border-radius:4px;margin:16px 0'>View Product</a>"
+                    + "<p style='color:#666;font-size:12px;margin-top:24px'>You requested to be notified when this product became available.</p>"
+                    + "</body></html>";
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromAddress());
+            helper.setTo(toEmail);
+            helper.setSubject(productName + " is back in stock");
+            helper.setText(html, true);
+
+            mailSender.send(message);
+            log.info("Back-in-stock email sent to {} for product {}", maskEmail(toEmail), productId);
+        } catch (MessagingException e) {
+            log.warn("Failed to send back-in-stock email to {}: {}", maskEmail(toEmail), e.getMessage());
+        } catch (Exception e) {
+            log.warn("Unexpected error sending back-in-stock email to {}: {}", maskEmail(toEmail), e.getMessage());
         }
     }
 
@@ -279,11 +344,11 @@ public class EmailService {
             helper.setText(html, true);
 
             mailSender.send(message);
-            log.info("Welcome email sent to {}", toEmail);
+            log.info("Welcome email sent to {}", maskEmail(toEmail));
         } catch (MessagingException e) {
-            log.warn("Failed to send welcome email to {}: {}", toEmail, e.getMessage());
+            log.warn("Failed to send welcome email to {}: {}", maskEmail(toEmail), e.getMessage());
         } catch (Exception e) {
-            log.warn("Unexpected error sending welcome email to {}: {}", toEmail, e.getMessage());
+            log.warn("Unexpected error sending welcome email to {}: {}", maskEmail(toEmail), e.getMessage());
         }
     }
 }

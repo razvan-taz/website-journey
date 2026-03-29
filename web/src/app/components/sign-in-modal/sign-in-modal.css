@@ -179,3 +179,43 @@
 .mode-toggle a:hover {
   text-decoration: underline;
 }
+
+/* Password strength indicator */
+.pw-strength {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.pw-strength-bar {
+  flex: 1;
+  height: 4px;
+  background: #2a2a2a;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pw-strength-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.pw-strength-fill--1 { background: #c0392b; }
+.pw-strength-fill--2 { background: #e67e22; }
+.pw-strength-fill--3 { background: #f1c40f; }
+.pw-strength-fill--4 { background: #27ae60; }
+.pw-strength-fill--5 { background: #27ae60; }
+
+.pw-strength-label {
+  font-size: 11px;
+  min-width: 38px;
+  text-align: right;
+}
+
+.pw-strength-label--1 { color: #c0392b; }
+.pw-strength-label--2 { color: #e67e22; }
+.pw-strength-label--3 { color: #f1c40f; }
+.pw-strength-label--4 { color: #27ae60; }
+.pw-strength-label--5 { color: #27ae60; }

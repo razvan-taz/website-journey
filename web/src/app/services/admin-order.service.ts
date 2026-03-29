@@ -24,6 +24,7 @@ export interface AdminOrder {
   total: number;
   status: OrderStatus;
   createdAt: string;
+  trackingNumber?: string | null;
 }
 
 export interface AdminOrderPageResponse {
@@ -55,5 +56,13 @@ export class AdminOrderService {
 
   updateOrderStatus(orderId: number, status: OrderStatus): Observable<AdminOrder> {
     return this.http.put<AdminOrder>(`/api/admin/orders/${orderId}/status`, { status });
+  }
+
+  setTrackingNumber(orderId: number, trackingNumber: string): Observable<AdminOrder> {
+    return this.http.put<AdminOrder>(`/api/admin/orders/${orderId}/tracking`, { trackingNumber });
+  }
+
+  bulkUpdateStatus(orderIds: number[], status: OrderStatus): Observable<AdminOrder[]> {
+    return this.http.put<AdminOrder[]>(`/api/admin/orders/bulk-status`, { orderIds, status });
   }
 }

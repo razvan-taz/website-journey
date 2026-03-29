@@ -6,6 +6,7 @@ import { Content } from './pages/content/content';
 import { ContentDetail } from './pages/content-detail/content-detail';
 import { Store } from './pages/store/store';
 import { adminGuard } from './guards/admin.guard';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -17,6 +18,7 @@ export const routes: Routes = [
 
   { path: 'store/:id', loadComponent: () => import('./pages/product-detail/product-detail').then(m => m.ProductDetail) },
   { path: 'store', component: Store },
+  { path: 'search', loadComponent: () => import('./pages/search/search').then(m => m.SearchPage) },
   { path: 'about', component: About },
 
   { path: 'contact', loadComponent: () => import('./pages/contact/contact').then(m => m.Contact) },
@@ -27,14 +29,14 @@ export const routes: Routes = [
   { path: 'checkout', loadComponent: () => import('./pages/checkout/checkout').then(m => m.Checkout) },
   { path: 'order-confirmation', loadComponent: () => import('./pages/order-confirmation/order-confirmation').then(m => m.OrderConfirmation) },
 
-  { path: 'orders/:id/invoice', loadComponent: () => import('./pages/orders/order-invoice/order-invoice').then(m => m.OrderInvoiceComponent) },
-  { path: 'orders/:id', loadComponent: () => import('./pages/orders/order-detail/order-detail').then(m => m.OrderDetailComponent) },
-  { path: 'orders', loadComponent: () => import('./pages/orders/orders').then(m => m.Orders) },
+  { path: 'orders/:id/invoice', canActivate: [authGuard], loadComponent: () => import('./pages/orders/order-invoice/order-invoice').then(m => m.OrderInvoiceComponent) },
+  { path: 'orders/:id', canActivate: [authGuard], loadComponent: () => import('./pages/orders/order-detail/order-detail').then(m => m.OrderDetailComponent) },
+  { path: 'orders', canActivate: [authGuard], loadComponent: () => import('./pages/orders/orders').then(m => m.Orders) },
 
-  { path: 'notifications', loadComponent: () => import('./pages/notifications/notifications').then(m => m.NotificationsComponent) },
+  { path: 'notifications', canActivate: [authGuard], loadComponent: () => import('./pages/notifications/notifications').then(m => m.NotificationsComponent) },
 
-  { path: 'profile', loadComponent: () => import('./pages/profile/profile').then(m => m.Profile) },
-  { path: 'wishlist', loadComponent: () => import('./pages/wishlist/wishlist').then(m => m.Wishlist) },
+  { path: 'profile', canActivate: [authGuard], loadComponent: () => import('./pages/profile/profile').then(m => m.Profile) },
+  { path: 'wishlist', canActivate: [authGuard], loadComponent: () => import('./pages/wishlist/wishlist').then(m => m.Wishlist) },
 
   { path: 'forgot-password', loadComponent: () => import('./pages/forgot-password/forgot-password').then(m => m.ForgotPassword) },
   { path: 'reset-password', loadComponent: () => import('./pages/reset-password/reset-password').then(m => m.ResetPassword) },
@@ -67,6 +69,11 @@ export const routes: Routes = [
       { path: 'newsletter-subscribers', loadComponent: () => import('./pages/admin/newsletter/admin-newsletter').then(m => m.AdminNewsletter) },
       { path: 'analytics', loadComponent: () => import('./pages/admin/analytics/admin-analytics').then(m => m.AdminAnalyticsComponent) },
       { path: 'comments', loadComponent: () => import('./pages/admin/comments/admin-comments').then(m => m.AdminCommentsComponent) },
+      { path: 'reviews', loadComponent: () => import('./pages/admin/reviews/admin-reviews').then(m => m.AdminReviews) },
+      { path: 'coupons', loadComponent: () => import('./pages/admin/coupons/admin-coupons').then(m => m.AdminCoupons) },
+      { path: 'users', loadComponent: () => import('./pages/admin/users/admin-users').then(m => m.AdminUsers) },
+      { path: 'shipping', loadComponent: () => import('./pages/admin/shipping/admin-shipping').then(m => m.AdminShipping) },
+      { path: 'categories', loadComponent: () => import('./pages/admin/categories/admin-categories').then(m => m.AdminCategories) },
     ]
   },
 

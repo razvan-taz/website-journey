@@ -1,0 +1,43 @@
+<div class="admin-shipping">
+  <h2 class="as-title">Shipping Settings</h2>
+  <p class="as-desc">Configure the default shipping rate applied at checkout.</p>
+
+  @if (loading()) {
+    <p class="as-loading">Loading...</p>
+  } @else {
+    <div class="as-form">
+      <div class="as-field">
+        <label class="as-label" for="ship-price">Shipping Price</label>
+        <div class="as-price-row">
+          <input
+            id="ship-price"
+            class="as-input"
+            type="number"
+            min="0"
+            step="0.01"
+            [value]="price()"
+            (input)="price.set($any($event.target).value)"
+          />
+          <select class="as-select" [value]="currency()" (change)="currency.set($any($event.target).value)">
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+        <p class="as-hint">Set to 0.00 for free shipping by default.</p>
+      </div>
+
+      @if (error()) {
+        <p class="as-error">{{ error() }}</p>
+      }
+
+      <button class="as-btn" (click)="save()" [disabled]="saving()">
+        {{ saving() ? 'Saving...' : 'Save Shipping Rate' }}
+      </button>
+
+      @if (saved()) {
+        <p class="as-success">Shipping rate saved successfully.</p>
+      }
+    </div>
+  }
+</div>

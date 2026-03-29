@@ -1,0 +1,73 @@
+<div class="admin-page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">Product Categories</h1>
+    </div>
+    <div class="page-header-right">
+      <button class="btn-create" (click)="openCreate()">+ New Category</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <p class="admin-loading">Loading...</p>
+  } @else if (error()) {
+    <p class="admin-error">{{ error() }}</p>
+  } @else if (categories().length === 0) {
+    <p class="admin-empty">No categories yet. Create one to get started.</p>
+  } @else {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (cat of categories(); track cat.id) {
+          <tr>
+            <td class="cat-name">{{ cat.name }}</td>
+            <td class="actions-cell">
+              <button class="btn-action btn-edit" (click)="openEdit(cat)">Rename</button>
+              <button class="btn-action btn-delete" (click)="deleteCategory(cat)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
+
+@if (showForm()) {
+  <div class="form-overlay" (click)="closeForm()"></div>
+  <div class="form-panel">
+    <div class="form-panel-header">
+      <h2 class="form-panel-title">{{ editingId() ? 'Rename Category' : 'New Category' }}</h2>
+      <button class="form-panel-close" (click)="closeForm()">✕</button>
+    </div>
+
+    <div class="form-body">
+      <div class="form-row">
+        <label class="form-label">Name *</label>
+        <input
+          class="form-input"
+          type="text"
+          [value]="formName()"
+          (input)="formName.set($any($event.target).value)"
+          placeholder="e.g. Apparel"
+          autofocus
+        />
+      </div>
+
+      @if (formError()) {
+        <p class="form-error">{{ formError() }}</p>
+      }
+
+      <div class="form-actions">
+        <button class="btn-save" (click)="save()" [disabled]="saving()">
+          {{ saving() ? 'Saving...' : (editingId() ? 'Update' : 'Create') }}
+        </button>
+        <button class="btn-cancel" (click)="closeForm()" [disabled]="saving()">Cancel</button>
+      </div>
+    </div>
+  </div>
+}

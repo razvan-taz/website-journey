@@ -1,0 +1,65 @@
+<div class="search-page">
+  <h1 class="search-heading">
+    @if (query()) {
+      Results for "<span class="search-query">{{ query() }}</span>"
+    } @else {
+      Search
+    }
+  </h1>
+
+  @if (loading()) {
+    <div class="results-list">
+      @for (_ of [1,2,3,4,5]; track $index) {
+        <div class="result-skeleton">
+          <div class="result-skeleton-inner">
+            <div class="skeleton result-skeleton-badge"></div>
+            <div class="skeleton result-skeleton-title"></div>
+            <div class="skeleton result-skeleton-summary"></div>
+            <div class="skeleton result-skeleton-summary result-skeleton-summary--short"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (searched() && results().length === 0) {
+    <div class="search-empty">
+      <p class="search-empty-text">No results found for "<strong>{{ query() }}</strong>".</p>
+      <p class="search-empty-hint">Try a different term, or browse below:</p>
+      <div class="search-empty-links">
+        <a routerLink="/content" class="search-empty-link">Browse Content</a>
+        <a routerLink="/store" class="search-empty-link">Browse Store</a>
+      </div>
+    </div>
+  } @else if (results().length > 0) {
+    @if (contentResults().length > 0) {
+      <section class="results-section">
+        <h2 class="results-section-heading">Content <span class="results-count">{{ contentResults().length }}</span></h2>
+        <div class="results-list">
+          @for (result of contentResults(); track result.id) {
+            <a class="result-card" [routerLink]="result.route">
+              <div class="result-type-badge result-type-badge--content">Article</div>
+              <h3 class="result-title">{{ result.title }}</h3>
+              <p class="result-summary">{{ result.summary }}</p>
+            </a>
+          }
+        </div>
+      </section>
+    }
+
+    @if (storeResults().length > 0) {
+      <section class="results-section">
+        <h2 class="results-section-heading">Store <span class="results-count">{{ storeResults().length }}</span></h2>
+        <div class="results-list">
+          @for (result of storeResults(); track result.id) {
+            <a class="result-card" [routerLink]="result.route">
+              <div class="result-type-badge result-type-badge--store">Product</div>
+              <h3 class="result-title">{{ result.title }}</h3>
+              <p class="result-summary">{{ result.summary }}</p>
+            </a>
+          }
+        </div>
+      </section>
+    }
+  } @else if (!query() || query().trim().length < 2) {
+    <p class="search-hint">Enter at least 2 characters to search.</p>
+  }
+</div>

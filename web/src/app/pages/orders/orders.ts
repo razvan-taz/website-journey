@@ -51,6 +51,7 @@ export class Orders {
       DELIVERED: 'Delivered',
       CANCELLED: 'Cancelled',
       REFUNDED: 'Refunded',
+      REFUND_REQUESTED: 'Refund Requested',
     };
     return labels[status] ?? status;
   }

@@ -44,5 +44,13 @@
       <div class="no-results">No results for "{{ query }}"</div>
     }
 
+    @if (query.length >= 2 && results.length > 0) {
+      <div class="view-all">
+        <a class="view-all-link" [routerLink]="['/search']" [queryParams]="{ q: query }" (click)="closed.emit()">
+          View all results for "{{ query }}" →
+        </a>
+      </div>
+    }
+
   </div>
 </div>

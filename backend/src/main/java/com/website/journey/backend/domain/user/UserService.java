@@ -56,6 +56,7 @@ public class UserService {
         emailService.sendWelcomeEmail(saved.getEmail(), saved.getName());
 
         return AuthResponse.builder()
+                .id(saved.getId())
                 .token(token)
                 .name(saved.getName())
                 .email(saved.getEmail())
@@ -69,7 +70,7 @@ public class UserService {
     public UserProfileResponse getProfile(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        return new UserProfileResponse(user.getName(), user.getEmail(), user.getRole(), user.isEmailVerified(), user.isNotificationsEnabled());
+        return new UserProfileResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.isEmailVerified(), user.isNotificationsEnabled());
     }
 
     @Transactional(readOnly = true)
@@ -82,9 +83,14 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
+        if (!user.isEnabled()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account is disabled");
+        }
+
         String token = jwtUtil.generateToken(user.getEmail(), user.getName(), user.getRole(), user.getId());
 
         return AuthResponse.builder()
+                .id(user.getId())
                 .token(token)
                 .name(user.getName())
                 .email(user.getEmail())
@@ -142,7 +148,7 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         user.setName(name);
         User saved = userRepository.save(user);
-        return new UserProfileResponse(saved.getName(), saved.getEmail(), saved.getRole(), saved.isEmailVerified(), saved.isNotificationsEnabled());
+        return new UserProfileResponse(saved.getId(), saved.getName(), saved.getEmail(), saved.getRole(), saved.isEmailVerified(), saved.isNotificationsEnabled());
     }
 
     @Transactional
@@ -163,6 +169,26 @@ public class UserService {
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteAccount(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is incorrect");
+        }
+
+        // Soft delete: anonymize and disable the account so existing order records remain intact
+        user.setEnabled(false);
+        user.setEmail("deleted_" + user.getId() + "@deleted.invalid");
+        user.setName("Deleted User");
+        user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+        user.setEmailVerified(false);
+        user.setEmailVerificationToken(null);
+        user.setVerificationTokenExpiry(null);
         userRepository.save(user);
     }
 }

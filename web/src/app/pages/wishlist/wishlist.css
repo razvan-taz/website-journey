@@ -114,6 +114,31 @@
   color: #aaa;
 }
 
+.btn-add-to-cart {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px 14px;
+  padding: 9px 0;
+  background: #880824;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-add-to-cart:hover:not(:disabled) {
+  background: #6a061c;
+}
+
+.btn-add-to-cart:disabled {
+  background: #2e2e2e;
+  color: #666;
+  cursor: not-allowed;
+}
+
 .btn-remove {
   position: absolute;
   top: 10px;
@@ -136,3 +161,38 @@
   background: rgba(224, 90, 112, 0.8);
   color: #fff;
 }
+
+/* ── Skeleton ──────────────────────────────────────── */
+
+.wishlist-card-skeleton {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+}
+
+.wishlist-skeleton-thumb {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.wishlist-skeleton-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wishlist-skeleton-name        { height: 16px; width: 100%; }
+.wishlist-skeleton-name--short { width: 60%; }
+
+.wishlist-skeleton-footer {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid #2a2a2a;
+  margin-top: 2px;
+}
+
+.wishlist-skeleton-price { height: 16px; width: 48px; }
+.wishlist-skeleton-stock { height: 14px; width: 56px; }

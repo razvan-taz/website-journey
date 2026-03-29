@@ -3,6 +3,8 @@ package com.website.journey.backend.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -12,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -25,6 +28,26 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> {})  // delegates to WebConfig's CorsRegistry
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; " +
+                                "script-src 'self' 'unsafe-inline'; " +
+                                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+                                "font-src 'self' https://fonts.gstatic.com; " +
+                                "img-src 'self' data: blob: https:; " +
+                                "frame-src https://www.youtube.com https://youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.dailymotion.com; " +
+                                "connect-src 'self' ws: wss:; " +
+                                "object-src 'none'; " +
+                                "base-uri 'self';"
+                        ))
+                        .contentTypeOptions(Customizer.withDefaults())
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .maxAgeInSeconds(31536000)
+                                .includeSubDomains(true)
+                        )
+                        .frameOptions(options -> options.disable())
+                        .xssProtection(Customizer.withDefaults())
+                )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -33,6 +56,7 @@ public class SecurityConfig {
                                 "/api/auth/reset-password").permitAll()
                         .requestMatchers("/api/site/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/articles/admin", "/api/articles/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
                         // Specific product endpoints that override the broad GET permitAll below
                         .requestMatchers(HttpMethod.GET, "/api/products/*/reviews/eligibility").authenticated()
@@ -55,8 +79,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/newsletter/subscribe").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/newsletter/unsubscribe").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/discount/validate").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/coupons/validate").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/shipping/rate").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/payments/config").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/create-intent").authenticated()
                         // Admin endpoints require ADMIN role
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // Write operations require ADMIN role

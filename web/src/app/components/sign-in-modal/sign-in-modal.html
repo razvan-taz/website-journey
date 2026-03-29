@@ -138,6 +138,14 @@
               }
             </button>
           </div>
+          @if (suPasswordStrength.score > 0) {
+            <div class="pw-strength">
+              <div class="pw-strength-bar">
+                <div class="pw-strength-fill" [style.width.%]="suPasswordStrength.score * 20" [class]="'pw-strength-fill--' + suPasswordStrength.score"></div>
+              </div>
+              <span class="pw-strength-label" [class]="'pw-strength-label--' + suPasswordStrength.score">{{ suPasswordStrength.label }}</span>
+            </div>
+          }
           @if (suPassword.invalid && suPassword.touched) {
             @if (suPassword.errors?.['required']) {
               <span class="field-error">Password is required.</span>

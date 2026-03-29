@@ -4,15 +4,120 @@
   padding: 2rem 1rem;
 }
 
+.notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.notif-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .notif-title {
   font-size: 1.75rem;
   font-weight: 700;
-  margin-bottom: 1.5rem;
+  margin: 0;
+}
+
+/* ── Live pref toggle ─────────────────────────────── */
+
+.notif-pref {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notif-pref-label {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.toggle-btn {
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: #333;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.toggle-btn.toggle-on {
+  background: #880824;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.toggle-btn.toggle-on .toggle-thumb {
+  transform: translateX(18px);
 }
 
 .notif-loading, .notif-empty {
   color: #888;
   padding: 1rem 0;
+}
+
+/* ── Mark all as read ─────────────────────────────── */
+
+.btn-mark-all-read {
+  background: transparent;
+  border: none;
+  color: #880824;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.btn-mark-all-read:hover {
+  color: #a00a2b;
+}
+
+/* ── Skeleton ─────────────────────────────────────── */
+
+.notif-item-skeleton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  background: #1a1a1a;
+  border: 1px solid #2e2e2e;
+}
+
+.notif-skeleton-msg {
+  flex: 1;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.notif-skeleton-date {
+  width: 72px;
+  height: 12px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .notif-list {

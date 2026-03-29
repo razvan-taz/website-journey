@@ -1,5 +1,6 @@
 import {
   Component,
+  DestroyRef,
   EventEmitter,
   HostListener,
   Output,
@@ -9,15 +10,16 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
-import { debounceTime, switchMap } from 'rxjs/operators';
+import { debounceTime, share, switchMap } from 'rxjs/operators';
 import { SearchService, SearchResult } from '../../services/search.service';
 
 @Component({
   selector: 'app-search-overlay',
   standalone: true,
+  imports: [RouterLink],
   templateUrl: './search-overlay.html',
   styleUrl: './search-overlay.css',
 })
@@ -28,6 +30,7 @@ export class SearchOverlay {
   private searchService = inject(SearchService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private destroyRef = inject(DestroyRef);
 
   query = '';
   results: SearchResult[] = [];
@@ -36,10 +39,13 @@ export class SearchOverlay {
   private inputSubject = new Subject<string>();
 
   constructor() {
-    this.inputSubject.pipe(
+    // Single shared debounced stream — both side-effects derive from the same timer
+    const debounced$ = this.inputSubject.pipe(
       debounceTime(300),
-      takeUntilDestroyed()
-    ).subscribe((value) => {
+      share()
+    );
+
+    debounced$.pipe(takeUntilDestroyed()).subscribe((value) => {
       this.query = value;
       this.router.navigate([], {
         relativeTo: this.route,
@@ -49,9 +55,7 @@ export class SearchOverlay {
       });
     });
 
-    // Separate pipeline for search calls — uses switchMap to cancel in-flight requests
-    this.inputSubject.pipe(
-      debounceTime(300),
+    debounced$.pipe(
       switchMap((value) => {
         this.searching.set(value.trim().length >= 2);
         return this.searchService.search(value);
@@ -67,10 +71,11 @@ export class SearchOverlay {
       if (initialQuery) {
         this.query = initialQuery;
         this.searching.set(true);
-        this.searchService.search(initialQuery).subscribe(results => {
+        const sub = this.searchService.search(initialQuery).subscribe(results => {
           this.results = results;
           this.searching.set(false);
         });
+        this.destroyRef.onDestroy(() => sub.unsubscribe());
         if (this.searchInput?.nativeElement) {
           this.searchInput.nativeElement.value = initialQuery;
         }

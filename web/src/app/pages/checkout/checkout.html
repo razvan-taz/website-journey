@@ -9,14 +9,21 @@
     </div>
   } @else {
 
-    <div class="step-indicator" aria-label="Checkout progress">
+    <div
+      class="step-indicator"
+      role="progressbar"
+      [attr.aria-valuenow]="step() === 'shipping' ? 1 : 2"
+      aria-valuemin="1"
+      aria-valuemax="2"
+      [attr.aria-label]="'Checkout step ' + (step() === 'shipping' ? '1' : '2') + ' of 2: ' + (step() === 'shipping' ? 'Shipping' : 'Payment')"
+    >
       <div class="step" [class.step--active]="step() === 'shipping'" [class.step--done]="step() === 'payment'">
-        <span class="step-num">{{ step() === 'payment' ? '✓' : '1' }}</span>
+        <span class="step-num" aria-hidden="true">{{ step() === 'payment' ? '✓' : '1' }}</span>
         <span class="step-label">Shipping</span>
       </div>
-      <div class="step-line"></div>
+      <div class="step-line" aria-hidden="true"></div>
       <div class="step" [class.step--active]="step() === 'payment'">
-        <span class="step-num">2</span>
+        <span class="step-num" aria-hidden="true">2</span>
         <span class="step-label">Payment</span>
       </div>
     </div>
@@ -29,6 +36,32 @@
         @if (step() === 'shipping') {
 
           <h2 class="section-title">Shipping Address</h2>
+
+          @if (hasSavedAddresses()) {
+            <div class="saved-addresses">
+              <p class="saved-addresses-label">Saved addresses</p>
+              <div class="saved-address-list">
+                @for (address of savedAddresses(); track address.id) {
+                  <button
+                    class="saved-address-card"
+                    [class.saved-address-card--default]="address.isDefault"
+                    type="button"
+                    (click)="selectSavedAddress(address)"
+                  >
+                    <span class="saved-address-name">{{ address.label }}</span>
+                    <span class="saved-address-detail">{{ address.fullName }}, {{ address.line1 }}, {{ address.city }}</span>
+                  </button>
+                }
+              </div>
+              <button class="btn-use-new-address" type="button" (click)="useNewAddress.set(true)">
+                + Use a different address
+              </button>
+            </div>
+          } @else if (savedAddresses().length > 0 && useNewAddress()) {
+            <button class="btn-use-saved-address" type="button" (click)="useNewAddress.set(false)">
+              ← Use a saved address
+            </button>
+          }
 
           <div class="form-group">
             <label for="name">Full Name</label>
@@ -44,13 +77,48 @@
               <input id="city" type="text" [value]="city()" (input)="city.set($any($event.target).value)" placeholder="Springfield" autocomplete="address-level2" />
             </div>
             <div class="form-group">
-              <label for="state">State</label>
+              <label for="state">State / Province</label>
               <input id="state" type="text" [value]="state()" (input)="state.set($any($event.target).value)" placeholder="IL" autocomplete="address-level1" />
             </div>
             <div class="form-group form-group--zip">
-              <label for="zip">ZIP</label>
+              <label for="zip">ZIP / Postal Code</label>
               <input id="zip" type="text" [value]="zip()" (input)="zip.set($any($event.target).value)" placeholder="62701" autocomplete="postal-code" />
             </div>
+          </div>
+          <div class="form-group">
+            <label for="country">Country</label>
+            <select id="country" [value]="country()" (change)="country.set($any($event.target).value)" autocomplete="country">
+              <option value="US">United States</option>
+              <option value="GB">United Kingdom</option>
+              <option value="CA">Canada</option>
+              <option value="AU">Australia</option>
+              <option value="DE">Germany</option>
+              <option value="FR">France</option>
+              <option value="ES">Spain</option>
+              <option value="IT">Italy</option>
+              <option value="NL">Netherlands</option>
+              <option value="BE">Belgium</option>
+              <option value="CH">Switzerland</option>
+              <option value="AT">Austria</option>
+              <option value="SE">Sweden</option>
+              <option value="NO">Norway</option>
+              <option value="DK">Denmark</option>
+              <option value="FI">Finland</option>
+              <option value="PL">Poland</option>
+              <option value="PT">Portugal</option>
+              <option value="IE">Ireland</option>
+              <option value="NZ">New Zealand</option>
+              <option value="JP">Japan</option>
+              <option value="KR">South Korea</option>
+              <option value="SG">Singapore</option>
+              <option value="BR">Brazil</option>
+              <option value="MX">Mexico</option>
+              <option value="RO">Romania</option>
+              <option value="HU">Hungary</option>
+              <option value="CZ">Czech Republic</option>
+              <option value="GR">Greece</option>
+              <option value="HR">Croatia</option>
+            </select>
           </div>
 
           @if (error()) {
@@ -98,6 +166,15 @@
             <span class="lock-icon">🔒</span> Payments secured by Stripe. Your card details never touch our servers.
           </p>
 
+          @if (orderSaveFailedRef()) {
+            <div class="order-save-error" role="alert">
+              <strong>Your payment went through, but we couldn't record your order.</strong>
+              <p>Please contact us and reference this payment ID so we can sort it out:</p>
+              <code class="payment-ref">{{ maskedPaymentRef() }}</code>
+              <a class="btn-contact-support" href="mailto:support@journeywebsite.com">Email Support</a>
+            </div>
+          }
+
         }
 
       </section>
@@ -143,9 +220,21 @@
               }
             } @else {
               <div class="coupon-applied">
-                <span class="coupon-applied-code">{{ appliedCoupon()!.code }}</span>
-                <span class="coupon-applied-discount">-{{ appliedCoupon()!.discountAmount | currency:'EUR':'symbol' }}</span>
-                <button class="btn-remove-coupon" (click)="removeCoupon()" aria-label="Remove coupon">✕</button>
+                <div class="coupon-applied-info">
+                  <span class="coupon-applied-code">{{ appliedCoupon()!.code }}</span>
+                  @if (appliedCoupon()!.description) {
+                    <span class="coupon-applied-desc">{{ appliedCoupon()!.description }}</span>
+                  }
+                </div>
+                <div class="coupon-applied-right">
+                  @if (appliedCoupon()!.discountAmount > 0) {
+                    <span class="coupon-applied-discount">-{{ appliedCoupon()!.discountAmount | currency:'EUR':'symbol' }}</span>
+                  }
+                  @if (appliedCoupon()!.freeShipping) {
+                    <span class="coupon-free-shipping">Free shipping</span>
+                  }
+                  <button class="btn-remove-coupon" (click)="removeCoupon()" aria-label="Remove coupon">✕</button>
+                </div>
               </div>
             }
           </div>
@@ -162,6 +251,16 @@
               <span>-{{ appliedCoupon()!.discountAmount | currency:'EUR':'symbol' }}</span>
             </div>
           }
+          <div class="summary-row summary-row--shipping">
+            <span>Shipping</span>
+            @if (!shippingLoaded()) {
+              <span class="shipping-loading">...</span>
+            } @else if (appliedCoupon()?.freeShipping || shippingAmount() === 0) {
+              <span class="shipping-free">Free</span>
+            } @else {
+              <span>{{ shippingAmount() | currency:'EUR':'symbol' }}</span>
+            }
+          </div>
           <div class="summary-row summary-row--total">
             <span>Total</span>
             <span class="total-amount">{{ orderTotal() | currency:'EUR':'symbol' }}</span>

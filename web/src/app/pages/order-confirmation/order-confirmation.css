@@ -116,3 +116,17 @@
   color: #dadada;
   border-color: #888;
 }
+
+/* ── Alternate icon states ────────────────────────── */
+
+.confirm-icon--pending {
+  background: #2a2000;
+  border-color: #c8a840;
+  color: #c8a840;
+}
+
+.confirm-icon--error {
+  background: #2a0d13;
+  border-color: #e05a70;
+  color: #e05a70;
+}

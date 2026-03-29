@@ -72,26 +72,36 @@ public class AdminNewsletterController {
 
     @PostMapping("/send")
     public ResponseEntity<Map<String, Integer>> sendNewsletter(@RequestBody SendNewsletterRequest request) {
-        List<NewsletterSubscriber> subscribers = newsletterRepository.findAll();
-        for (NewsletterSubscriber subscriber : subscribers) {
-            String unsubscribeUrl = baseUrl + "/unsubscribe?token=" + subscriber.getUnsubscribeToken();
-            emailService.sendNewsletterToSubscriber(subscriber.getEmail(), request.subject(), request.body(), unsubscribeUrl);
-        }
-        return ResponseEntity.ok(Map.of("recipientCount", subscribers.size()));
+        int total = 0;
+        int batch = 0;
+        Page<NewsletterSubscriber> page;
+        do {
+            page = newsletterRepository.findAll(PageRequest.of(batch++, 200));
+            for (NewsletterSubscriber subscriber : page.getContent()) {
+                String unsubscribeUrl = baseUrl + "/unsubscribe?token=" + subscriber.getUnsubscribeToken();
+                emailService.sendNewsletterToSubscriber(subscriber.getEmail(), request.subject(), request.body(), unsubscribeUrl);
+            }
+            total += page.getNumberOfElements();
+        } while (!page.isLast());
+        return ResponseEntity.ok(Map.of("recipientCount", total));
     }
 
     @GetMapping("/subscribers/export")
     public void exportSubscribersCsv(HttpServletResponse response) throws IOException {
         response.setContentType("text/csv");
         response.setHeader("Content-Disposition", "attachment; filename=\"subscribers.csv\"");
-        List<NewsletterSubscriber> all = newsletterRepository.findAll();
         try (java.io.PrintWriter writer = response.getWriter()) {
             writer.println("#,email,subscribed_at");
             int row = 1;
-            for (NewsletterSubscriber s : all) {
-                writer.printf("%d,%s,%s%n", row++, s.getEmail(),
-                        s.getSubscribedAt() != null ? s.getSubscribedAt().toString() : "");
-            }
+            int batch = 0;
+            Page<NewsletterSubscriber> page;
+            do {
+                page = newsletterRepository.findAll(PageRequest.of(batch++, 500));
+                for (NewsletterSubscriber s : page.getContent()) {
+                    writer.printf("%d,%s,%s%n", row++, s.getEmail(),
+                            s.getSubscribedAt() != null ? s.getSubscribedAt().toString() : "");
+                }
+            } while (!page.isLast());
         }
     }
 
